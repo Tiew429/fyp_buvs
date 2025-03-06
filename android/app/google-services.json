@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "971972876725",
+    "project_id": "blockchain-voting-system-f1dfe",
+    "storage_bucket": "blockchain-voting-system-f1dfe.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:971972876725:android:0699d851cb645d641a21fc",
+        "android_client_info": {
+          "package_name": "com.example.blockchain_university_voting_system"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDbaTNdL6_BTU__GYQusGLHrMB0SIWm-58"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

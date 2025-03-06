@@ -1,0 +1,1 @@
+C:\tarumt\FYP\Mobile\blockchain_university_voting_system\build\app\intermediates\cxx\RelWithDebInfo\631p6nq4\obj\armeabi-v7a

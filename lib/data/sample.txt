@@ -1,0 +1,44 @@
+return [
+  VotingEvent(
+    title: "Student Council Election",
+    description: "Election for the new student council members.",
+    startDate: DateTime(2025, 3, 10),
+    endDate: DateTime(2025, 3, 12),
+    startTime: const TimeOfDay(hour: 9, minute: 0),
+    endTime: const TimeOfDay(hour: 17, minute: 0),
+    createdBy: "user123",
+    status: VotingEventStatus.ongoing,
+    candidates: [
+      Candidate(candidateID: "C1", userID: "000", name: "Alice Johnson", bio: "Dedicated to student welfare.", votingEventID: "VE-0"),
+      Candidate(candidateID: "C2", userID: "111", name: "Bob Smith", bio: "Passionate about student rights.", votingEventID: "VE-0"),
+    ],
+  ),
+  VotingEvent(
+    title: "University President Election",
+    description: "Voting for the new university president.",
+    startDate: DateTime(2025, 5, 1),
+    endDate: DateTime(2025, 5, 3),
+    startTime: const TimeOfDay(hour: 8, minute: 30),
+    endTime: const TimeOfDay(hour: 18, minute: 0),
+    createdBy: "user456",
+    status: VotingEventStatus.pending,
+    candidates: [
+      Candidate(candidateID: "C3", userID: "123123", name: "Dr. Emily Davis", bio: "Experience in university leadership.", votingEventID: "VE-1"),
+      Candidate(candidateID: "C4", userID: "321321", name: "Prof. James Wilson", bio: "Focused on academic excellence.", votingEventID: "VE-1"),
+    ],
+  ),
+  VotingEvent(
+    title: "Club Representative Election",
+    description: "Selecting representatives for university clubs.",
+    startDate: DateTime(2025, 4, 15),
+    endDate: DateTime(2025, 4, 17),
+    startTime: const TimeOfDay(hour: 10, minute: 0),
+    endTime: const TimeOfDay(hour: 16, minute: 0),
+    createdBy: "user789",
+    status: VotingEventStatus.completed,
+    candidates: [
+      Candidate(candidateID: "C5", userID: "222", name: "Sophia Martinez", bio: "Active in multiple clubs.", votingEventID: "VE-2"),
+      Candidate(candidateID: "C6", userID: "333", name: "Liam Brown", bio: "Committed to club engagement.", votingEventID: "VE-2"),
+    ],
+  ),
+];

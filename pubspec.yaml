@@ -1,0 +1,41 @@
+name: blockchain_university_voting_system
+description: "A new Flutter project."
+publish_to: 'none'
+version: 0.1.0
+
+environment:
+  sdk: ^3.5.4
+
+dependencies:
+  cloud_firestore: ^5.6.3
+  firebase_auth: ^5.4.2
+  firebase_core: ^3.11.0
+  flutter:
+    sdk: flutter
+  flutter_dotenv: ^5.2.1
+  flutter_localization: ^0.3.1
+  flutter_localizations:
+    sdk: flutter
+  fluttertoast: ^8.2.12
+  font_awesome_flutter: ^10.8.0
+  go_router: ^14.6.1
+  intl: ^0.19.0
+  local_auth: ^2.3.0
+  logger: ^2.5.0
+  mailer: ^6.4.1
+  provider: ^6.1.2
+  reown_appkit: ^1.3.0
+  shared_preferences: ^2.3.3
+  url_launcher: ^6.3.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/contracts/
+    - assets/images/
+    - .env

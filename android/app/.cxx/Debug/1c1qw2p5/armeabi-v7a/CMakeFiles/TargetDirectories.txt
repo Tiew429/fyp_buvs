@@ -1,0 +1,2 @@
+C:/tarumt/FYP/Mobile/blockchain_university_voting_system/android/app/.cxx/Debug/1c1qw2p5/armeabi-v7a/CMakeFiles/edit_cache.dir
+C:/tarumt/FYP/Mobile/blockchain_university_voting_system/android/app/.cxx/Debug/1c1qw2p5/armeabi-v7a/CMakeFiles/rebuild_cache.dir

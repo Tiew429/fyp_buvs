@@ -1,0 +1,2 @@
+C:/tarumt/FYP/Mobile/blockchain_university_voting_system/android/app/.cxx/RelWithDebInfo/631p6nq4/arm64-v8a/CMakeFiles/edit_cache.dir
+C:/tarumt/FYP/Mobile/blockchain_university_voting_system/android/app/.cxx/RelWithDebInfo/631p6nq4/arm64-v8a/CMakeFiles/rebuild_cache.dir

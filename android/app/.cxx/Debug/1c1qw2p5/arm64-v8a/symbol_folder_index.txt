@@ -1,0 +1,1 @@
+C:\tarumt\FYP\Mobile\blockchain_university_voting_system\build\app\intermediates\cxx\Debug\1c1qw2p5\obj\arm64-v8a

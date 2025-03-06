@@ -1,0 +1,29 @@
+{
+  "configurations": [
+    {
+      "name": "Flutter (lib\\main.dart)",
+      "type": "dart",
+      "request": "launch",
+      "program": "lib\\main.dart"
+    },
+    {
+      "name": "C/C++ Runner: Debug Session",
+      "type": "cppdbg",
+      "request": "launch",
+      "args": [],
+      "stopAtEntry": false,
+      "externalConsole": true,
+      "cwd": "c:/tarumt/FYP/Mobile/blockchain_university_voting_system",
+      "program": "c:/tarumt/FYP/Mobile/blockchain_university_voting_system/build/Release/outRelease",
+      "MIMode": "gdb",
+      "miDebuggerPath": "gdb",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ]
+    }
+  ]
+}
