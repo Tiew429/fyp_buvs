@@ -31,7 +31,7 @@ class _ConfirmedCandidatePageState extends State<ConfirmedCandidatePage> {
       backgroundColor: colorScheme.tertiary,
       body:  Column(
         children: [
-          Text(_votingEvent.title),
+          const Text(“Confirmed Candidate”),
         ],
       ),
     );
