@@ -29,9 +29,9 @@ class _ConfirmedCandidatePageState extends State<ConfirmedCandidatePage> {
 
     return Scaffold(
       backgroundColor: colorScheme.tertiary,
-      body:  Column(
+      body: const Column(
         children: [
-          const Text(“Confirmed Candidate”),
+          Text("Confirmed Candidates"),
         ],
       ),
     );
