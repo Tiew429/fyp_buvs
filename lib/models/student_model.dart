@@ -36,4 +36,15 @@ class Student extends User {
       isEligibleForVoting: json['isEligibleForVoting'],
     );
   }
+
+  factory Student.fromMap(Map<String, dynamic> map) {
+    return Student(
+      userID: map['userID'],
+      name: map['name'],
+      email: map['email'],
+      walletAddress: map['walletAddress'],
+      isVerified: map['isVerified'],
+      isEligibleForVoting: map['isEligibleForVoting'],
+    );
+  }
 }

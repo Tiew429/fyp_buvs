@@ -31,4 +31,15 @@ class Candidate {
   // setter
   void setName(String name) => _name = name;
   void setBio(String bio) => _bio = bio;
+
+  factory Candidate.fromMap(Map<String, dynamic> map) {
+    return Candidate(
+      candidateID: map['candidateID'],
+      userID: map['userID'],
+      name: map['name'],
+      bio: map['bio'],
+      votingEventID: map['votingEventID'],
+      votesReceived: map['votesReceived'],
+    );
+  }
 }

@@ -107,8 +107,18 @@ mixin AppLocale {
   static const String updatingVotingEvent = 'updating voting event...';
 
   // candidate
+  static const String candidate = 'candidate';
   static const String confirmedCandidate = 'confirmed candidate';
   static const String pendingCandidate = 'pending candidate';
+  static const String noConfirmedCandidateAvailable = 'no confirmed candidate available';
+  static const String noPendingCandidateAvailable = 'no pending candidate available';
+  static const String noCandidateFound = 'no candidate found';
+  static const String votesReceived = 'votes received';
+  static const String confirmed = 'confirmed';
+  static const String rejected = 'rejected';
+  static const String errorConfirmingCandidate = 'error confirming candidate';
+  static const String errorRejectingCandidate = 'error rejecting candidate';
+  static const String addCandidate = 'add candidate';
 
   // validator_util
   static const String dontLeaveBlank = 'please don\'t leave this field blank';
@@ -129,6 +139,7 @@ mixin AppLocale {
 
   // others
   static const String pleaseConnectYourWallet = 'please connect your wallet';
+  static const String close = 'close';
 
   // english-en
   static const Map<String, dynamic> en = {
@@ -237,8 +248,18 @@ mixin AppLocale {
     updatingVotingEvent: 'Updating voting event...',
 
     // candidate
+    candidate: 'Candidate',
     confirmedCandidate: 'Confirmed Candidate',
     pendingCandidate: 'Pending Candidate',
+    noConfirmedCandidateAvailable: 'No confirmed candidate available',
+    noPendingCandidateAvailable: 'No pending candidate available',
+    noCandidateFound: 'No candidate found',
+    votesReceived: 'Votes Received',
+    confirmed: 'Confirmed',
+    rejected: 'Rejected',
+    errorConfirmingCandidate: 'Error confirming candidate',
+    errorRejectingCandidate: 'Error rejecting candidate',
+    addCandidate: 'Add Candidate',
 
     // validator_util
     dontLeaveBlank: 'Please don\'t leave this field blank',
@@ -259,6 +280,7 @@ mixin AppLocale {
 
     // others
     pleaseConnectYourWallet: 'Please connect your wallet',
+    close: 'Close',
   };
 
   // malay-ms
@@ -368,8 +390,18 @@ mixin AppLocale {
     updatingVotingEvent: 'Sedang mengemas kini acara pengundian...',
 
     // candidate
+    candidate: 'Calon',
     confirmedCandidate: 'Calon Diluluskan',
     pendingCandidate: 'Calon Belum Diluluskan',
+    noConfirmedCandidateAvailable: 'Tiada calon yang diluluskan tersedia',
+    noPendingCandidateAvailable: 'Tiada calon belum diluluskan tersedia',
+    noCandidateFound: 'Tiada calon ditemui',
+    votesReceived: 'Jumlah Undian',
+    confirmed: 'Diluluskan',
+    rejected: 'Menolak',
+    errorConfirmingCandidate: 'Kesalahan mengkonfirmasi calon',
+    errorRejectingCandidate: 'Kesalahan menolak calon',
+    addCandidate: 'Tambah Calon',
 
     // validator_util
     dontLeaveBlank: 'Medan ini tidak boleh kosong',
@@ -390,6 +422,7 @@ mixin AppLocale {
 
     // others
     pleaseConnectYourWallet: 'Sila hubungkan kripto wallet anda',
+    close: 'Tutup',
   };
 
   // chinese-zh
@@ -499,8 +532,18 @@ mixin AppLocale {
     updatingVotingEvent: '正在更新投票活动...',
 
     // candidate
+    candidate: '候选人',
     confirmedCandidate: '已确认候选人',
     pendingCandidate: '待确认候选人',
+    noConfirmedCandidateAvailable: '没有可用的已确认候选人',
+    noPendingCandidateAvailable: '没有可用的待确认候选人',
+    noCandidateFound: '没有找到候选人',
+    votesReceived: '票数',
+    confirmed: '已确认',
+    rejected: '已拒绝',
+    errorConfirmingCandidate: '确认候选人失败',
+    errorRejectingCandidate: '拒绝候选人失败',
+    addCandidate: '添加候选人',
 
     // validator_util
     dontLeaveBlank: '此字段不能为空',
@@ -521,5 +564,6 @@ mixin AppLocale {
 
     // others
     pleaseConnectYourWallet: '请连接您的钱包',
+    close: '关闭',
   };
 }

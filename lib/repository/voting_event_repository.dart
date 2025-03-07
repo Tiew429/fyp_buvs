@@ -1,4 +1,6 @@
 import 'package:blockchain_university_voting_system/blockchain/smart_contract_service.dart';
+import 'package:blockchain_university_voting_system/models/candidate_model.dart';
+import 'package:blockchain_university_voting_system/models/student_model.dart';
 import 'package:blockchain_university_voting_system/models/voting_event_model.dart';
 import 'package:blockchain_university_voting_system/routes/navigation_keys.dart';
 import 'package:blockchain_university_voting_system/utils/converter_util.dart';
@@ -103,8 +105,8 @@ class VotingEventRepository {
             status: status,
             startTime: startTime,
             endTime: endTime,
-            candidates: candidates,
-            voters: voters,
+            candidates: candidates.map((c) => Candidate.fromMap(c)).toList(),
+            voters: voters.map((v) => Student.fromMap(v)).toList(),
           );
 
           // add the voting event into votingEventList

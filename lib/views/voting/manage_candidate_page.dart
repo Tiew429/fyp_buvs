@@ -2,6 +2,7 @@ import 'package:blockchain_university_voting_system/localization/app_locale.dart
 import 'package:blockchain_university_voting_system/viewmodels/voting_event_viewmodel.dart';
 import 'package:blockchain_university_voting_system/views/voting/confirmed_candidate_page.dart';
 import 'package:blockchain_university_voting_system/views/voting/pending_candidate_page.dart';
+import 'package:blockchain_university_voting_system/widgets/custom_animated_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localization/flutter_localization.dart';
 
@@ -43,12 +44,15 @@ class _ManageCandidatePageState extends State<ManageCandidatePage> {
         title: Text(AppLocale.manageCandidate.getString(context)),
         backgroundColor: colorScheme.secondary,
       ),
-      backgroundColor: colorScheme.primary,
+      backgroundColor: colorScheme.tertiary,
       body: Column(
         children: [
           Container(
             width: double.infinity,
             height: 50,
+            decoration: BoxDecoration(
+              color: colorScheme.primary,
+            ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
@@ -131,6 +135,10 @@ class _ManageCandidatePageState extends State<ManageCandidatePage> {
             ),
           ),
         ],
+      ),
+      floatingActionButton: CustomAnimatedButton(
+        text: AppLocale.addCandidate.getString(context),
+        onPressed: () {},
       ),
     );
   }

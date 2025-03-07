@@ -1,9 +1,11 @@
 import 'package:blockchain_university_voting_system/localization/app_locale.dart';
+import 'package:blockchain_university_voting_system/models/candidate_model.dart';
 import 'package:blockchain_university_voting_system/models/user_model.dart';
 import 'package:blockchain_university_voting_system/models/voting_event_model.dart';
 import 'package:blockchain_university_voting_system/routes/navigation_helper.dart';
 import 'package:blockchain_university_voting_system/utils/snackbar_util.dart';
 import 'package:blockchain_university_voting_system/viewmodels/voting_event_viewmodel.dart';
+import 'package:blockchain_university_voting_system/widgets/candidate_box.dart';
 import 'package:blockchain_university_voting_system/widgets/centered_container.dart';
 import 'package:blockchain_university_voting_system/widgets/custom_animated_button.dart';
 import 'package:blockchain_university_voting_system/widgets/response_widget.dart';
@@ -52,6 +54,9 @@ class _VotingEventPageState extends State<VotingEventPage> {
   @override
   Widget build(BuildContext context) {
     ColorScheme colorScheme = Theme.of(context).colorScheme;
+
+    // Convert candidates to Candidate objects if needed
+    List<Candidate> candidateObjects = _convertToCandidateObjects(_votingEvent.candidates);
 
     return Scaffold(
       appBar: AppBar(
@@ -174,10 +179,31 @@ class _VotingEventPageState extends State<VotingEventPage> {
                 ),
               ),
             ),
-            Column(
-              children: _votingEvent.candidates.map(
-                (candidate) => candidateBox(candidate)).toList(),
-            ),
+            candidateObjects.isEmpty 
+              ? Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Text(
+                      AppLocale.noCandidateFound.getString(context),
+                      style: TextStyle(
+                        color: colorScheme.onTertiary,
+                        fontSize: 18,
+                      ),
+                    ),
+                  ),
+                )
+              : Column(
+                  children: candidateObjects.map(
+                    (candidate) => Padding(
+                      padding: const EdgeInsets.only(bottom: 8.0),
+                      child: CandidateBox(
+                        candidate: candidate,
+                        onTap: () => _showCandidateDetails(candidate),
+                        backgroundColor: colorScheme.surface,
+                        textColor: colorScheme.onSurface,
+                      ),
+                    )).toList(),
+                ),
             Row(
               children: [
                 const Spacer(),
@@ -205,69 +231,74 @@ class _VotingEventPageState extends State<VotingEventPage> {
     );
   }
 
-  Widget candidateBox(dynamic candidate) {
-    // Handle different types of candidate data
-    String name = "";
-    String bio = "";
+  // Convert dynamic candidates to Candidate objects
+  List<Candidate> _convertToCandidateObjects(List<dynamic> candidates) {
+    List<Candidate> result = [];
     
-    if (candidate is String) {
-      // If candidate is just a wallet address string
-      name = candidate;
-      bio = "Wallet Address";
-    } else if (candidate is Map) {
-      // If candidate is a Map (from JSON)
-      name = candidate['name'] ?? candidate['_name'] ?? "Unknown";
-      bio = candidate['bio'] ?? candidate['_bio'] ?? "No bio available";
-    } else if (candidate.runtimeType.toString().contains('Candidate')) {
-      // If candidate is a Candidate object
-      try {
-        name = candidate.name;
-        bio = candidate.bio;
-      } catch (e) {
-        print("Error accessing candidate properties: $e");
-        name = "Error: Unable to access candidate data";
-        bio = "Please check data format";
+    for (var candidate in candidates) {
+      if (candidate is Candidate) {
+        // Already a Candidate object
+        result.add(candidate);
+      } else if (candidate is Map) {
+        // Convert Map to Candidate
+        String candidateID = candidate['candidateID'] ?? candidate['_candidateID'] ?? '';
+        String userID = candidate['userID'] ?? candidate['_userID'] ?? '';
+        String name = candidate['name'] ?? candidate['_name'] ?? 'Unknown';
+        String bio = candidate['bio'] ?? candidate['_bio'] ?? '';
+        String votingEventID = candidate['votingEventID'] ?? candidate['_votingEventID'] ?? '';
+        int votesReceived = candidate['votesReceived'] ?? candidate['_votesReceived'] ?? 0;
+        
+        result.add(Candidate(
+          candidateID: candidateID,
+          userID: userID,
+          name: name,
+          bio: bio,
+          votingEventID: votingEventID,
+          votesReceived: votesReceived,
+        ));
+      } else if (candidate is String) {
+        // If it's just a string (like a wallet address), create a minimal Candidate
+        result.add(Candidate(
+          candidateID: 'unknown',
+          userID: candidate,
+          name: 'Unknown',
+          bio: 'No bio available',
+          votingEventID: _votingEvent.votingEventID,
+        ));
       }
-    } else {
-      // Default case for other types
-      name = candidate.toString();
-      bio = "Unknown format";
     }
     
-    return GestureDetector(
-      onTap: () {},
-      child: CenteredContainer(
-        containerPaddingVertical: 10.0,
-        child: Row(
+    return result;
+  }
+
+  void _showCandidateDetails(Candidate candidate) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(candidate.name),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Expanded(
-              flex: 3,
-              child: Container(
-                padding: const EdgeInsets.all(2.0),
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: Theme.of(context).colorScheme.onPrimary
-                  ),
-                ),
-                child: const CircleAvatar(
-                  radius: 30.0,
-                  child: Text("Avatar"),
-                ),
-              ),
-            ),
-            Expanded(
-              flex: 7,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text("${AppLocale.name.getString(context)}: $name"),
-                  Text("${AppLocale.bio.getString(context)}: $bio"),
-                ],
-              ),
-            ),
+            if (candidate.bio.isNotEmpty) ...[
+              Text("${AppLocale.bio.getString(context)}:"),
+              const SizedBox(height: 4),
+              Text(candidate.bio),
+              const SizedBox(height: 12),
+            ],
+            Text("${AppLocale.walletAddress.getString(context)}:"),
+            const SizedBox(height: 4),
+            SelectableText(candidate.userID),
+            // const SizedBox(height: 8),
+            // Text("${AppLocale.votesReceived.getString(context)}: ${candidate.votesReceived}"),
           ],
         ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(AppLocale.close.getString(context)),
+          ),
+        ],
       ),
     );
   }

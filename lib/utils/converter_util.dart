@@ -15,11 +15,13 @@ class ConverterUtil {
     return DateTime.fromMillisecondsSinceEpoch(ConverterUtil.bigIntToInt(x) * 1000);
   }
 
-  static TimeOfDay bigIntToTimeOfDay(BigInt x) {
-    int totalSeconds = ConverterUtil.bigIntToInt(x);
+  static TimeOfDay bigIntToTimeOfDay(dynamic x) {
+    // Ensure it's parsed to BigInt first
+    final intValue = (x is BigInt) ? x.toInt() : int.parse(x.toString());
+    
     return TimeOfDay(
-      hour: totalSeconds ~/ 3600,
-      minute: (totalSeconds % 3600) ~/ 60
+      hour: (intValue ~/ 3600), // Convert seconds to hours
+      minute: (intValue % 3600) ~/ 60, // Convert remaining seconds to minutes
     );
   }
 

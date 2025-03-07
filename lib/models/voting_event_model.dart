@@ -1,4 +1,7 @@
 import 'package:blockchain_university_voting_system/data/voting_event_status.dart';
+import 'package:blockchain_university_voting_system/models/candidate_model.dart';
+import 'package:blockchain_university_voting_system/models/student_model.dart';
+import 'package:blockchain_university_voting_system/utils/converter_util.dart';
 import 'package:flutter/material.dart';
 
 class VotingEvent {
@@ -11,8 +14,9 @@ class VotingEvent {
   TimeOfDay? _endTime;
   final String _createdBy; // store creater's wallet address
   VotingEventStatus _status;
-  final List<dynamic> _voters;
-  final List<dynamic> _candidates;
+  final List<Student> _voters;
+  final List<Candidate> _candidates;
+  final List<Candidate> _pendingCandidates;
 
   VotingEvent({
     required String votingEventID,
@@ -24,8 +28,9 @@ class VotingEvent {
     TimeOfDay? endTime,
     required String createdBy,
     VotingEventStatus status = VotingEventStatus.pending,
-    List<dynamic> voters = const [],
-    List<dynamic> candidates = const [],
+    List<Student> voters = const [],
+    List<Candidate> candidates = const [],
+    List<Candidate> pendingCandidates = const [],
   }) : _votingEventID = votingEventID,
        _title = title,
        _description = description,
@@ -36,7 +41,8 @@ class VotingEvent {
        _createdBy = createdBy,
        _status = status,
        _voters = voters,
-       _candidates = candidates;
+       _candidates = candidates,
+       _pendingCandidates = pendingCandidates;
 
   // getter
   String get votingEventID => _votingEventID;
@@ -48,8 +54,9 @@ class VotingEvent {
   TimeOfDay? get endTime => _endTime;
   String get createdBy => _createdBy;
   VotingEventStatus get status => _status;
-  List<dynamic> get voters => _voters;
-  List<dynamic> get candidates => _candidates;
+  List<Student> get voters => _voters;
+  List<Candidate> get candidates => _candidates;
+  List<Candidate> get pendingCandidates => _pendingCandidates;
 
   // setter
   void setTitle(String title) => _title = title;
@@ -74,8 +81,9 @@ class VotingEvent {
     TimeOfDay? endTime,
     String? createdBy,
     VotingEventStatus? status,
-    List<dynamic>? voters,
-    List<dynamic>? candidates,
+    List<Student>? voters,
+    List<Candidate>? candidates,
+    List<Candidate>? pendingCandidates,
   }) {
     return VotingEvent(
       votingEventID: votingEventID ?? _votingEventID,
@@ -89,6 +97,7 @@ class VotingEvent {
       status: status ?? _status,
       voters: voters ?? _voters,
       candidates: candidates ?? _candidates,
+      pendingCandidates: pendingCandidates ?? _pendingCandidates,
     );
   }
 
@@ -99,22 +108,13 @@ class VotingEvent {
       description: map['description'],
       startDate: DateTime.fromMillisecondsSinceEpoch(map['startDate'] * 1000),
       endDate: DateTime.fromMillisecondsSinceEpoch(map['endDate'] * 1000),
-      startTime: _bigIntToTimeOfDay(map['startTime']),
-      endTime: _bigIntToTimeOfDay(map['endTime']),
+      startTime: ConverterUtil.bigIntToTimeOfDay(map['startTime']),
+      endTime: ConverterUtil.bigIntToTimeOfDay(map['endTime']),
       createdBy: map['createdBy'],
       status: VotingEventStatus.values[map['status']],
       voters: map['voters'] ?? [],
       candidates: map['candidates'] ?? [],
-    );
-  }
-
-  static TimeOfDay _bigIntToTimeOfDay(dynamic bigIntValue) {
-    // Ensure it's parsed to BigInt first
-    final intValue = (bigIntValue is BigInt) ? bigIntValue.toInt() : int.parse(bigIntValue.toString());
-    
-    return TimeOfDay(
-      hour: (intValue ~/ 3600), // Convert seconds to hours
-      minute: (intValue % 3600) ~/ 60, // Convert remaining seconds to minutes
+      pendingCandidates: map['pendingCandidates'] ?? [],
     );
   }
 }
