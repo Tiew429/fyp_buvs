@@ -19,6 +19,7 @@ import 'package:blockchain_university_voting_system/views/report/report_page.dar
 import 'package:blockchain_university_voting_system/views/user_management/invite_new_user_page.dart';
 import 'package:blockchain_university_voting_system/views/user_management/profile_page_view_page.dart';
 import 'package:blockchain_university_voting_system/views/user_management/user_management_page.dart';
+import 'package:blockchain_university_voting_system/views/voting/add_candidate_page.dart';
 import 'package:blockchain_university_voting_system/views/voting/edit_voting_event_page.dart';
 import 'package:blockchain_university_voting_system/views/voting/manage_candidate_page.dart';
 import 'package:blockchain_university_voting_system/views/voting/voting_event_create_page.dart';
@@ -479,6 +480,18 @@ List<RouteBase> router(String initialRoute, GlobalKey<NavigatorState> navigatorK
       pageBuilder: (context, state) {
         return buildPageWithAnimation(
           ManageCandidatePage(
+            votingEventViewModel: getVotingEventViewModel()!,
+          ), 
+          state,
+        );
+      },
+    ),
+    GoRoute(
+      path: '/${RouterPath.addcandidatepage.path}',
+      name: RouterPath.addcandidatepage.path,
+      pageBuilder: (context, state) {
+        return buildPageWithAnimation(
+          AddCandidatePage(
             votingEventViewModel: getVotingEventViewModel()!,
           ), 
           state,

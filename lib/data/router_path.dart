@@ -12,6 +12,7 @@ enum RouterPath {
   votingeventpage,
   editvotingeventpage,
   managecandidatepage,
+  addcandidatepage,
   pendingvotingeventlistpage,
   usermanagementpage,
   invitenewuserpage,

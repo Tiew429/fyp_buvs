@@ -74,6 +74,9 @@ class NavigationHelper {
   static void navigateToManageCandidatePage(BuildContext context) {
     context.push('/${RouterPath.managecandidatepage.path}');
   }
+  static void navigateToAddCandidatePage(BuildContext context) {
+    context.push('/${RouterPath.addcandidatepage.path}');
+  }
 
   // Pending VE
   static void navigateToPendingVotingEventListPage(BuildContext context) {

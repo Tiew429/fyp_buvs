@@ -9,7 +9,7 @@ class Student extends User {
     required super.email,
     required super.walletAddress,
     super.isVerified,
-    bool isEligibleForVoting = false,
+    bool isEligibleForVoting = false, required UserRole role,
   }) : _isEligibleForVoting = isEligibleForVoting, 
        super(role: UserRole.student);
 
@@ -31,6 +31,7 @@ class Student extends User {
       userID: json['userID'],
       name: json['name'],
       email: json['email'],
+      role: UserRole.student,
       walletAddress: json['walletAddress'],
       isVerified: json['isVerified'],
       isEligibleForVoting: json['isEligibleForVoting'],
@@ -42,6 +43,7 @@ class Student extends User {
       userID: map['userID'],
       name: map['name'],
       email: map['email'],
+      role: UserRole.student,
       walletAddress: map['walletAddress'],
       isVerified: map['isVerified'],
       isEligibleForVoting: map['isEligibleForVoting'],

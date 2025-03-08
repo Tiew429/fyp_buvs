@@ -1,4 +1,5 @@
 import 'package:blockchain_university_voting_system/localization/app_locale.dart';
+import 'package:blockchain_university_voting_system/routes/navigation_helper.dart';
 import 'package:blockchain_university_voting_system/viewmodels/voting_event_viewmodel.dart';
 import 'package:blockchain_university_voting_system/views/voting/confirmed_candidate_page.dart';
 import 'package:blockchain_university_voting_system/views/voting/pending_candidate_page.dart';
@@ -138,7 +139,7 @@ class _ManageCandidatePageState extends State<ManageCandidatePage> {
       ),
       floatingActionButton: CustomAnimatedButton(
         text: AppLocale.addCandidate.getString(context),
-        onPressed: () {},
+        onPressed: () => NavigationHelper.navigateToAddCandidatePage(context),
       ),
     );
   }

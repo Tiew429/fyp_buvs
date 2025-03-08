@@ -8,6 +8,7 @@ class CustomAnimatedButton extends StatefulWidget {
   final Color? fontColor;
   final double? borderRadius;
   final EdgeInsetsGeometry? padding;
+  final double? width;
 
   const CustomAnimatedButton({
     super.key,
@@ -21,6 +22,7 @@ class CustomAnimatedButton extends StatefulWidget {
       horizontal: 16.0,
       vertical: 6.0,
     ),
+    this.width,
   });
 
   @override
@@ -63,7 +65,7 @@ class _CustomAnimatedButtonState extends State<CustomAnimatedButton> {
             AnimatedContainer(
               duration: const Duration(milliseconds: 200),
               curve: Curves.easeOut,
-              width: 200,
+              width: widget.width ?? 200,
               height: 60,
               decoration: BoxDecoration(
                 color: widget.backgroundColor?.withOpacity(1 - _darkenFactor) ?? colorScheme.secondary.withOpacity(1 - _darkenFactor),

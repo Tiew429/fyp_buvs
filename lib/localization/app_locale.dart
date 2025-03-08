@@ -106,8 +106,15 @@ mixin AppLocale {
   static const String creatingVotingEvent = 'creating voting event...';
   static const String updatingVotingEvent = 'updating voting event...';
 
+  // student
+  static const String notEligibleForVoting = 'not eligible for voting';
+  static const String pleaseSelectAtLeastOneStudent = 'please select at least one student';
+  static const String searchStudents = 'search students';
+  static const String noStudentsFound = 'no students found';
+
   // candidate
   static const String candidate = 'candidate';
+  static const String confirmCandidates = 'confirm candidates';
   static const String confirmedCandidate = 'confirmed candidate';
   static const String pendingCandidate = 'pending candidate';
   static const String noConfirmedCandidateAvailable = 'no confirmed candidate available';
@@ -119,6 +126,9 @@ mixin AppLocale {
   static const String errorConfirmingCandidate = 'error confirming candidate';
   static const String errorRejectingCandidate = 'error rejecting candidate';
   static const String addCandidate = 'add candidate';
+  static const String candidatesAddedSuccessfully = 'candidates added successfully';
+  static const String errorAddingCandidates = 'error adding candidates';
+  static const String addSelectedCandidates = 'add selected candidates';
 
   // validator_util
   static const String dontLeaveBlank = 'please don\'t leave this field blank';
@@ -247,8 +257,15 @@ mixin AppLocale {
     creatingVotingEvent: 'Creating voting event...',
     updatingVotingEvent: 'Updating voting event...',
 
+    // student
+    notEligibleForVoting: 'Not eligible for voting',
+    pleaseSelectAtLeastOneStudent: 'Please select at least one student',
+    searchStudents: 'Search students',
+    noStudentsFound: 'No students found',
+
     // candidate
     candidate: 'Candidate',
+    confirmCandidates: 'Confirm Candidates',
     confirmedCandidate: 'Confirmed Candidate',
     pendingCandidate: 'Pending Candidate',
     noConfirmedCandidateAvailable: 'No confirmed candidate available',
@@ -260,6 +277,9 @@ mixin AppLocale {
     errorConfirmingCandidate: 'Error confirming candidate',
     errorRejectingCandidate: 'Error rejecting candidate',
     addCandidate: 'Add Candidate',
+    candidatesAddedSuccessfully: 'Candidates added successfully',
+    errorAddingCandidates: 'Error adding candidates',
+    addSelectedCandidates: 'Add Selected Candidates',
 
     // validator_util
     dontLeaveBlank: 'Please don\'t leave this field blank',
@@ -389,8 +409,15 @@ mixin AppLocale {
     creatingVotingEvent: 'Sedang membuat acara pengundian...',
     updatingVotingEvent: 'Sedang mengemas kini acara pengundian...',
 
+    // student
+    notEligibleForVoting: 'Tidak layak untuk pengundian', 
+    pleaseSelectAtLeastOneStudent: 'Sila pilih sekurang-kurangnya satu pelajar',
+    searchStudents: 'Cari pelajar',
+    noStudentsFound: 'Tiada pelajar ditemui',
+
     // candidate
     candidate: 'Calon',
+    confirmCandidates: 'Konfirmasi Calon',
     confirmedCandidate: 'Calon Diluluskan',
     pendingCandidate: 'Calon Belum Diluluskan',
     noConfirmedCandidateAvailable: 'Tiada calon yang diluluskan tersedia',
@@ -402,6 +429,9 @@ mixin AppLocale {
     errorConfirmingCandidate: 'Kesalahan mengkonfirmasi calon',
     errorRejectingCandidate: 'Kesalahan menolak calon',
     addCandidate: 'Tambah Calon',
+    candidatesAddedSuccessfully: 'Calon berjaya ditambahkan',
+    errorAddingCandidates: 'Kesalahan menambahkan calon',
+    addSelectedCandidates: 'Tambah Calon yang Dipilih',
 
     // validator_util
     dontLeaveBlank: 'Medan ini tidak boleh kosong',
@@ -531,8 +561,15 @@ mixin AppLocale {
     creatingVotingEvent: '正在创建投票活动...',
     updatingVotingEvent: '正在更新投票活动...',
 
+    // student
+    notEligibleForVoting: '不符合投票资格',
+    pleaseSelectAtLeastOneStudent: '请至少选择一个学生',
+    searchStudents: '搜索学生',
+    noStudentsFound: '没有找到学生',
+
     // candidate
     candidate: '候选人',
+    confirmCandidates: '确认候选人',
     confirmedCandidate: '已确认候选人',
     pendingCandidate: '待确认候选人',
     noConfirmedCandidateAvailable: '没有可用的已确认候选人',
@@ -544,6 +581,9 @@ mixin AppLocale {
     errorConfirmingCandidate: '确认候选人失败',
     errorRejectingCandidate: '拒绝候选人失败',
     addCandidate: '添加候选人',
+    candidatesAddedSuccessfully: '候选人已添加成功',
+    errorAddingCandidates: '添加候选人失败',
+    addSelectedCandidates: '添加选定候选人',
 
     // validator_util
     dontLeaveBlank: '此字段不能为空',
