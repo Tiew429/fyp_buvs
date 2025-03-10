@@ -281,8 +281,22 @@ class SmartContractService {
     try {
       // check is the voting event id already exists in blockchain
       final votingEventIDs = await readFunction('getVotingEventIDs');
-      if (!votingEventIDs.contains(votingEvent.votingEventID)) {
-        throw Exception("Smart_Contract_Service (removeVotingEventFromBlockchain): Voting event id not exists in blockchain.");
+
+      bool eventExists = false;
+      if (votingEventIDs is List) {
+        for (var id in votingEventIDs) {
+          String idStr = id is List ? id[0].toString() : id.toString();
+          if (idStr == votingEvent.votingEventID) {
+            eventExists = true;
+            break;
+          }
+        }
+      } else if (votingEventIDs is String) {
+        eventExists = votingEventIDs == votingEvent.votingEventID;
+      }
+
+      if (!eventExists) {
+        throw Exception("Smart_Contract_Service (removeVotingEventFromBlockchain): Voting event ID '${votingEvent.votingEventID}' not found in blockchain. Available IDs: $votingEventIDs");
       }
 
       // delete voting event in blockchain

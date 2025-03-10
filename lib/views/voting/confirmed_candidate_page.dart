@@ -27,7 +27,7 @@ class _ConfirmedCandidatePageState extends State<ConfirmedCandidatePage> {
   void initState() {
     super.initState();
     _votingEvent = widget.votingEventViewModel.selectedVotingEvent;
-    _candidateObjects = _convertToCandidateObjects(_votingEvent.candidates);
+    _candidateObjects = Candidate.convertToCandidateList(_votingEvent.candidates);
   }
 
   @override
@@ -67,46 +67,6 @@ class _ConfirmedCandidatePageState extends State<ConfirmedCandidatePage> {
         tablet: Container(), // Implement tablet layout if needed
       ),
     );
-  }
-
-  // Convert dynamic candidates to Candidate objects
-  List<Candidate> _convertToCandidateObjects(List<dynamic> candidates) {
-    List<Candidate> result = [];
-    
-    for (var candidate in candidates) {
-      if (candidate is Candidate) {
-        // Already a Candidate object
-        result.add(candidate);
-      } else if (candidate is Map) {
-        // Convert Map to Candidate
-        String candidateID = candidate['candidateID'] ?? candidate['_candidateID'] ?? '';
-        String userID = candidate['userID'] ?? candidate['_userID'] ?? '';
-        String name = candidate['name'] ?? candidate['_name'] ?? 'Unknown';
-        String bio = candidate['bio'] ?? candidate['_bio'] ?? '';
-        String votingEventID = candidate['votingEventID'] ?? candidate['_votingEventID'] ?? '';
-        int votesReceived = candidate['votesReceived'] ?? candidate['_votesReceived'] ?? 0;
-        
-        result.add(Candidate(
-          candidateID: candidateID,
-          userID: userID,
-          name: name,
-          bio: bio,
-          votingEventID: votingEventID,
-          votesReceived: votesReceived,
-        ));
-      } else if (candidate is String) {
-        // If it's just a string (like a wallet address), create a minimal Candidate
-        result.add(Candidate(
-          candidateID: 'unknown',
-          userID: candidate,
-          name: 'Unknown',
-          bio: 'No bio available',
-          votingEventID: _votingEvent.votingEventID,
-        ));
-      }
-    }
-    
-    return result;
   }
 
   void _showCandidateDetails(Candidate candidate) {

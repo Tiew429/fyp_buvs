@@ -12,19 +12,20 @@ class ScrollableWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // 计算内容区域的高度
-    final screenHeight = MediaQuery.of(context).size.height;
-    final contentHeight = hasBottomNavigationBar
-        ? screenHeight - kBottomNavigationBarHeight - 30
-        : screenHeight - 60;
-
     return SingleChildScrollView(
-      physics: const AlwaysScrollableScrollPhysics(),
-      child: Container(
-        // 使用固定高度而不是约束，避免无限高度约束
-        height: contentHeight,
-        padding: const EdgeInsets.all(20),
-        child: child,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          minHeight: hasBottomNavigationBar? 
+            (MediaQuery.of(context).size.height - kBottomNavigationBarHeight - 30) 
+            : MediaQuery.of(context).size.height - 60, // ensures minimum height matches screen size
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: child,
+        ),
+        // child: IntrinsicHeight( // makes column height dynamic based on content
+        //   child: child,
+        // ),
       ),
     );
   }

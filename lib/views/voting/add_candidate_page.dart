@@ -150,6 +150,8 @@ class _AddCandidatePageState extends State<AddCandidatePage> {
 
   // 显示确认对话框
   void _showConfirmationDialog() {
+    final colorScheme = Theme.of(context).colorScheme;
+
     if (_selectedStudentIds.isEmpty) {
       SnackbarUtil.showSnackBar(
         context, 
@@ -183,14 +185,22 @@ class _AddCandidatePageState extends State<AddCandidatePage> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: Text(AppLocale.cancel.getString(context)),
+            child: Text(AppLocale.cancel.getString(context),
+              style: TextStyle(
+                color: colorScheme.onPrimary,
+              ),
+            ),
           ),
           TextButton(
             onPressed: () {
               Navigator.of(context).pop();
               _addCandidates(selectedStudents);
             },
-            child: Text(AppLocale.confirm.getString(context)),
+            child: Text(AppLocale.confirm.getString(context),
+              style: TextStyle(
+                color: colorScheme.onPrimary,
+              ),
+            ),
           ),
         ],
       ),
@@ -207,16 +217,17 @@ class _AddCandidatePageState extends State<AddCandidatePage> {
       // 创建候选人对象
       List<Candidate> newCandidates = students.map((student) => 
         Candidate(
-          candidateID: 'candidate_${student.userID}',
+          candidateID: 'CAND_${_getExistingCandidateIds().length + 1}',
           userID: student.userID,
           name: student.name,
           bio: '',
+          walletAddress: student.walletAddress,
           votingEventID: votingEvent.votingEventID,
         )
       ).toList();
       
       // 在实际应用中，这里应该调用ViewModel的方法添加候选人
-      // 例如: await widget.votingEventViewModel.addCandidates(newCandidates);
+      await widget.votingEventViewModel.addCandidates(newCandidates);
       
       // 模拟延迟
       await Future.delayed(const Duration(seconds: 1));
@@ -257,6 +268,42 @@ class _AddCandidatePageState extends State<AddCandidatePage> {
     }
   }
 
+  // 构建学生列表项
+  Widget _buildStudentItem(Student student) {
+    final colorScheme = Theme.of(context).colorScheme;
+    bool isSelected = _selectedStudentIds.contains(student.userID);
+    bool isEligible = student.isEligibleForVoting;
+    
+    return Card(
+      margin: const EdgeInsets.only(bottom: 8.0),
+      child: ListTile(
+        title: Text(
+          student.name,
+          style: TextStyle(
+            color: isEligible 
+                ? colorScheme.onSurface 
+                : colorScheme.onSurface.withOpacity(0.5),
+          ),
+        ),
+        subtitle: Text(
+          student.email,
+          style: TextStyle(
+            color: isEligible 
+                ? colorScheme.onSurface.withOpacity(0.7) 
+                : colorScheme.onSurface.withOpacity(0.3),
+          ),
+        ),
+        trailing: Checkbox(
+          value: isSelected,
+          onChanged: isEligible 
+              ? (value) => _toggleStudentSelection(student)
+              : null,
+        ),
+        onTap: () => _toggleStudentSelection(student),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
@@ -270,9 +317,10 @@ class _AddCandidatePageState extends State<AddCandidatePage> {
       backgroundColor: colorScheme.tertiary,
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
-          : Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
+          : ScrollableResponsiveWidget(
+              phone: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   // 搜索栏
                   TextField(
@@ -292,7 +340,8 @@ class _AddCandidatePageState extends State<AddCandidatePage> {
                   const SizedBox(height: 16),
                   
                   // 学生列表
-                  Expanded(
+                  Flexible(
+                    fit: FlexFit.loose,
                     child: _filteredStudents.isEmpty
                         ? Center(
                             child: Text(
@@ -303,43 +352,13 @@ class _AddCandidatePageState extends State<AddCandidatePage> {
                               ),
                             ),
                           )
-                        : ListView.builder(
-                            padding: const EdgeInsets.symmetric(vertical: 8.0),
-                            itemCount: _filteredStudents.length,
-                            itemBuilder: (context, index) {
-                              Student student = _filteredStudents[index];
-                              bool isSelected = _selectedStudentIds.contains(student.userID);
-                              bool isEligible = student.isEligibleForVoting;
-                              
-                              return Card(
-                                margin: const EdgeInsets.only(bottom: 8.0),
-                                child: ListTile(
-                                  title: Text(
-                                    student.name,
-                                    style: TextStyle(
-                                      color: isEligible 
-                                          ? colorScheme.onSurface 
-                                          : colorScheme.onSurface.withOpacity(0.5),
-                                    ),
-                                  ),
-                                  subtitle: Text(
-                                    student.email,
-                                    style: TextStyle(
-                                      color: isEligible 
-                                          ? colorScheme.onSurface.withOpacity(0.7) 
-                                          : colorScheme.onSurface.withOpacity(0.3),
-                                    ),
-                                  ),
-                                  trailing: Checkbox(
-                                    value: isSelected,
-                                    onChanged: isEligible 
-                                        ? (value) => _toggleStudentSelection(student)
-                                        : null,
-                                  ),
-                                  onTap: () => _toggleStudentSelection(student),
-                                ),
-                              );
-                            },
+                        : SingleChildScrollView(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: _filteredStudents
+                                  .map((student) => _buildStudentItem(student))
+                                  .toList(),
+                            ),
                           ),
                   ),
                   
@@ -354,7 +373,8 @@ class _AddCandidatePageState extends State<AddCandidatePage> {
                   ),
                 ],
               ),
-            ),
+              tablet: Container(),
+          ),
     );
   }
 }

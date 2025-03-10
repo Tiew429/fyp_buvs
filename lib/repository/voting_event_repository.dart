@@ -14,7 +14,7 @@ class VotingEventRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   Future<List<VotingEvent>> getVotingEventList() async {
-    print("\nVoting_Event_Repository: Obtaining voting event list from firebase and blockchain.");
+    print("Voting_Event_Repository: Obtaining voting event list from firebase and blockchain.");
 
     // create an empty array list for voting event object to store the voting event later
     List<VotingEvent> votingEventList = [];
@@ -125,7 +125,7 @@ class VotingEventRepository {
   }
 
   Future<bool> insertNewVotingEvent(VotingEvent votingEvent) async {
-    print("\nVoting_Event_Repository: Inserting voting event to blockchain and firebase.");
+    print("Voting_Event_Repository: Inserting voting event to blockchain and firebase.");
 
     try {
       // blockchain insertion
@@ -141,7 +141,7 @@ class VotingEventRepository {
   }
 
   Future<void> updateVotingEvent(VotingEvent votingEvent) async {
-    print("\nVoting_Event_Repository: Updating voting event in blockchain and firebase.");
+    print("Voting_Event_Repository: Updating voting event in blockchain and firebase.");
 
     // blockchain update
     await _smartContractService.updateVotingEventInBlockchain(votingEvent);
@@ -151,7 +151,7 @@ class VotingEventRepository {
   }
 
   Future<void> deleteVotingEvent(VotingEvent votingEvent) async {
-    print("\nVoting_Event_Repository: Deleting voting event in blockchain and firebase.");
+    print("Voting_Event_Repository: Deleting voting event in blockchain and firebase.");
 
     // blockchain deletion (change status to deprecated)
     await _smartContractService.removeVotingEventFromBlockchain(votingEvent);

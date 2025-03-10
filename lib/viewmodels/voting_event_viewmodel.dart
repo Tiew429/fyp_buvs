@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:blockchain_university_voting_system/data/voting_event_status.dart';
+import 'package:blockchain_university_voting_system/models/candidate_model.dart';
 import 'package:blockchain_university_voting_system/models/voting_event_model.dart';
 import 'package:blockchain_university_voting_system/repository/voting_event_repository.dart';
 import 'package:flutter/material.dart';
@@ -95,6 +96,12 @@ class VotingEventViewModel extends ChangeNotifier{
   Future<void> deleteVotingEvent(VotingEvent votingEvent) async {
     print("Voting_Event_ViewModel: Removing voting event.");
     await _votingEventRepository.deleteVotingEvent(votingEvent);
+  }
+
+  Future<void> addCandidates(List<Candidate> candidates) async {
+    print("Voting_Event_ViewModel: Adding candidates.");
+    _selectedVotingEvent.candidates.addAll(candidates);
+    await _votingEventRepository.updateVotingEvent(_selectedVotingEvent);
   }
 
   @override

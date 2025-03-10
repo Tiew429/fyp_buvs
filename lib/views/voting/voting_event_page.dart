@@ -245,6 +245,7 @@ class _VotingEventPageState extends State<VotingEventPage> {
         String userID = candidate['userID'] ?? candidate['_userID'] ?? '';
         String name = candidate['name'] ?? candidate['_name'] ?? 'Unknown';
         String bio = candidate['bio'] ?? candidate['_bio'] ?? '';
+        String walletAddress = candidate['walletAddress'] ?? candidate['_walletAddress'] ?? '';
         String votingEventID = candidate['votingEventID'] ?? candidate['_votingEventID'] ?? '';
         int votesReceived = candidate['votesReceived'] ?? candidate['_votesReceived'] ?? 0;
         
@@ -253,6 +254,7 @@ class _VotingEventPageState extends State<VotingEventPage> {
           userID: userID,
           name: name,
           bio: bio,
+          walletAddress: walletAddress,
           votingEventID: votingEventID,
           votesReceived: votesReceived,
         ));
@@ -263,6 +265,7 @@ class _VotingEventPageState extends State<VotingEventPage> {
           userID: candidate,
           name: 'Unknown',
           bio: 'No bio available',
+          walletAddress: '',
           votingEventID: _votingEvent.votingEventID,
         ));
       }
