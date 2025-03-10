@@ -34,7 +34,8 @@ mixin AppLocale {
   static const String verification = 'verification';
   static const String verificationCode = 'verification code';
   static const String verify = 'verify';
-
+  static const String loggingIn = 'logging in...';
+  static const String registering = 'registering...'; 
 
   // home (dashboard, profile, settings)
   static const String home = 'home';
@@ -188,6 +189,8 @@ mixin AppLocale {
     verification: 'Verification',
     verificationCode: 'Verification Code',
     verify: 'Verify',
+    loggingIn: 'Logging in...', 
+    registering: 'Registering...',
 
     // home
     home: 'Home',
@@ -340,6 +343,8 @@ mixin AppLocale {
     verification: 'Pengesahan',
     verificationCode: 'Kod Pengesahan',
     verify: 'Sahkan',
+    loggingIn: 'Log masuk...',
+    registering: 'Mendaftar...',
 
     // home
     home: 'Home',
@@ -492,6 +497,8 @@ mixin AppLocale {
     verification: '验证',
     verificationCode: '验证码',
     verify: '验证',
+    loggingIn: '登录中...',
+    registering: '注册中...',
 
     // home
     home: '主页',

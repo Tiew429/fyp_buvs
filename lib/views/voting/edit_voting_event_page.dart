@@ -226,8 +226,6 @@ class _EditVotingEventPageState extends State<EditVotingEventPage> {
             if (_isLoading)
               ProgressCircular(
                 isLoading: true,
-                backgroundColor: colorScheme.inversePrimary,
-                progressColor: colorScheme.onPrimary,
                 message: AppLocale.updatingVotingEvent.getString(context),
               ),
           ],

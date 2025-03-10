@@ -259,8 +259,6 @@ class _VotingEventCreatePageState extends State<VotingEventCreatePage> {
           if (_loading)
             ProgressCircular(
               isLoading: true,
-              backgroundColor: colorScheme.inversePrimary,
-              progressColor: colorScheme.onPrimary,
               message: AppLocale.creatingVotingEvent.getString(context),
             ),
         ],
