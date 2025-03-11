@@ -1,7 +1,7 @@
 import 'package:blockchain_university_voting_system/localization/app_locale.dart';
 import 'package:blockchain_university_voting_system/models/user_model.dart';
 import 'package:blockchain_university_voting_system/routes/navigation_helper.dart';
-import 'package:blockchain_university_voting_system/viewmodels/user_viewmodel.dart';
+import 'package:blockchain_university_voting_system/provider/user_provider.dart';
 import 'package:blockchain_university_voting_system/widgets/custom_confirm_button.dart';
 import 'package:blockchain_university_voting_system/widgets/custom_text_form_field.dart';
 import 'package:blockchain_university_voting_system/widgets/scrollable_widget.dart';
@@ -42,9 +42,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
     super.initState();
     _emailController.text = widget._user.email;
     _usernameController.text = widget._user.name;
-    _walletAddressController.text = widget._user.walletAddress.isEmpty 
-        ? AppLocale.haveNotConnectedWithCryptoWallet.getString(context)
-        : widget._user.walletAddress;
+    _walletAddressController.text = widget._user.walletAddress;
     _bioController.text = widget._user.bio;
   }
 
@@ -58,7 +56,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
       role: widget._user.role,
       isVerified: widget._user.isVerified,
     );
-    final userViewModel = Provider.of<UserViewModel>(context, listen: false);
+    final userViewModel = Provider.of<UserProvider>(context, listen: false);
     await userViewModel.updateUser(updatedUser);
     if (context.mounted) {
       NavigationHelper.navigateBack(context);
@@ -178,7 +176,12 @@ class _EditProfilePageState extends State<EditProfilePage> {
                   Expanded(
                     child: CustomTextFormField(
                       readOnly: true,
-                      controller: _walletAddressController,
+                      controller: _walletAddressController.text.isEmpty
+                          ? TextEditingController(
+                              text: AppLocale.haveNotConnectedWithCryptoWallet
+                                  .getString(context),
+                            )
+                          : _walletAddressController,
                       maxLines: 2,
                     ),
                   ),

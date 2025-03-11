@@ -4,7 +4,7 @@ import 'package:blockchain_university_voting_system/models/user_model.dart';
 import 'package:blockchain_university_voting_system/models/voting_event_model.dart';
 import 'package:blockchain_university_voting_system/routes/navigation_helper.dart';
 import 'package:blockchain_university_voting_system/utils/snackbar_util.dart';
-import 'package:blockchain_university_voting_system/viewmodels/voting_event_viewmodel.dart';
+import 'package:blockchain_university_voting_system/provider/voting_event_provider.dart';
 import 'package:blockchain_university_voting_system/widgets/candidate_box.dart';
 import 'package:blockchain_university_voting_system/widgets/centered_container.dart';
 import 'package:blockchain_university_voting_system/widgets/custom_animated_button.dart';
@@ -15,12 +15,12 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class VotingEventPage extends StatefulWidget {
   final User _user;
-  final VotingEventViewModel _votingEventViewModel;
+  final VotingEventProvider _votingEventViewModel;
 
   const VotingEventPage({
     super.key,
     required User user,
-    required VotingEventViewModel votingEventViewModel,
+    required VotingEventProvider votingEventViewModel,
   }) :_user = user,
       _votingEventViewModel = votingEventViewModel;
 

@@ -3,21 +3,26 @@ import 'package:blockchain_university_voting_system/models/user_model.dart';
 import 'package:blockchain_university_voting_system/repository/user_repository.dart';
 import 'package:flutter/material.dart';
 
-class UserViewModel extends ChangeNotifier {
+class UserProvider extends ChangeNotifier {
   final UserRepository _userRepository = UserRepository();
 
   User? _user;
   bool _isLoading = false;
   String _initialRoute = '/${RouterPath.loginpage.path}';
+  String _department = ''; // declared for staff
+  bool _isEligibleForVoting = false; // declared for student
 
   // getter
   User? get user => _user;
   bool get isLoading => _isLoading;
   String get initialRoute => _initialRoute;
+  String get department => _department;
+  bool get isEligibleForVoting => _isEligibleForVoting;
 
   // setter
-  void setUser(User user) {
+  void setUser(dynamic user) {
     _user = user;
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       notifyListeners();
     });
@@ -33,6 +38,16 @@ class UserViewModel extends ChangeNotifier {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       notifyListeners();
     });
+  }
+
+  void setDepartment(String department) {
+    _department = department;
+    notifyListeners();
+  }
+
+  void setIsEligibleForVoting(bool isEligibleForVoting) {
+    _isEligibleForVoting = isEligibleForVoting;
+    notifyListeners();
   }
 
   void clearUser() {

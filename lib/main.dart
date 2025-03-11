@@ -6,12 +6,13 @@ import 'package:blockchain_university_voting_system/database/shared_preferences.
 import 'package:blockchain_university_voting_system/firebase_options.dart';
 import 'package:blockchain_university_voting_system/localization/app_locale.dart';
 import 'package:blockchain_university_voting_system/models/user_model.dart';
+import 'package:blockchain_university_voting_system/provider/student_provider.dart';
 import 'package:blockchain_university_voting_system/provider/theme_provider.dart';
 import 'package:blockchain_university_voting_system/provider/wallet_provider.dart';
 import 'package:blockchain_university_voting_system/routes/app_routes.dart';
 import 'package:blockchain_university_voting_system/routes/navigation_keys.dart';
-import 'package:blockchain_university_voting_system/viewmodels/user_viewmodel.dart';
-import 'package:blockchain_university_voting_system/viewmodels/voting_event_viewmodel.dart';
+import 'package:blockchain_university_voting_system/provider/user_provider.dart';
+import 'package:blockchain_university_voting_system/provider/voting_event_provider.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -51,10 +52,13 @@ Future<void> main() async {
           create: (_) => WalletProvider(),
         ),
         ChangeNotifierProvider(
-          create: (_) => UserViewModel(),
+          create: (_) => UserProvider(),
         ),
         ChangeNotifierProvider(
-          create: (_) => VotingEventViewModel()
+          create: (_) => VotingEventProvider()
+        ),
+        ChangeNotifierProvider(
+          create: (_) => StudentProvider()
         ),
         Provider<WalletConnectService>(
           create: (_) => WalletConnectService(),
@@ -116,7 +120,7 @@ class _MainAppState extends State<MainApp> {
   @override
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
-    final userViewModel = Provider.of<UserViewModel>(context, listen: false);
+    final userViewModel = Provider.of<UserProvider>(context, listen: false);
     
     return widget.user != null
       ? FutureBuilder(

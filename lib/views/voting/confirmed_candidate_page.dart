@@ -1,14 +1,14 @@
 import 'package:blockchain_university_voting_system/localization/app_locale.dart';
 import 'package:blockchain_university_voting_system/models/candidate_model.dart';
 import 'package:blockchain_university_voting_system/models/voting_event_model.dart';
-import 'package:blockchain_university_voting_system/viewmodels/voting_event_viewmodel.dart';
+import 'package:blockchain_university_voting_system/provider/voting_event_provider.dart';
 import 'package:blockchain_university_voting_system/widgets/candidate_box.dart';
 import 'package:blockchain_university_voting_system/widgets/response_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localization/flutter_localization.dart';
 
 class ConfirmedCandidatePage extends StatefulWidget {
-  final VotingEventViewModel votingEventViewModel;
+  final VotingEventProvider votingEventViewModel;
 
   const ConfirmedCandidatePage({
     super.key,

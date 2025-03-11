@@ -1,21 +1,23 @@
 import 'package:blockchain_university_voting_system/localization/app_locale.dart';
 import 'package:blockchain_university_voting_system/models/candidate_model.dart';
 import 'package:blockchain_university_voting_system/models/student_model.dart';
-import 'package:blockchain_university_voting_system/models/user_model.dart';
 import 'package:blockchain_university_voting_system/models/voting_event_model.dart';
+import 'package:blockchain_university_voting_system/provider/student_provider.dart';
 import 'package:blockchain_university_voting_system/utils/snackbar_util.dart';
-import 'package:blockchain_university_voting_system/viewmodels/voting_event_viewmodel.dart';
+import 'package:blockchain_university_voting_system/provider/voting_event_provider.dart';
 import 'package:blockchain_university_voting_system/widgets/custom_animated_button.dart';
 import 'package:blockchain_university_voting_system/widgets/response_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localization/flutter_localization.dart';
 
 class AddCandidatePage extends StatefulWidget {
-  final VotingEventViewModel votingEventViewModel;
+  final VotingEventProvider votingEventProvider;
+  final StudentProvider studentProvider;
 
   const AddCandidatePage({
     super.key, 
-    required this.votingEventViewModel,
+    required this.votingEventProvider,
+    required this.studentProvider,
   });
 
   @override
@@ -26,51 +28,7 @@ class _AddCandidatePageState extends State<AddCandidatePage> {
   late final VotingEvent votingEvent;
   late TextEditingController _searchController;
   bool _isLoading = false;
-  
-  // 模拟学生数据，实际应用中应从数据库或API获取
-  final List<Student> _allStudents = [
-    Student(
-      userID: 'student1',
-      name: 'John Doe',
-      email: 'john@example.com',
-      role: UserRole.student,
-      walletAddress: '',
-      isEligibleForVoting: true,
-    ),
-    Student(
-      userID: 'student2',
-      name: 'Jane Smith',
-      email: 'jane@example.com',
-      role: UserRole.student,
-      walletAddress: '',
-      isEligibleForVoting: true,
-    ),
-    Student(
-      userID: 'student3',
-      name: 'Bob Johnson',
-      email: 'bob@example.com',
-      role: UserRole.student,
-      walletAddress: '',
-      isEligibleForVoting: false,
-    ),
-    Student(
-      userID: 'student4',
-      name: 'Alice Brown',
-      email: 'alice@example.com',
-      role: UserRole.student,
-      walletAddress: '',
-      isEligibleForVoting: true,
-    ),
-    Student(
-      userID: 'student5',
-      name: 'Charlie Wilson',
-      email: 'charlie@example.com',
-      role: UserRole.student,
-      walletAddress: '',
-      isEligibleForVoting: true,
-    ),
-  ];
-  
+  late List<Student> _students;
   List<Student> _filteredStudents = [];
   Set<String> _selectedStudentIds = {};
   Set<String> _existingCandidateIds = {};
@@ -78,14 +36,11 @@ class _AddCandidatePageState extends State<AddCandidatePage> {
   @override
   void initState() {
     super.initState();
-    votingEvent = widget.votingEventViewModel.selectedVotingEvent;
+    votingEvent = widget.votingEventProvider.selectedVotingEvent;
     _searchController = TextEditingController();
-    
-    // 初始化现有候选人ID集合
     _existingCandidateIds = _getExistingCandidateIds();
-    
-    // 初始化过滤后的学生列表
-    _filteredStudents = _allStudents.where((student) => 
+    _loadStudents();
+    _filteredStudents = widget.studentProvider.students.where((student) => 
       !_existingCandidateIds.contains(student.userID)
     ).toList();
   }
@@ -96,31 +51,40 @@ class _AddCandidatePageState extends State<AddCandidatePage> {
     super.dispose();
   }
 
-  // 获取现有候选人ID
+  Future<void> _loadStudents() async {
+    setState(() => _isLoading = true);
+    await widget.studentProvider.fetchStudents();
+    setState(() {
+      _students = widget.studentProvider.students;
+      _isLoading = false;
+    });
+  }
+
+  // get existing candidate ids
   Set<String> _getExistingCandidateIds() {
     Set<String> existingIds = {};
     
-    // 添加已确认的候选人
+    // add confirmed candidates
     for (var candidate in votingEvent.candidates) {
       existingIds.add(candidate.userID);
     }
     
-    // 添加待定的候选人
+    // add pending candidates
     for (var candidate in votingEvent.pendingCandidates) {
       existingIds.add(candidate.userID);
     }
     return existingIds;
   }
 
-  // 搜索学生
+  // search students
   void _searchStudents(String query) {
     setState(() {
       if (query.isEmpty) {
-        _filteredStudents = _allStudents.where((student) => 
+        _filteredStudents = _students.where((student) => 
           !_existingCandidateIds.contains(student.userID)
         ).toList();
       } else {
-        _filteredStudents = _allStudents.where((student) => 
+        _filteredStudents = _students.where((student) => 
           !_existingCandidateIds.contains(student.userID) &&
           (student.name.toLowerCase().contains(query.toLowerCase()) ||
            student.email.toLowerCase().contains(query.toLowerCase()))
@@ -129,7 +93,7 @@ class _AddCandidatePageState extends State<AddCandidatePage> {
     });
   }
 
-  // 切换学生选择状态
+  // toggle student selection status
   void _toggleStudentSelection(Student student) {
     if (!student.isEligibleForVoting) {
       SnackbarUtil.showSnackBar(
@@ -148,7 +112,7 @@ class _AddCandidatePageState extends State<AddCandidatePage> {
     });
   }
 
-  // 显示确认对话框
+  // show confirmation dialog
   void _showConfirmationDialog() {
     final colorScheme = Theme.of(context).colorScheme;
 
@@ -160,7 +124,7 @@ class _AddCandidatePageState extends State<AddCandidatePage> {
       return;
     }
     
-    List<Student> selectedStudents = _allStudents.where(
+    List<Student> selectedStudents = _students.where(
       (student) => _selectedStudentIds.contains(student.userID)
     ).toList();
     
@@ -207,14 +171,14 @@ class _AddCandidatePageState extends State<AddCandidatePage> {
     );
   }
 
-  // 添加候选人
+  // add candidates
   Future<void> _addCandidates(List<Student> students) async {
     setState(() {
       _isLoading = true;
     });
     
     try {
-      // 创建候选人对象
+      // create candidate objects
       List<Candidate> newCandidates = students.map((student) => 
         Candidate(
           candidateID: 'CAND_${_getExistingCandidateIds().length + 1}',
@@ -226,24 +190,24 @@ class _AddCandidatePageState extends State<AddCandidatePage> {
         )
       ).toList();
       
-      // 在实际应用中，这里应该调用ViewModel的方法添加候选人
-      await widget.votingEventViewModel.addCandidates(newCandidates);
+      // in actual application, this should call the provider method to add candidates
+      await widget.votingEventProvider.addCandidates(newCandidates);
       
-      // 模拟延迟
+      // simulate delay
       await Future.delayed(const Duration(seconds: 1));
       
-      // 更新UI
+      // update UI
       setState(() {
         _isLoading = false;
         _selectedStudentIds.clear();
         
-        // 更新现有候选人ID集合
+        // update existing candidate ids
         for (var candidate in newCandidates) {
           _existingCandidateIds.add(candidate.userID);
         }
         
-        // 更新过滤后的学生列表
-        _filteredStudents = _allStudents.where((student) => 
+        // update filtered students list
+        _filteredStudents = _students.where((student) => 
           !_existingCandidateIds.contains(student.userID)
         ).toList();
       });
@@ -268,7 +232,7 @@ class _AddCandidatePageState extends State<AddCandidatePage> {
     }
   }
 
-  // 构建学生列表项
+  // build student list item
   Widget _buildStudentItem(Student student) {
     final colorScheme = Theme.of(context).colorScheme;
     bool isSelected = _selectedStudentIds.contains(student.userID);
@@ -322,7 +286,7 @@ class _AddCandidatePageState extends State<AddCandidatePage> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // 搜索栏
+                  // search bar
                   TextField(
                     controller: _searchController,
                     onChanged: _searchStudents,
@@ -339,7 +303,7 @@ class _AddCandidatePageState extends State<AddCandidatePage> {
                   
                   const SizedBox(height: 16),
                   
-                  // 学生列表
+                  // student list
                   Flexible(
                     fit: FlexFit.loose,
                     child: _filteredStudents.isEmpty
@@ -362,7 +326,7 @@ class _AddCandidatePageState extends State<AddCandidatePage> {
                           ),
                   ),
                   
-                  // 确认按钮
+                  // confirm button
                   Padding(
                     padding: const EdgeInsets.only(top: 16.0),
                     child: CustomAnimatedButton(

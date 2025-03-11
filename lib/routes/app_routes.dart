@@ -1,8 +1,9 @@
 import 'package:blockchain_university_voting_system/blockchain/wallet_connect_service.dart';
 import 'package:blockchain_university_voting_system/data/router_path.dart';
+import 'package:blockchain_university_voting_system/provider/student_provider.dart';
 import 'package:blockchain_university_voting_system/provider/wallet_provider.dart';
-import 'package:blockchain_university_voting_system/viewmodels/user_viewmodel.dart';
-import 'package:blockchain_university_voting_system/viewmodels/voting_event_viewmodel.dart';
+import 'package:blockchain_university_voting_system/provider/user_provider.dart';
+import 'package:blockchain_university_voting_system/provider/voting_event_provider.dart';
 import 'package:blockchain_university_voting_system/views/audit/audit_list_page.dart';
 import 'package:blockchain_university_voting_system/views/audit/voting_event_audit_logs_page.dart';
 import 'package:blockchain_university_voting_system/views/authentication/login_page.dart';
@@ -106,10 +107,10 @@ Future<void> navigateWithPreload(
 
 List<RouteBase> router(String initialRoute, GlobalKey<NavigatorState> navigatorKey) {
   // Create builder function that will be called when context is available
-  UserViewModel? getUserViewModel() {
+  UserProvider? getUserViewModel() {
     try {
       if (navigatorKey.currentContext != null) {
-        return Provider.of<UserViewModel>(navigatorKey.currentContext!, listen: false);
+        return Provider.of<UserProvider>(navigatorKey.currentContext!, listen: false);
       }
     } catch (e) {
       debugPrint('Error getting UserViewModel: $e');
@@ -139,15 +140,24 @@ List<RouteBase> router(String initialRoute, GlobalKey<NavigatorState> navigatorK
     return null;
   }
 
-  VotingEventViewModel? getVotingEventViewModel() {
+  VotingEventProvider? getVotingEventViewModel() {
     try {
       if (navigatorKey.currentContext != null) {
-        VotingEventViewModel votingEventViewModel = 
-          Provider.of<VotingEventViewModel>(navigatorKey.currentContext!, listen: false);
-        return votingEventViewModel;
+        return Provider.of<VotingEventProvider>(navigatorKey.currentContext!, listen: false);
       }
     } catch (e) {
       debugPrint('Error getting votingEventViewModel: $e');
+    }
+    return null;
+  }
+
+  StudentProvider? getStudentProvider() {
+    try {
+      if (navigatorKey.currentContext != null) {
+        return Provider.of<StudentProvider>(navigatorKey.currentContext!, listen: false);
+      }
+    } catch (e) {
+      debugPrint('Error getting StudentProvider: $e');
     }
     return null;
   }
@@ -492,7 +502,8 @@ List<RouteBase> router(String initialRoute, GlobalKey<NavigatorState> navigatorK
       pageBuilder: (context, state) {
         return buildPageWithAnimation(
           AddCandidatePage(
-            votingEventViewModel: getVotingEventViewModel()!,
+            votingEventProvider: getVotingEventViewModel()!,
+            studentProvider: getStudentProvider()!,
           ), 
           state,
         );

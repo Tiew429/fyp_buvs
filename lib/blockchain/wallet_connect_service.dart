@@ -1,6 +1,6 @@
 import 'package:blockchain_university_voting_system/provider/wallet_provider.dart';
 import 'package:blockchain_university_voting_system/services/auth_service.dart';
-import 'package:blockchain_university_voting_system/viewmodels/user_viewmodel.dart';
+import 'package:blockchain_university_voting_system/provider/user_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:reown_appkit/reown_appkit.dart';
@@ -57,7 +57,7 @@ class WalletConnectService {
       // update wallet address in wallet provider
       updateWalletAddress(context);
 
-      subscribeToEvents(context);
+      await subscribeToEvents(context);
       isInitialized = true;
       
       debugPrint("WalletConnectService: Initialization completed successfully");
@@ -80,10 +80,6 @@ class WalletConnectService {
     }
   }
 
-  ReownAppKitModal? getAppKitModalSafe() {
-    return _appkitModal;
-  }
-
   Future<ReownAppKitModal> getAppKitModalAsync(BuildContext context) async {
     if (!isInitialized || _appkitModal == null) {
       debugPrint("WalletConnectService: AppKitModal not initialized, initializing now...");
@@ -98,7 +94,6 @@ class WalletConnectService {
   }
 
   ReownAppKitModal getAppKitModal(BuildContext context) {
-    debugPrint("WARNING: Using synchronous getAppKitModal. Consider using getAppKitModalAsync instead.");
     if (!isInitialized || _appkitModal == null) {
       debugPrint("WalletConnectService: AppKitModal not initialized, scheduling initialization");
       WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
@@ -109,7 +104,7 @@ class WalletConnectService {
     return _appkitModal!;
   }
 
-  void subscribeToEvents(BuildContext context) {
+  Future<void> subscribeToEvents(BuildContext context) async {
     if (_appkitModal == null) {
       debugPrint("WalletConnectService: Cannot subscribe to events, AppKitModal is null");
       return;
@@ -117,7 +112,26 @@ class WalletConnectService {
     
     debugPrint("WalletConnectService: Subscribing to events");
     
-    _appkitModal!.onModalConnect.subscribe((ModalConnect? event) {
+    _appkitModal!.onModalConnect.subscribe((ModalConnect? event) async {
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
+
+      // userviewmodel got user, means user is logged in
+      if (userProvider.user != null) {
+        // if user's wallet address is not the same as the event's address
+        if (userProvider.user!.walletAddress != getWalletAddress(context) && userProvider.user!.walletAddress.isNotEmpty) {
+          // prompt error and disconnect wallet
+          handleDisconnect(context, false);
+        } else if (userProvider.user!.walletAddress.isEmpty) {
+          // update wallet address in provider and firestore
+          await userProvider.updateUser(userProvider.user!.copyWith(walletAddress: getWalletAddress(context)));
+          updateWalletAddress(context);
+          return;
+        } else {
+          updateWalletAddress(context);
+          return;
+        }
+      }
+
       updateWalletAddress(context);
       authService.loginWithMetamask(context);
     });
@@ -156,16 +170,16 @@ class WalletConnectService {
   }
 
   Future<void> connectWalletWithAccount(BuildContext context) async {
-    final userViewModel = Provider.of<UserViewModel>(context, listen: false);
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
     final walletProvider = Provider.of<WalletProvider>(context, listen: false);
-    if (userViewModel.user?.walletAddress != null) {
+    if (userProvider.user?.walletAddress != null) {
       return;
     }
 
-    userViewModel.updateUser(userViewModel.user!.copyWith(walletAddress: walletProvider.walletAddress));
+    userProvider.updateUser(userProvider.user!.copyWith(walletAddress: walletProvider.walletAddress));
   }
 
-  Future<void> handleDisconnect(BuildContext context) async {
+  Future<void> handleDisconnect(BuildContext context, [bool logout = true]) async {
     final walletProvider = Provider.of<WalletProvider>(context, listen: false);
     
     try {
@@ -175,7 +189,7 @@ class WalletConnectService {
         walletProvider.removeAddress();
       }
       
-      if (context.mounted) {
+      if (context.mounted && logout) {
         authService.logout(context);
       }
     } catch (e) {
@@ -185,15 +199,20 @@ class WalletConnectService {
 
   void updateWalletAddress(BuildContext context) {
     final walletProvider = Provider.of<WalletProvider>(context, listen: false);
-      String chainId = _appkitModal!.selectedChain?.chainId ?? 'No Chain ID';
-      final namespace = ReownAppKitModalNetworks.getNamespaceForChainId(chainId);
-      final address = _appkitModal!.session?.getAddress(namespace) ?? 'No wallet address';
+    String address = getWalletAddress(context);
 
-      if (address.startsWith('0x') && address.length == 42) {
-          walletProvider.updateAddress(address);
-          debugPrint("WalletConnectService: Connected to wallet: $address");
-      } else {
-          debugPrint('Invalid wallet address: $address');
-      }
+    if (address.startsWith('0x') && address.length == 42) {
+        walletProvider.updateAddress(address);
+        debugPrint("WalletConnectService: Connected to wallet: $address");
+    } else {
+        debugPrint('Invalid wallet address: $address');
+    }
+  }
+
+  String getWalletAddress(BuildContext context) {
+    String chainId = _appkitModal!.selectedChain?.chainId ?? 'No Chain ID';
+    final namespace = ReownAppKitModalNetworks.getNamespaceForChainId(chainId);
+    final address = _appkitModal!.session?.getAddress(namespace) ?? 'No wallet address';
+    return address;
   }
 }

@@ -7,7 +7,7 @@ import 'package:blockchain_university_voting_system/repository/voting_event_repo
 import 'package:flutter/material.dart';
 import 'package:reown_appkit/reown_appkit.dart';
 
-class VotingEventViewModel extends ChangeNotifier{
+class VotingEventProvider extends ChangeNotifier{
   final VotingEventRepository _votingEventRepository = VotingEventRepository();
 
   late VotingEvent _selectedVotingEvent;

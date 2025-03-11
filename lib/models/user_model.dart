@@ -67,7 +67,6 @@ class User {
     String? id,
     String? email,
     String? username,
-    String? password,
     String? walletAddress,
     UserRole? role,
     bool? isVerified,

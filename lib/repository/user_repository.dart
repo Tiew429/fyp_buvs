@@ -1,6 +1,12 @@
+import 'package:blockchain_university_voting_system/models/admin_model.dart';
+import 'package:blockchain_university_voting_system/models/staff_model.dart';
+import 'package:blockchain_university_voting_system/models/student_model.dart';
 import 'package:blockchain_university_voting_system/models/user_model.dart' as model_user;
+import 'package:blockchain_university_voting_system/provider/user_provider.dart';
+import 'package:blockchain_university_voting_system/routes/navigation_keys.dart';
 import 'package:cloud_firestore/cloud_firestore.dart' as auth_user;
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:provider/provider.dart';
 
 class UserRepository {
   final _firestore = auth_user.FirebaseFirestore.instance;
@@ -94,15 +100,17 @@ class UserRepository {
         if (querySnapshot.docs.isNotEmpty) {
           final doc = querySnapshot.docs.first;
           final userData = doc.data() as Map<String, dynamic>;
-          return model_user.User(
-            userID: userData['userID'],
-            name: userData['username'],
-            email: userData['email'],
-            role: model_user.UserRoleExtension.fromString(userData['role']),
-            walletAddress: userData['walletAddress'],
-            bio: userData['bio'],
-            isVerified: userData['isVerified'],
-          );
+          final UserProvider userProvider = Provider.of(rootNavigatorKey.currentContext!, listen: false);
+
+          if (role == model_user.UserRole.staff) {
+            userProvider.setDepartment(userData['department']);
+            return Staff.fromJson(userData);
+          } else if (role == model_user.UserRole.student) {
+            userProvider.setIsEligibleForVoting(userData['isEligibleForVoting']);
+            return Student.fromJson(userData);
+          } else {
+            return Admin.fromJson(userData);
+          }
         }
       }
       

@@ -1,12 +1,13 @@
 import 'package:blockchain_university_voting_system/data/router_path.dart';
 import 'package:blockchain_university_voting_system/database/shared_preferences.dart';
 import 'package:blockchain_university_voting_system/localization/app_locale.dart';
+import 'package:blockchain_university_voting_system/models/student_model.dart';
 import 'package:blockchain_university_voting_system/models/user_model.dart' as model_user;
 import 'package:blockchain_university_voting_system/provider/wallet_provider.dart';
 import 'package:blockchain_university_voting_system/repository/user_repository.dart';
 import 'package:blockchain_university_voting_system/routes/navigation_helper.dart';
 import 'package:blockchain_university_voting_system/utils/snackbar_util.dart';
-import 'package:blockchain_university_voting_system/viewmodels/user_viewmodel.dart';
+import 'package:blockchain_university_voting_system/provider/user_provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth_user;
 import 'package:flutter/material.dart';
@@ -144,6 +145,8 @@ class AuthService {
       model_user.User? userRetrieved = await userRepo.retrieveUser(walletAddress);
 
       // if user found set userviewmodel and save login status
+      print("User email: ${userRetrieved?.email}");
+      print("User address: ${userRetrieved?.walletAddress}");
       if (userRetrieved != null) {
         setUserAndLoginAndNavigate(context, userRetrieved);
         return;
@@ -162,9 +165,9 @@ class AuthService {
 
   // save login status
   Future<void> setUserAndLoginAndNavigate(context, model_user.User user) async {
-    final userViewModel = Provider.of<UserViewModel>(context, listen: false);
-    userViewModel.setUser(user);
-    userViewModel.setInitialRoute('/${RouterPath.homepage.path}');
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    userProvider.setUser(user);
+    userProvider.setInitialRoute('/${RouterPath.homepage.path}');
     await saveLoginStatus(true, user);
     NavigationHelper.navigateToHomePage(context);
   }
@@ -232,12 +235,14 @@ class AuthService {
 
       // Create user in Firestore + FirebaseAuth
       await userRepo.createUser(
-        model_user.User(
+        // Basically, the user will be a student. Admin and staff will be added earlier while deploying the app (admin) and added while inviting (staff).
+        Student(
           userID: '', // Will be assigned internally in createUser method
           name: username,
           email: email,
           role: role,
           walletAddress: walletAddress,
+          isEligibleForVoting: false,
         ),
         password,
       );
@@ -373,7 +378,7 @@ class AuthService {
     await clearLoginStatus();
     
     // 3. clear user in userviewmodel and set initial route
-    final userViewModel = Provider.of<UserViewModel>(context, listen: false);
+    final userViewModel = Provider.of<UserProvider>(context, listen: false);
     userViewModel.clearUser();
     userViewModel.setInitialRoute('/${RouterPath.loginpage.path}');
   }
