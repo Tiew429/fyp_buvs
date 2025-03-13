@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localization/flutter_localization.dart';
 
 class LightTheme {
-  final primarySwatch = const Color(0xFFD9EAFD); // container color
-  final secondaryColor = const Color(0xFFBCCCDC); // widget (button) color
-  final tertiaryColor = const Color(0xFF9AA6B2); // page color
+  final primarySwatch = const Color.fromARGB(255, 188, 204, 220); // container color
+  final secondaryColor = const Color.fromARGB(255, 147, 175, 202); // widget (button) color
+  final tertiaryColor = const Color.fromARGB(255, 217, 234, 253); // const Color(0xFF9AA6B2); // page color
 }
 
 /*

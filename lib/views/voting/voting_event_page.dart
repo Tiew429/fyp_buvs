@@ -55,9 +55,6 @@ class _VotingEventPageState extends State<VotingEventPage> {
   Widget build(BuildContext context) {
     ColorScheme colorScheme = Theme.of(context).colorScheme;
 
-    // Convert candidates to Candidate objects if needed
-    List<Candidate> candidateObjects = _convertToCandidateObjects(_votingEvent.candidates);
-
     return Scaffold(
       appBar: AppBar(
         backgroundColor: colorScheme.secondary,
@@ -179,7 +176,7 @@ class _VotingEventPageState extends State<VotingEventPage> {
                 ),
               ),
             ),
-            candidateObjects.isEmpty 
+            _votingEvent.candidates.isEmpty 
               ? Center(
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
@@ -193,7 +190,7 @@ class _VotingEventPageState extends State<VotingEventPage> {
                   ),
                 )
               : Column(
-                  children: candidateObjects.map(
+                  children: _votingEvent.candidates.map(
                     (candidate) => Padding(
                       padding: const EdgeInsets.only(bottom: 8.0),
                       child: CandidateBox(
@@ -229,49 +226,6 @@ class _VotingEventPageState extends State<VotingEventPage> {
         tablet: Container(),
       ),
     );
-  }
-
-  // Convert dynamic candidates to Candidate objects
-  List<Candidate> _convertToCandidateObjects(List<dynamic> candidates) {
-    List<Candidate> result = [];
-    
-    for (var candidate in candidates) {
-      if (candidate is Candidate) {
-        // Already a Candidate object
-        result.add(candidate);
-      } else if (candidate is Map) {
-        // Convert Map to Candidate
-        String candidateID = candidate['candidateID'] ?? candidate['_candidateID'] ?? '';
-        String userID = candidate['userID'] ?? candidate['_userID'] ?? '';
-        String name = candidate['name'] ?? candidate['_name'] ?? 'Unknown';
-        String bio = candidate['bio'] ?? candidate['_bio'] ?? '';
-        String walletAddress = candidate['walletAddress'] ?? candidate['_walletAddress'] ?? '';
-        String votingEventID = candidate['votingEventID'] ?? candidate['_votingEventID'] ?? '';
-        int votesReceived = candidate['votesReceived'] ?? candidate['_votesReceived'] ?? 0;
-        
-        result.add(Candidate(
-          candidateID: candidateID,
-          userID: userID,
-          name: name,
-          bio: bio,
-          walletAddress: walletAddress,
-          votingEventID: votingEventID,
-          votesReceived: votesReceived,
-        ));
-      } else if (candidate is String) {
-        // If it's just a string (like a wallet address), create a minimal Candidate
-        result.add(Candidate(
-          candidateID: 'unknown',
-          userID: candidate,
-          name: 'Unknown',
-          bio: 'No bio available',
-          walletAddress: '',
-          votingEventID: _votingEvent.votingEventID,
-        ));
-      }
-    }
-    
-    return result;
   }
 
   void _showCandidateDetails(Candidate candidate) {

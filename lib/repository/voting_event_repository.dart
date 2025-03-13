@@ -7,6 +7,7 @@ import 'package:blockchain_university_voting_system/utils/converter_util.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:reown_appkit/reown_appkit.dart';
 
 class VotingEventRepository {
 
@@ -18,6 +19,7 @@ class VotingEventRepository {
 
     // create an empty array list for voting event object to store the voting event later
     List<VotingEvent> votingEventList = [];
+    late QuerySnapshot votingEventSnapshot;
 
     try {
       // retrieve the important details of voting events from blockchain
@@ -39,17 +41,17 @@ class VotingEventRepository {
           // the votingEvents list does not include all details for the voting event object
           // so we need to retrieve also from firebase for the rest of the details
           String votingEventID = event[0];
-          final QuerySnapshot snapshot = await _firestore
+          votingEventSnapshot = await _firestore
             .collection('votingevents')
             .where('votingEventID', isEqualTo: votingEventID)
             .get();
             
-          if (snapshot.docs.isEmpty) {
+          if (votingEventSnapshot.docs.isEmpty) {
             print("Voting_Event_Repository (getVotingEventList): No matching document found in Firebase for event ID: $votingEventID");
             continue;
           }
           
-          final firestoreData = snapshot.docs.first;
+          final firestoreData = votingEventSnapshot.docs.first;
 
           // convert string representations back to TimeOfDay
           TimeOfDay? startTime;
@@ -91,8 +93,56 @@ class VotingEventRepository {
           
           // handle candidates and voters lists
           // the blockchain returns List<dynamic> but we need to ensure proper type casting
-          final List<dynamic> candidates = event[6] ?? [];
-          final List<dynamic> voters = event[7] ?? [];
+          final List<dynamic> blockchainCandidateAddresses = event[6] ?? [];
+          final List<dynamic> blockchainVoterAddresses = event[7] ?? [];
+
+          // convert ethereum addresses to string
+          final List<String> candidateAddressStrings = blockchainCandidateAddresses.map((address) {
+            if (address is EthereumAddress) {
+              return address.hex; // get the hex representation
+            } else {
+              return address.toString();
+            }
+          }).toList();
+
+          final List<String> voterAddressStrings = blockchainVoterAddresses.map((address) {
+            if (address is EthereumAddress) {
+              return address.hex;
+            } else {
+              return address.toString();
+            }
+          }).toList();
+
+          // print debug information
+          // print("Candidate address strings: $candidateAddressStrings");
+          // print("Voter address strings: $voterAddressStrings");
+
+          // get candidate details
+          final List<Candidate> candidates = [];
+          final List<Candidate> candidatesInFirestore = 
+            (firestoreData['candidates'] as List<dynamic>)
+              .map((candidate) => Candidate.fromMap(candidate)).toList();
+
+          for (String addressStr in candidateAddressStrings) {
+            print("Candidate address: $addressStr (blockchain)");
+            try {
+              // compare between candidates in blockchain and candidates (array) in firestore
+              // if the candidate is not found in firestore, ignore it
+              // if the candidate is found in firestore, add the candidate to the candidates list
+              for (Candidate candidate in candidatesInFirestore) {
+                print("Candidate address: ${candidate.walletAddress} (firestore)");
+                if (candidate.walletAddress.toLowerCase() == addressStr.toLowerCase()) {
+                  candidates.add(candidate);
+                  break;
+                }
+              }
+            } catch (e) {
+              print("Error fetching candidate data for address $addressStr: $e");
+            }
+          }
+
+          // get voter details
+          final List<Student> voters = [];
 
           // create the voting event object with all details from blockchain and firestore
           final VotingEvent votingEvent = VotingEvent(
@@ -105,8 +155,8 @@ class VotingEventRepository {
             status: status,
             startTime: startTime,
             endTime: endTime,
-            candidates: candidates.map((c) => Candidate.fromMap(c)).toList(),
-            voters: voters.map((v) => Student.fromMap(v)).toList(),
+            candidates: candidates,
+            voters: voters,
           );
 
           // add the voting event into votingEventList
@@ -155,6 +205,28 @@ class VotingEventRepository {
 
     // blockchain deletion (change status to deprecated)
     await _smartContractService.removeVotingEventFromBlockchain(votingEvent);
+  }
+
+  Future<bool> addCandidatesToVotingEvent(VotingEvent votingEvent) async {
+    print("Voting_Event_Repository: Adding candidates to voting event in blockchain and firebase.");
+
+    // blockchain addition
+    bool success = await _smartContractService.addCandidatesToVotingEvent(votingEvent);
+
+    if (!success) {
+      print("Voting_Event_Repository (addCandidatesToVotingEvent): Failed to add candidates to voting event in blockchain.");
+      return false;
+    }
+
+    // firebase addition
+    // store only candidateID, userID, name, bio, walletAddress, votingEventID and isConfirmed
+    final List<Map<String, dynamic>> candidateMaps = votingEvent.candidates.map((candidate) => candidate.toMap()).toList();
+
+    await _firestore.collection('votingevents').doc(votingEvent.votingEventID).update({
+      'candidates': candidateMaps,
+    });
+
+    return true;
   }
 
   Future<void> insertVotingEventToFirebase(VotingEvent votingEvent) async {

@@ -7,35 +7,17 @@
 				"type": "string"
 			},
 			{
-				"internalType": "address",
-				"name": "_candidate",
-				"type": "address"
-			}
-		],
-		"name": "addCandidate",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "string",
-				"name": "_eventIDStr",
-				"type": "string"
+				"internalType": "string[]",
+				"name": "_candidateIDStrs",
+				"type": "string[]"
 			},
 			{
-				"internalType": "string",
-				"name": "_candidateIDStr",
-				"type": "string"
-			},
-			{
-				"internalType": "address",
-				"name": "_walletAddress",
-				"type": "address"
+				"internalType": "address[]",
+				"name": "_walletAddresses",
+				"type": "address[]"
 			}
 		],
-		"name": "addCandidateWithDetails",
+		"name": "addCandidates",
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"

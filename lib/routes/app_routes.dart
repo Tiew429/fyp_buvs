@@ -47,7 +47,7 @@ Future<ReownAppKitModal?> preloadAppKitModal(BuildContext context, WalletConnect
   }
   
   try {
-    _cachedAppKitModal = await service.getAppKitModalAsync(context);
+    _cachedAppKitModal = await service.getAppKitModalAsync();
     return _cachedAppKitModal;
   } catch (e) {
     debugPrint('Error preloading AppKitModal: $e');
@@ -205,7 +205,7 @@ List<RouteBase> router(String initialRoute, GlobalKey<NavigatorState> navigatorK
       barrierColor: colorScheme.tertiary,
       transitionDuration: const Duration(milliseconds: 300),
       child: FutureBuilder<ReownAppKitModal>(
-        future: getWalletConnectService()?.getAppKitModalAsync(context),
+        future: getWalletConnectService()?.getAppKitModalAsync(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Scaffold(

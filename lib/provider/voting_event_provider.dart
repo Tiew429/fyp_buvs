@@ -84,8 +84,13 @@ class VotingEventProvider extends ChangeNotifier{
       endTime: endTime,
       createdBy: walletAddress,
     );
+
+    bool success = await _votingEventRepository.insertNewVotingEvent(newVotingEvent);
+    if (success) {
+      _votingEventList.add(newVotingEvent);
+    }
     
-    return await _votingEventRepository.insertNewVotingEvent(newVotingEvent);
+    return success;
   }
 
   Future<void> updateVotingEvent(VotingEvent votingEvent) async {
@@ -98,10 +103,21 @@ class VotingEventProvider extends ChangeNotifier{
     await _votingEventRepository.deleteVotingEvent(votingEvent);
   }
 
-  Future<void> addCandidates(List<Candidate> candidates) async {
+  Future<bool> addCandidates(List<Candidate> candidates) async {
     print("Voting_Event_ViewModel: Adding candidates.");
-    _selectedVotingEvent.candidates.addAll(candidates);
-    await _votingEventRepository.updateVotingEvent(_selectedVotingEvent);
+    List<Candidate> newCandidates = _selectedVotingEvent.candidates.toList();
+    newCandidates.addAll(candidates);
+    VotingEvent cloneEvent = _selectedVotingEvent.copyWith(
+      candidates: newCandidates,
+    );
+    
+    bool success = await _votingEventRepository.addCandidatesToVotingEvent(cloneEvent);
+
+    if (success) {
+      _selectedVotingEvent = cloneEvent; // put after the repository call to avoid race condition
+    }
+
+    return success;
   }
 
   @override

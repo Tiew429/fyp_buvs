@@ -63,7 +63,7 @@ class _WalletConnectInitializerState extends State<WalletConnectInitializer> {
     
     debugPrint("WalletConnectInitializer: Setting up wallet service.");
     _walletConnectService = Provider.of<WalletConnectService>(context, listen: false);
-    await _walletConnectService.initialize(context);
+    await _walletConnectService.initialize();
   }
 
   Future<void> _setupSmartContract() async {

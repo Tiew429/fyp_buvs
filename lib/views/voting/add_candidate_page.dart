@@ -6,6 +6,7 @@ import 'package:blockchain_university_voting_system/provider/student_provider.da
 import 'package:blockchain_university_voting_system/utils/snackbar_util.dart';
 import 'package:blockchain_university_voting_system/provider/voting_event_provider.dart';
 import 'package:blockchain_university_voting_system/widgets/custom_animated_button.dart';
+import 'package:blockchain_university_voting_system/widgets/progress_circular.dart';
 import 'package:blockchain_university_voting_system/widgets/response_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localization/flutter_localization.dart';
@@ -27,10 +28,10 @@ class AddCandidatePage extends StatefulWidget {
 class _AddCandidatePageState extends State<AddCandidatePage> {
   late final VotingEvent votingEvent;
   late TextEditingController _searchController;
-  bool _isLoading = false;
+  bool _isLoadingTransaction = false, _isLoadingStudent = false;
   late List<Student> _students;
   List<Student> _filteredStudents = [];
-  Set<String> _selectedStudentIds = {};
+  final Set<String> _selectedStudentIds = {};
   Set<String> _existingCandidateIds = {};
 
   @override
@@ -40,9 +41,6 @@ class _AddCandidatePageState extends State<AddCandidatePage> {
     _searchController = TextEditingController();
     _existingCandidateIds = _getExistingCandidateIds();
     _loadStudents();
-    _filteredStudents = widget.studentProvider.students.where((student) => 
-      !_existingCandidateIds.contains(student.userID)
-    ).toList();
   }
 
   @override
@@ -52,12 +50,37 @@ class _AddCandidatePageState extends State<AddCandidatePage> {
   }
 
   Future<void> _loadStudents() async {
-    setState(() => _isLoading = true);
-    await widget.studentProvider.fetchStudents();
-    setState(() {
-      _students = widget.studentProvider.students;
-      _isLoading = false;
-    });
+    setState(() => _isLoadingStudent = true);
+    
+    try {
+      // Wait for students to be fetched
+      await widget.studentProvider.fetchStudents();
+      
+      // Now that students are loaded, update the state with both students and filtered students
+      if (mounted) {
+        setState(() {
+          _students = widget.studentProvider.students;
+          
+          // Filter students after they've been loaded
+          _filteredStudents = _students.where((student) => 
+            !_existingCandidateIds.contains(student.userID)
+          ).toList();
+          
+          _isLoadingStudent = false;
+        });
+      }
+    } catch (e) {
+      // Handle any errors during loading
+      if (mounted) {
+        setState(() {
+          _isLoadingStudent = false;
+        });
+        SnackbarUtil.showSnackBar(
+          context, 
+          "${AppLocale.errorLoadingStudents.getString(context)}: $e"
+        );
+      }
+    }
   }
 
   // get existing candidate ids
@@ -174,7 +197,7 @@ class _AddCandidatePageState extends State<AddCandidatePage> {
   // add candidates
   Future<void> _addCandidates(List<Student> students) async {
     setState(() {
-      _isLoading = true;
+      _isLoadingTransaction = true;
     });
     
     try {
@@ -184,43 +207,52 @@ class _AddCandidatePageState extends State<AddCandidatePage> {
           candidateID: 'CAND_${_getExistingCandidateIds().length + 1}',
           userID: student.userID,
           name: student.name,
-          bio: '',
           walletAddress: student.walletAddress,
           votingEventID: votingEvent.votingEventID,
+          isConfirmed: true, // since it is added by admin or event creator
         )
       ).toList();
       
       // in actual application, this should call the provider method to add candidates
-      await widget.votingEventProvider.addCandidates(newCandidates);
+      bool success = await widget.votingEventProvider.addCandidates(newCandidates);
       
       // simulate delay
       await Future.delayed(const Duration(seconds: 1));
       
       // update UI
       setState(() {
-        _isLoading = false;
-        _selectedStudentIds.clear();
+        _isLoadingTransaction = false;
         
-        // update existing candidate ids
-        for (var candidate in newCandidates) {
-          _existingCandidateIds.add(candidate.userID);
+        if (success) {
+          _selectedStudentIds.clear();
+        
+          // update existing candidate ids
+          for (var candidate in newCandidates) {
+            _existingCandidateIds.add(candidate.userID);
+          }
+          
+          // update filtered students list
+          _filteredStudents = _students.where((student) => 
+              !_existingCandidateIds.contains(student.userID)).toList();
         }
-        
-        // update filtered students list
-        _filteredStudents = _students.where((student) => 
-          !_existingCandidateIds.contains(student.userID)
-        ).toList();
       });
       
       if (mounted) {
-        SnackbarUtil.showSnackBar(
-          context, 
-          AppLocale.candidatesAddedSuccessfully.getString(context)
-        );
+        if (!success) {
+          SnackbarUtil.showSnackBar(
+            context, 
+            AppLocale.errorAddingCandidates.getString(context)
+          );
+        } else {
+          SnackbarUtil.showSnackBar(
+            context, 
+            AppLocale.candidatesAddedSuccessfully.getString(context)
+          );
+        }
       }
     } catch (e) {
       setState(() {
-        _isLoading = false;
+        _isLoadingTransaction = false;
       });
       
       if (mounted) {
@@ -279,66 +311,89 @@ class _AddCandidatePageState extends State<AddCandidatePage> {
         title: Text(AppLocale.addCandidate.getString(context)),
       ),
       backgroundColor: colorScheme.tertiary,
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : ScrollableResponsiveWidget(
-              phone: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                mainAxisSize: MainAxisSize.min,
+      body: _isLoadingStudent
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // search bar
-                  TextField(
-                    controller: _searchController,
-                    onChanged: _searchStudents,
-                    decoration: InputDecoration(
-                      hintText: AppLocale.searchStudents.getString(context),
-                      prefixIcon: const Icon(Icons.search),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10.0),
-                      ),
-                      filled: true,
-                      fillColor: colorScheme.surface,
-                    ),
-                  ),
-                  
+                  const CircularProgressIndicator(),
                   const SizedBox(height: 16),
-                  
-                  // student list
-                  Flexible(
-                    fit: FlexFit.loose,
-                    child: _filteredStudents.isEmpty
-                        ? Center(
-                            child: Text(
-                              AppLocale.noStudentsFound.getString(context),
-                              style: TextStyle(
-                                color: colorScheme.onTertiary,
-                                fontSize: 18,
-                              ),
-                            ),
-                          )
-                        : SingleChildScrollView(
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: _filteredStudents
-                                  .map((student) => _buildStudentItem(student))
-                                  .toList(),
-                            ),
-                          ),
-                  ),
-                  
-                  // confirm button
-                  Padding(
-                    padding: const EdgeInsets.only(top: 16.0),
-                    child: CustomAnimatedButton(
-                      onPressed: _showConfirmationDialog,
-                      text: AppLocale.addSelectedCandidates.getString(context),
-                      width: double.infinity,
+                  Text(
+                    AppLocale.loadingStudents.getString(context),
+                    style: TextStyle(
+                      color: colorScheme.onTertiary,
                     ),
                   ),
                 ],
               ),
-              tablet: Container(),
-          ),
+            )
+          : Stack(
+              children: [
+                ScrollableResponsiveWidget(
+                  phone: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // search bar
+                      TextField(
+                        controller: _searchController,
+                        onChanged: _searchStudents,
+                        decoration: InputDecoration(
+                          hintText: AppLocale.searchStudents.getString(context),
+                          prefixIcon: const Icon(Icons.search),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10.0),
+                          ),
+                          filled: true,
+                          fillColor: colorScheme.surface,
+                        ),
+                      ),
+                      
+                      const SizedBox(height: 16),
+                      
+                      // student list
+                      Flexible(
+                        fit: FlexFit.loose,
+                        child: _filteredStudents.isEmpty
+                            ? Center(
+                                child: Text(
+                                  AppLocale.noStudentsFound.getString(context),
+                                  style: TextStyle(
+                                    color: colorScheme.onTertiary,
+                                    fontSize: 18,
+                                  ),
+                                ),
+                              )
+                            : SingleChildScrollView(
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: _filteredStudents
+                                      .map((student) => _buildStudentItem(student))
+                                      .toList(),
+                                ),
+                              ),
+                      ),
+                      
+                      // confirm button
+                      Padding(
+                        padding: const EdgeInsets.only(top: 16.0),
+                        child: CustomAnimatedButton(
+                          onPressed: _showConfirmationDialog,
+                          text: AppLocale.addSelectedCandidates.getString(context),
+                          width: double.infinity,
+                        ),
+                      ),
+                    ],
+                  ),
+                  tablet: Container(),
+                ),
+                if (_isLoadingTransaction)
+                  ProgressCircular(
+                    isLoading: _isLoadingTransaction,
+                    message: AppLocale.addingCandidates.getString(context),
+                  )
+              ],
+            ),
     );
   }
 }

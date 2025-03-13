@@ -64,7 +64,7 @@ class _VotingListPageState extends State<VotingListPage> {
               child: Text(
                 AppLocale.pleaseConnectYourWallet.getString(context),
                 style: TextStyle(
-                  color: colorScheme.onTertiary,
+                  color: colorScheme.onPrimary,
                   fontSize: 16,
                 ),
               ),
@@ -75,7 +75,12 @@ class _VotingListPageState extends State<VotingListPage> {
                   children: _votingEventList.isEmpty
                     ? [
                         Center(
-                          child: Text(AppLocale.noVotingEventAvailable.getString(context)),
+                          child: Text(AppLocale.noVotingEventAvailable.getString(context),
+                            style: TextStyle(
+                              color: colorScheme.onPrimary,
+                              fontSize: 16,
+                            ),
+                          ),
                         ),
                       ]
                     : _votingEventList.map((event) => VotingEventBox(

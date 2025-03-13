@@ -112,6 +112,8 @@ mixin AppLocale {
   static const String pleaseSelectAtLeastOneStudent = 'please select at least one student';
   static const String searchStudents = 'search students';
   static const String noStudentsFound = 'no students found';
+  static const String errorLoadingStudents = 'error loading students';
+  static const String loadingStudents = 'loading students...';
 
   // candidate
   static const String candidate = 'candidate';
@@ -130,6 +132,7 @@ mixin AppLocale {
   static const String candidatesAddedSuccessfully = 'candidates added successfully';
   static const String errorAddingCandidates = 'error adding candidates';
   static const String addSelectedCandidates = 'add selected candidates';
+  static const String addingCandidates = 'adding candidates...';
 
   // validator_util
   static const String dontLeaveBlank = 'please don\'t leave this field blank';
@@ -265,6 +268,8 @@ mixin AppLocale {
     pleaseSelectAtLeastOneStudent: 'Please select at least one student',
     searchStudents: 'Search students',
     noStudentsFound: 'No students found',
+    errorLoadingStudents: 'Error loading students',
+    loadingStudents: 'Loading students...',
 
     // candidate
     candidate: 'Candidate',
@@ -283,6 +288,7 @@ mixin AppLocale {
     candidatesAddedSuccessfully: 'Candidates added successfully',
     errorAddingCandidates: 'Error adding candidates',
     addSelectedCandidates: 'Add Selected Candidates',
+    addingCandidates: 'Adding candidates...',
 
     // validator_util
     dontLeaveBlank: 'Please don\'t leave this field blank',
@@ -419,6 +425,8 @@ mixin AppLocale {
     pleaseSelectAtLeastOneStudent: 'Sila pilih sekurang-kurangnya satu pelajar',
     searchStudents: 'Cari pelajar',
     noStudentsFound: 'Tiada pelajar ditemui',
+    errorLoadingStudents: 'Gagal memuatkan pelajar',
+    loadingStudents: 'Memuatkan pelajar...',
 
     // candidate
     candidate: 'Calon',
@@ -437,6 +445,7 @@ mixin AppLocale {
     candidatesAddedSuccessfully: 'Calon berjaya ditambahkan',
     errorAddingCandidates: 'Kesalahan menambahkan calon',
     addSelectedCandidates: 'Tambah Calon yang Dipilih',
+    addingCandidates: 'Menambahkan calon...',
 
     // validator_util
     dontLeaveBlank: 'Medan ini tidak boleh kosong',
@@ -573,6 +582,8 @@ mixin AppLocale {
     pleaseSelectAtLeastOneStudent: '请至少选择一个学生',
     searchStudents: '搜索学生',
     noStudentsFound: '没有找到学生',
+    errorLoadingStudents: '加载学生失败',
+    loadingStudents: '加载学生...',
 
     // candidate
     candidate: '候选人',
@@ -591,6 +602,7 @@ mixin AppLocale {
     candidatesAddedSuccessfully: '候选人已添加成功',
     errorAddingCandidates: '添加候选人失败',
     addSelectedCandidates: '添加选定候选人',
+    addingCandidates: '添加候选人...',
 
     // validator_util
     dontLeaveBlank: '此字段不能为空',

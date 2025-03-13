@@ -3,6 +3,7 @@ import 'package:blockchain_university_voting_system/provider/wallet_provider.dar
 import 'package:blockchain_university_voting_system/routes/navigation_helper.dart';
 import 'package:blockchain_university_voting_system/utils/snackbar_util.dart';
 import 'package:blockchain_university_voting_system/provider/voting_event_provider.dart';
+import 'package:blockchain_university_voting_system/utils/validator_util.dart';
 import 'package:blockchain_university_voting_system/widgets/custom_cancel_button.dart';
 import 'package:blockchain_university_voting_system/widgets/custom_confirm_button.dart';
 import 'package:blockchain_university_voting_system/widgets/custom_text_form_field.dart';
@@ -31,6 +32,7 @@ class _VotingEventCreatePageState extends State<VotingEventCreatePage> {
   late final TextEditingController _titleController, _descriptionController, _startDateController, 
   _endDateController, _startTimeController, _endTimeController;
   bool _showStartDateWarning = false, _loading = false;
+  final _formKey = GlobalKey<FormState>();
 
   @override
   void initState() {
@@ -74,6 +76,17 @@ class _VotingEventCreatePageState extends State<VotingEventCreatePage> {
       initialDate: firstDate,
       firstDate: firstDate, 
       lastDate: DateTime(DateTime.now().year + 5),
+      builder: (context, child) {
+        ColorScheme colorScheme = Theme.of(context).colorScheme;
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: Theme.of(context).colorScheme.copyWith(
+              primary: colorScheme.tertiary,
+            ),
+          ),
+          child: child!,
+        );
+      },
     );
     if (picked != null) {
       setState(() {
@@ -96,6 +109,17 @@ class _VotingEventCreatePageState extends State<VotingEventCreatePage> {
     final TimeOfDay? picked = await showTimePicker(
       context: context, 
       initialTime: TimeOfDay.now(),
+      builder: (context, child) {
+        ColorScheme colorScheme = Theme.of(context).colorScheme;
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: Theme.of(context).colorScheme.copyWith(
+              primary: colorScheme.tertiary,
+            ),
+          ),
+          child: child!,
+        );
+      },
     );
     if (picked != null) {
       setState(() {
@@ -105,6 +129,10 @@ class _VotingEventCreatePageState extends State<VotingEventCreatePage> {
   }
 
   Future<void> _create() async {
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
     // set loading to true and force rebuild
     setState(() {
       _loading = true;
@@ -177,82 +205,91 @@ class _VotingEventCreatePageState extends State<VotingEventCreatePage> {
       body: Stack(
         children: [
           ScrollableResponsiveWidget(
-            phone: Column(
-              children: [
-                CustomTextFormField(
-                  controller: _titleController,
-                  labelText: AppLocale.title.getString(context),
-                ),
-                const SizedBox(height: 20,),
-                CustomTextFormField(
-                  controller: _descriptionController,
-                  labelText: AppLocale.description.getString(context),
-                ),
-                const SizedBox(height: 20,),
-                CustomTextFormField(
-                  controller: _startDateController,
-                  labelText: AppLocale.startDate.getString(context),
-                  readOnly: true,
-                  suffixIcon: IconButton(
-                    onPressed: () => _selectDate(context, _startDateController), 
-                    icon: const Icon(FontAwesomeIcons.calendar),
+            phone: Form(
+              key: _formKey,
+              child: Column(
+                children: [
+                  CustomTextFormField(
+                    controller: _titleController,
+                    labelText: AppLocale.title.getString(context),
+                    validator: (value) => ValidatorUtil.validateEmpty(context, _titleController.text),
                   ),
-                ),
-                const SizedBox(height: 20,),
-                CustomTextFormField(
-                  controller: _endDateController,
-                  labelText: AppLocale.endDate.getString(context),
-                  readOnly: true,
-                  suffixIcon: IconButton(
-                    onPressed: () => _selectDate(context, _endDateController, isEndDate: true), 
-                    icon: const Icon(FontAwesomeIcons.calendar),
+                  const SizedBox(height: 20,),
+                  CustomTextFormField(
+                    controller: _descriptionController,
+                    labelText: AppLocale.description.getString(context),
+                    validator: (value) => ValidatorUtil.validateEmpty(context, _descriptionController.text),
                   ),
-                ),
-                if (_showStartDateWarning)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 10.0),
-                    child: Text(
-                      AppLocale.pleaseSelectStartDateFirstBeforeYouSelectTheEndDate.getString(context),
-                      style: const TextStyle(color: Colors.red),
+                  const SizedBox(height: 20,),
+                  CustomTextFormField(
+                    controller: _startDateController,
+                    labelText: AppLocale.startDate.getString(context),
+                    readOnly: true,
+                    suffixIcon: IconButton(
+                      onPressed: () => _selectDate(context, _startDateController), 
+                      icon: const Icon(FontAwesomeIcons.calendar),
                     ),
+                    validator: (value) => ValidatorUtil.validateEmpty(context, _startDateController.text),
                   ),
-                const SizedBox(height: 20,),
-                CustomTextFormField(
-                  controller: _startTimeController,
-                  labelText: AppLocale.startTime.getString(context),
-                  readOnly: true,
-                  suffixIcon: IconButton(
-                    onPressed: () => _selectTime(context, _startTimeController), 
-                    icon: const Icon(FontAwesomeIcons.clock),
-                  ),
-                ),
-                const SizedBox(height: 20,),
-                CustomTextFormField(
-                  controller: _endTimeController,
-                  labelText: AppLocale.endTime.getString(context),
-                  readOnly: true,
-                  suffixIcon: IconButton(
-                    onPressed: () => _selectTime(context, _endTimeController), 
-                    icon: const Icon(FontAwesomeIcons.clock),
-                  ),
-                ),
-                const SizedBox(height: 40,),
-                Row(
-                  children: [
-                    CustomConfirmButton(
-                      text: AppLocale.createNew.getString(context), 
-                      onPressed: () => _create(),
+                  const SizedBox(height: 20,),
+                  CustomTextFormField(
+                    controller: _endDateController,
+                    labelText: AppLocale.endDate.getString(context),
+                    readOnly: true,
+                    suffixIcon: IconButton(
+                      onPressed: () => _selectDate(context, _endDateController, isEndDate: true), 
+                      icon: const Icon(FontAwesomeIcons.calendar),
                     ),
-                    const SizedBox(width: 20,),
-                    CustomCancelButton(
-                      text: AppLocale.cancel.getString(context),
-                      onPressed: () {
-                        NavigationHelper.navigateBack(context);
-                      },
+                    validator: (value) => ValidatorUtil.validateEmpty(context, _endDateController.text),
+                  ),
+                  if (_showStartDateWarning)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 10.0),
+                      child: Text(
+                        AppLocale.pleaseSelectStartDateFirstBeforeYouSelectTheEndDate.getString(context),
+                        style: const TextStyle(color: Colors.red),
+                      ),
                     ),
-                  ],
-                ),
-              ],
+                  const SizedBox(height: 20,),
+                  CustomTextFormField(
+                    controller: _startTimeController,
+                    labelText: AppLocale.startTime.getString(context),
+                    readOnly: true,
+                    suffixIcon: IconButton(
+                      onPressed: () => _selectTime(context, _startTimeController), 
+                      icon: const Icon(FontAwesomeIcons.clock),
+                    ),
+                    validator: (value) => ValidatorUtil.validateEmpty(context, _startTimeController.text),
+                  ),
+                  const SizedBox(height: 20,),
+                  CustomTextFormField(
+                    controller: _endTimeController,
+                    labelText: AppLocale.endTime.getString(context),
+                    readOnly: true,
+                    suffixIcon: IconButton(
+                      onPressed: () => _selectTime(context, _endTimeController), 
+                      icon: const Icon(FontAwesomeIcons.clock),
+                    ),
+                    validator: (value) => ValidatorUtil.validateEmpty(context, _endTimeController.text),
+                  ),
+                  const SizedBox(height: 40,),
+                  Row(
+                    children: [
+                      CustomConfirmButton(
+                        text: AppLocale.createNew.getString(context), 
+                        onPressed: () => _create(),
+                      ),
+                      const SizedBox(width: 20,),
+                      CustomCancelButton(
+                        text: AppLocale.cancel.getString(context),
+                        onPressed: () {
+                          NavigationHelper.navigateBack(context);
+                        },
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ), 
             tablet: Container(),
           ),

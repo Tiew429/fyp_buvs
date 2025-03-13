@@ -1,4 +1,5 @@
 import 'package:blockchain_university_voting_system/provider/wallet_provider.dart';
+import 'package:blockchain_university_voting_system/routes/navigation_keys.dart';
 import 'package:blockchain_university_voting_system/services/auth_service.dart';
 import 'package:blockchain_university_voting_system/provider/user_provider.dart';
 import 'package:flutter/material.dart';
@@ -12,26 +13,23 @@ class WalletConnectService {
   bool isInitialized = false;
   bool _isInitializing = false;
 
-  final Completer<void> _initializationCompleter = Completer<void>();
-  Future<void> get initializationComplete => _initializationCompleter.future;
-
   WalletConnectService._internal();
   static final WalletConnectService _instance = WalletConnectService._internal();
   factory WalletConnectService() => _instance;
 
-  Future<void> initialize(BuildContext context) async {
+  Future<void> initialize() async {
+    BuildContext context = rootNavigatorKey.currentContext!;
+    
     if (isInitialized) {
-      if (!_initializationCompleter.isCompleted) {
-        _initializationCompleter.complete();
-      }
       return;
     }
 
     if (_isInitializing) {
-      return await initializationComplete;
+      return;
     }
 
     _isInitializing = true;
+    
     try {
       debugPrint("WalletConnectService: Starting initialization...");
       
@@ -61,29 +59,20 @@ class WalletConnectService {
       isInitialized = true;
       
       debugPrint("WalletConnectService: Initialization completed successfully");
-      
-      if (!_initializationCompleter.isCompleted) {
-        _initializationCompleter.complete();
-      }
+       
     } catch (e) {
       debugPrint("Error initializing WalletConnectService: $e");
       _appkitModal = null;
       isInitialized = false;
-      
-      if (!_initializationCompleter.isCompleted) {
-        _initializationCompleter.completeError(e);
-      }
-      
-      rethrow;
     } finally {
       _isInitializing = false;
     }
   }
 
-  Future<ReownAppKitModal> getAppKitModalAsync(BuildContext context) async {
+  Future<ReownAppKitModal> getAppKitModalAsync() async {
     if (!isInitialized || _appkitModal == null) {
       debugPrint("WalletConnectService: AppKitModal not initialized, initializing now...");
-      await initialize(context);
+      await initialize();
     }
     
     if (_appkitModal == null) {
@@ -93,11 +82,11 @@ class WalletConnectService {
     return _appkitModal!;
   }
 
-  ReownAppKitModal getAppKitModal(BuildContext context) {
+  ReownAppKitModal getAppKitModal() {
     if (!isInitialized || _appkitModal == null) {
       debugPrint("WalletConnectService: AppKitModal not initialized, scheduling initialization");
       WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-        initialize(context);
+        initialize();
       });
       throw Exception('WalletConnectService not initialized. Please call initialize() first or use getAppKitModalAsync().');
     }

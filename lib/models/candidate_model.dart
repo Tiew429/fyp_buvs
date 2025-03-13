@@ -40,7 +40,7 @@ class Candidate {
   void setBio(String bio) => _bio = bio;
   void setIsConfirmed(bool isConfirmed) => _isConfirmed = isConfirmed;
 
-  factory Candidate.fromMap(Map<String, dynamic> map) {
+  factory Candidate.fromMap(Map<String, dynamic> map, [int votesReceived = 0]) {
     return Candidate(
       candidateID: map['candidateID'],
       userID: map['userID'],
@@ -48,9 +48,21 @@ class Candidate {
       bio: map['bio'],
       votingEventID: map['votingEventID'],
       walletAddress: map['walletAddress'],
-      votesReceived: map['votesReceived'],
+      votesReceived: votesReceived, // only after the voting event is over, it will be retrieved from the blockchain
       isConfirmed: map['isConfirmed'],
     );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'candidateID': candidateID,
+      'userID': userID,
+      'name': name,
+      'bio': bio,
+      'walletAddress': walletAddress,
+      'votingEventID': votingEventID,
+      'isConfirmed': isConfirmed,
+    };
   }
 
   static List<Candidate> convertToCandidateList(List<dynamic> candidates) {

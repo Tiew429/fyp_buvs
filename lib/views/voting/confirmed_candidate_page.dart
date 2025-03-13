@@ -37,39 +37,44 @@ class _ConfirmedCandidatePageState extends State<ConfirmedCandidatePage> {
     return Scaffold(
       backgroundColor: colorScheme.tertiary,
       body: ScrollableResponsiveWidget(
-        phone: _candidateObjects.isEmpty
-          ? Center(
-              child: Text(
-                AppLocale.noConfirmedCandidateAvailable.getString(context),
-                style: TextStyle(
-                  color: colorScheme.onTertiary,
-                  fontSize: 18,
+        hasBottomNavigationBar: true,
+        phone: Column(
+          children: _candidateObjects.isEmpty
+            ? [
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Center(
+                      child: Text(
+                        AppLocale.noConfirmedCandidateAvailable.getString(context),
+                        style: TextStyle(
+                          color: colorScheme.onTertiary,
+                          fontSize: 18,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-            )
-          : ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: _candidateObjects.length,
-              itemBuilder: (context, index) {
-                final candidate = _candidateObjects[index];
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 12.0),
-                  child: CandidateBox(
-                    candidate: candidate,
-                    status: CandidateStatus.confirmed,
-                    onTap: () => _showCandidateDetails(candidate),
-                    backgroundColor: colorScheme.surface,
-                    textColor: colorScheme.onSurface,
-                  ),
-                );
-              },
-            ),
-        tablet: Container(), // Implement tablet layout if needed
+              ]
+            : _candidateObjects.map((candidate) => Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 6.0),
+                child: CandidateBox(
+                  candidate: candidate,
+                  status: CandidateStatus.confirmed,
+                  onTap: () => _showCandidateDetails(candidate),
+                  backgroundColor: colorScheme.surface,
+                  textColor: colorScheme.onSurface,
+                ),
+              )).toList(),
+        ),
+        tablet: Container(),
       ),
     );
   }
 
   void _showCandidateDetails(Candidate candidate) {
+    final colorScheme = Theme.of(context).colorScheme;
+    
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -94,7 +99,12 @@ class _ConfirmedCandidatePageState extends State<ConfirmedCandidatePage> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: Text(AppLocale.close.getString(context)),
+            child: Text(
+              AppLocale.close.getString(context),
+              style: TextStyle(
+                color: colorScheme.onPrimary,
+              ),
+            ),
           ),
         ],
       ),

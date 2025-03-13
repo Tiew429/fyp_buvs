@@ -12,7 +12,6 @@ class StudentRepository {
   }
 
   CollectionReference<Map<String, dynamic>> getStudentPath() {
-    print("getStudentPath");
     return _firestore.collection("users").doc("student").collection("student");
   }
 

@@ -36,7 +36,7 @@ class CandidateBox extends StatelessWidget {
     // Get candidate data directly from the Candidate object
     final name = candidate.name;
     final bio = candidate.bio;
-    final walletAddress = candidate.userID; // Using userID as wallet address
+    final walletAddress = candidate.userID;
     
     return GestureDetector(
       onTap: onTap,

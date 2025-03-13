@@ -18,7 +18,7 @@ class SmartContractService {
     .of<WalletConnectService>(
       rootNavigatorKey.currentContext!,
       listen: false,
-    ).getAppKitModal(rootNavigatorKey.currentContext!);
+    ).getAppKitModal();
   
   final Map<String, dynamic> _eventCache = {};
   DateTime _lastCacheRefresh = DateTime.now();
@@ -315,6 +315,67 @@ class SmartContractService {
     }
   }
 
+  Future<bool> addCandidatesToVotingEvent(VotingEvent votingEvent) async {
+    print("Smart_Contract_Service (addCandidatesToVotingEvent): Adding candidates to voting event in blockchain.");
+    
+    try {
+      // check is the voting event id already exists in blockchain
+      final votingEventIDs = await readFunction('getVotingEventIDs');
+
+      bool eventExists = false;
+      if (votingEventIDs is List) {
+        for (var id in votingEventIDs) {
+          String idStr = id is List ? id[0].toString() : id.toString();
+          if (idStr == votingEvent.votingEventID) {
+            eventExists = true;
+            break;
+          }
+        }
+      } else if (votingEventIDs is String) {
+        eventExists = votingEventIDs == votingEvent.votingEventID;
+      }
+
+      if (!eventExists) {
+        throw Exception("Smart_Contract_Service (addCandidatesToVotingEvent): Voting event ID '${votingEvent.votingEventID}' not found in blockchain. Available IDs: $votingEventIDs");
+      }
+
+      // add candidates to voting event in blockchain
+      final List<String> candidateIDs = votingEvent.candidates.map((candidate) => candidate.candidateID).toList();
+      final List<EthereumAddress> candidateWalletAddresses = votingEvent.candidates.map((candidate) {
+        try {
+          // ensure the address format is correct (starts with 0x)
+          String address = candidate.walletAddress;
+          if (!address.startsWith('0x')) {
+            address = '0x$address';
+          }
+          return EthereumAddress.fromHex(address);
+        } catch (e) {
+          print("Error converting address ${candidate.walletAddress}: $e");
+          // if the conversion fails, return a zero address or throw an error
+          throw Exception("Invalid wallet address format: ${candidate.walletAddress}");
+        }
+      }).toList();
+
+      final bool success = await writeFunction('addCandidates', [
+        votingEvent.votingEventID,
+        candidateIDs,
+        candidateWalletAddresses,
+      ]);
+
+      // check if transaction was successful
+      if (!success) {
+        print("Smart_Contract_Service (addCandidatesToVotingEvent): Transaction was rejected or failed.");
+        return false;
+      }
+
+      print("Smart_Contract_Service (addCandidatesToVotingEvent): Candidates added successfully.");
+      return true;
+    } catch (e) {
+      debugPrint("Smart_Contract_Service (addCandidatesToVotingEvent): $e");
+      return false;
+    }
+  }
+
   //--------------------
   // Helper Functions
   //--------------------
@@ -374,10 +435,8 @@ class SmartContractService {
           errorMessage.contains('canceled') ||
           errorMessage.contains('user refused')) {
         print("Smart_Contract_Service (writeFunction): Transaction was rejected by user.");
-      } else {
-        print("Smart_Contract_Service (writeFunction): Transaction failed with error: $e");
       }
-      return false;
+      throw Exception("Smart_Contract_Service (writeFunction): Transaction failed with error: $e");
     }
   }
 
