@@ -1,6 +1,7 @@
 import 'package:blockchain_university_voting_system/localization/app_locale.dart';
 import 'package:blockchain_university_voting_system/models/candidate_model.dart';
 import 'package:blockchain_university_voting_system/widgets/centered_container.dart';
+import 'package:blockchain_university_voting_system/widgets/custom_animated_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localization/flutter_localization.dart';
 
@@ -17,6 +18,8 @@ class CandidateBox extends StatelessWidget {
   final Color? textColor;
   final CandidateStatus status;
   final bool showAvatar;
+  final bool canVote;
+  final VoidCallback? onVote;
   
   const CandidateBox({
     super.key,
@@ -26,6 +29,8 @@ class CandidateBox extends StatelessWidget {
     this.textColor,
     this.status = CandidateStatus.none,
     this.showAvatar = true,
+    this.canVote = false,
+    this.onVote,
   });
 
   @override
@@ -44,7 +49,6 @@ class CandidateBox extends StatelessWidget {
         containerPaddingVertical: 10.0,
         child: Stack(
           children: [
-            // Main content
             Row(
               children: [
                 if (showAvatar)
@@ -72,7 +76,7 @@ class CandidateBox extends StatelessWidget {
                     ),
                   ),
                 Expanded(
-                  flex: 7,
+                  flex: canVote ? 5 : 7,
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 12.0),
                     child: Column(
@@ -108,10 +112,17 @@ class CandidateBox extends StatelessWidget {
                     ),
                   ),
                 ),
+                if (canVote)
+                  Expanded(
+                    flex: 2,
+                    child: CustomAnimatedButton(
+                      text: AppLocale.vote.getString(context),
+                      onPressed: onVote!,
+                    ),
+                  ),
               ],
             ),
             
-            // Status badge
             if (status != CandidateStatus.none)
               Positioned(
                 top: 0,
@@ -119,7 +130,7 @@ class CandidateBox extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: _getStatusColor(status, colorScheme),
+                    color: _getStatusColor(status),
                     borderRadius: const BorderRadius.only(
                       bottomLeft: Radius.circular(8),
                       topRight: Radius.circular(8),
@@ -141,7 +152,7 @@ class CandidateBox extends StatelessWidget {
     );
   }
   
-  Color _getStatusColor(CandidateStatus status, ColorScheme colorScheme) {
+  Color _getStatusColor(CandidateStatus status) {
     switch (status) {
       case CandidateStatus.confirmed:
         return Colors.green;

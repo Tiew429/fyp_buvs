@@ -23,7 +23,7 @@ class PendingVotingEventListPage extends StatefulWidget {
 
 class _PendingVotingEventListPageState extends State<PendingVotingEventListPage> {
   bool _isLoading = true;
-  late List<VotingEvent> _pendingVotingEventList;
+  late List<VotingEvent> _availableVotingEventList;
   VotingEvent? _selectedEvent;
 
   @override
@@ -36,7 +36,7 @@ class _PendingVotingEventListPageState extends State<PendingVotingEventListPage>
     setState(() => _isLoading = true);
     await widget._votingEventViewModel.loadVotingEvents();
     setState(() {
-      _pendingVotingEventList = widget._votingEventViewModel.pendingVotingEvents;
+      _availableVotingEventList = widget._votingEventViewModel.availableVotingEvents;
       _isLoading = false;
     });
   }
@@ -80,13 +80,13 @@ class _PendingVotingEventListPageState extends State<PendingVotingEventListPage>
             phone: _isLoading 
               ? const Center(child: CircularProgressIndicator())
               : Column(
-                  children: _pendingVotingEventList.isEmpty
+                  children: _availableVotingEventList.isEmpty
                     ? [
                         Center(
                           child: Text(AppLocale.noPendingStatusVotingEventAvailable.getString(context)),
                         ),
                       ]
-                    : _pendingVotingEventList.map((event) => VotingEventBox(
+                    : _availableVotingEventList.map((event) => VotingEventBox(
                         onTap: () {
                           _showVotingEventDetails(event);
                         },

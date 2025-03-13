@@ -5,10 +5,7 @@ mixin AppLocale {
   static const String student = 'student';
 
   // voting event status
-  static const String pending = 'pending';
-  static const String approved = 'approved';
-  static const String ongoing = 'ongoing';
-  static const String completed = 'completed';
+  static const String available = 'available';
   static const String deprecated = 'deprecated';
 
   // authentication
@@ -36,6 +33,7 @@ mixin AppLocale {
   static const String verify = 'verify';
   static const String loggingIn = 'logging in...';
   static const String registering = 'registering...'; 
+  static const String exportToReport = 'export to report';
 
   // home (dashboard, profile, settings)
   static const String home = 'home';
@@ -106,6 +104,14 @@ mixin AppLocale {
   static const String votingEventDeletedSuccessfully = 'voting event deleted successfully';
   static const String creatingVotingEvent = 'creating voting event...';
   static const String updatingVotingEvent = 'updating voting event...';
+  static const String vote = 'vote';
+  static const String statistics = 'statistics';
+  static const String totalVotesCast = 'total votes cast';
+  static const String percentageOfVotesCast = 'percentage of votes cast';
+  static const String remainingVoters = 'remaining voters';
+  static const String timeRemaining = 'time remaining';
+  static const String results = 'results';
+  static const String winner = 'winner';
 
   // student
   static const String notEligibleForVoting = 'not eligible for voting';
@@ -126,6 +132,7 @@ mixin AppLocale {
   static const String votesReceived = 'votes received';
   static const String confirmed = 'confirmed';
   static const String rejected = 'rejected';
+  static const String pending = 'pending';
   static const String errorConfirmingCandidate = 'error confirming candidate';
   static const String errorRejectingCandidate = 'error rejecting candidate';
   static const String addCandidate = 'add candidate';
@@ -163,10 +170,7 @@ mixin AppLocale {
     student: 'Student',
 
     // voting event status
-    pending: 'Pending',
-    approved: 'Approved',
-    ongoing: 'Ongoing',
-    completed: 'Completed',
+    available: 'Available',
     deprecated: 'Deprecated',
 
     // authentication
@@ -194,6 +198,7 @@ mixin AppLocale {
     verify: 'Verify',
     loggingIn: 'Logging in...', 
     registering: 'Registering...',
+    exportToReport: 'Export to Report',
 
     // home
     home: 'Home',
@@ -262,6 +267,14 @@ mixin AppLocale {
     votingEventDeletedSuccessfully: 'Voting event deleted successfully',
     creatingVotingEvent: 'Creating voting event...',
     updatingVotingEvent: 'Updating voting event...',
+    vote: 'Vote',
+    statistics: 'Statistics',
+    totalVotesCast: 'Total Votes Cast',
+    percentageOfVotesCast: 'Percentage of Votes Cast',
+    remainingVoters: 'Remaining Voters',
+    timeRemaining: 'Time Remaining',
+    results: 'Results',
+    winner: 'Winner',
 
     // student
     notEligibleForVoting: 'Not eligible for voting',
@@ -281,6 +294,7 @@ mixin AppLocale {
     noCandidateFound: 'No candidate found',
     votesReceived: 'Votes Received',
     confirmed: 'Confirmed',
+    pending: 'Pending',
     rejected: 'Rejected',
     errorConfirmingCandidate: 'Error confirming candidate',
     errorRejectingCandidate: 'Error rejecting candidate',
@@ -320,10 +334,7 @@ mixin AppLocale {
     student: 'Pelajar',
 
     // voting event status
-    pending: 'Belum Selesai',
-    approved: 'Diluluskan',
-    ongoing: 'Berterusan',
-    completed: 'Selesai',
+    available: 'Tersedia',
     deprecated: 'Ditamatkan',
 
     // authentication
@@ -351,6 +362,7 @@ mixin AppLocale {
     verify: 'Sahkan',
     loggingIn: 'Log masuk...',
     registering: 'Mendaftar...',
+    exportToReport: 'Eksport ke Laporan',
 
     // home
     home: 'Home',
@@ -419,6 +431,14 @@ mixin AppLocale {
     votingEventDeletedSuccessfully: 'Acara pengundian berjaya dihapus',
     creatingVotingEvent: 'Sedang membuat acara pengundian...',
     updatingVotingEvent: 'Sedang mengemas kini acara pengundian...',
+    vote: 'Undi',
+    statistics: 'Statistik',
+    totalVotesCast: 'Jumlah Undian Dibuat',
+    percentageOfVotesCast: 'Peratusan Undian Dibuat',
+    remainingVoters: 'Jumlah Pengguna Tidak Undi',
+    timeRemaining: 'Masa Tinggal',
+    results: 'Hasil',
+    winner: 'Pemenang',
 
     // student
     notEligibleForVoting: 'Tidak layak untuk pengundian', 
@@ -439,6 +459,7 @@ mixin AppLocale {
     votesReceived: 'Jumlah Undian',
     confirmed: 'Diluluskan',
     rejected: 'Menolak',
+    pending: 'Belum Diluluskan',
     errorConfirmingCandidate: 'Kesalahan mengkonfirmasi calon',
     errorRejectingCandidate: 'Kesalahan menolak calon',
     addCandidate: 'Tambah Calon',
@@ -477,10 +498,7 @@ mixin AppLocale {
     student: '学生',
 
     // voting event status
-    pending: '待处理',
-    approved: '已批准',
-    ongoing: '正在进行',
-    completed: '已完成',
+    available: '可用',
     deprecated: '已弃用',
 
     // authentication
@@ -508,7 +526,8 @@ mixin AppLocale {
     verify: '验证',
     loggingIn: '登录中...',
     registering: '注册中...',
-
+    exportToReport: '导出到报告',
+    
     // home
     home: '主页',
 
@@ -576,6 +595,14 @@ mixin AppLocale {
     votingEventDeletedSuccessfully: '投票活动已删除成功',
     creatingVotingEvent: '正在创建投票活动...',
     updatingVotingEvent: '正在更新投票活动...',
+    vote: '投票',
+    statistics: '统计',
+    totalVotesCast: '总投票数',
+    percentageOfVotesCast: '投票百分比',
+    remainingVoters: '剩余投票者',
+    timeRemaining: '剩余时间',
+    results: '结果',
+    winner: '获胜者',
 
     // student
     notEligibleForVoting: '不符合投票资格',
@@ -596,6 +623,7 @@ mixin AppLocale {
     votesReceived: '票数',
     confirmed: '已确认',
     rejected: '已拒绝',
+    pending: '待确认',
     errorConfirmingCandidate: '确认候选人失败',
     errorRejectingCandidate: '拒绝候选人失败',
     addCandidate: '添加候选人',

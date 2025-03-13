@@ -124,15 +124,14 @@ class VotingEventRepository {
               .map((candidate) => Candidate.fromMap(candidate)).toList();
 
           for (String addressStr in candidateAddressStrings) {
-            print("Candidate address: $addressStr (blockchain)");
             try {
               // compare between candidates in blockchain and candidates (array) in firestore
               // if the candidate is not found in firestore, ignore it
               // if the candidate is found in firestore, add the candidate to the candidates list
               for (Candidate candidate in candidatesInFirestore) {
-                print("Candidate address: ${candidate.walletAddress} (firestore)");
                 if (candidate.walletAddress.toLowerCase() == addressStr.toLowerCase()) {
                   candidates.add(candidate);
+                  candidatesInFirestore.remove(candidate); // to improve performance
                   break;
                 }
               }
@@ -227,6 +226,10 @@ class VotingEventRepository {
     });
 
     return true;
+  }
+
+  Future<bool> vote(Candidate candidate) async {
+    return await _smartContractService.voteInBlockchain(candidate);
   }
 
   Future<void> insertVotingEventToFirebase(VotingEvent votingEvent) async {

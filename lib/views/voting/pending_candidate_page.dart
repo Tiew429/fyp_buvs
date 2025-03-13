@@ -69,6 +69,7 @@ class _PendingCandidatePageState extends State<PendingCandidatePage> {
                                 onTap: () => _showCandidateDetails(candidate),
                                 backgroundColor: colorScheme.surface,
                                 textColor: colorScheme.onSurface,
+                                canVote: false,
                               ),
                               Positioned(
                                 bottom: 8,
@@ -149,7 +150,7 @@ class _PendingCandidatePageState extends State<PendingCandidatePage> {
       if (mounted) {
         SnackbarUtil.showSnackBar(
           context, 
-          "${AppLocale.candidate.getString(context)} ${candidate.name} ${AppLocale.approved.getString(context)}"
+          "${AppLocale.candidate.getString(context)} ${candidate.name} ${AppLocale.available.getString(context)}"
         );
       }
     } catch (e) {

@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:blockchain_university_voting_system/blockchain/wallet_connect_service.dart';
+import 'package:blockchain_university_voting_system/models/candidate_model.dart';
 import 'package:blockchain_university_voting_system/models/voting_event_model.dart';
 import 'package:blockchain_university_voting_system/routes/navigation_keys.dart';
 import 'package:blockchain_university_voting_system/utils/converter_util.dart';
@@ -225,28 +226,10 @@ class SmartContractService {
     print("Smart_Contract_Service (updateVotingEventInBlockchain): Updating voting event in blockchain.");
 
     try {
-      // check is the voting event id already exists in blockchain
-      final votingEventIDs = await readFunction('getVotingEventIDs');
-      print("Smart_Contract_Service: Retrieved voting event IDs: $votingEventIDs");
-
-      // handle different possible return formats
-      bool eventExists = false;
-      if (votingEventIDs is List) {
-        // check if the ID exists in the list, handling potential nested lists
-        for (var id in votingEventIDs) {
-          String idStr = id is List ? id[0].toString() : id.toString();
-          if (idStr == votingEvent.votingEventID || idStr == votingEvent.votingEventID) {
-            eventExists = true;
-            break;
-          }
-        }
-      } else if (votingEventIDs is String) {
-        // if a single string is returned
-        eventExists = votingEventIDs == votingEvent.votingEventID;
-      }
-
-      if (!eventExists) {
-        throw Exception("Smart_Contract_Service (updateVotingEventInBlockchain): Voting event ID '${votingEvent.votingEventID}' not found in blockchain. Available IDs: $votingEventIDs");
+      // check if the voting event exists
+      if (!await checkIfVotingEventExists(votingEvent.votingEventID)) {
+        print("Smart_Contract_Service (updateVotingEventInBlockchain): Voting event ID '${votingEvent.votingEventID}' not found in blockchain.");
+        return;
       }
 
       final BigInt startDate = ConverterUtil.dateTimeToBigInt(votingEvent.startDate!);
@@ -279,24 +262,9 @@ class SmartContractService {
     print("Smart_Contract_Service (removeVotingEventFromBlockchain): Deleting voting event in blockchain.");
 
     try {
-      // check is the voting event id already exists in blockchain
-      final votingEventIDs = await readFunction('getVotingEventIDs');
-
-      bool eventExists = false;
-      if (votingEventIDs is List) {
-        for (var id in votingEventIDs) {
-          String idStr = id is List ? id[0].toString() : id.toString();
-          if (idStr == votingEvent.votingEventID) {
-            eventExists = true;
-            break;
-          }
-        }
-      } else if (votingEventIDs is String) {
-        eventExists = votingEventIDs == votingEvent.votingEventID;
-      }
-
-      if (!eventExists) {
-        throw Exception("Smart_Contract_Service (removeVotingEventFromBlockchain): Voting event ID '${votingEvent.votingEventID}' not found in blockchain. Available IDs: $votingEventIDs");
+      if (!await checkIfVotingEventExists(votingEvent.votingEventID)) {
+        print("Smart_Contract_Service (removeVotingEventFromBlockchain): Voting event ID '${votingEvent.votingEventID}' not found in blockchain.");
+        return;
       }
 
       // delete voting event in blockchain
@@ -319,24 +287,9 @@ class SmartContractService {
     print("Smart_Contract_Service (addCandidatesToVotingEvent): Adding candidates to voting event in blockchain.");
     
     try {
-      // check is the voting event id already exists in blockchain
-      final votingEventIDs = await readFunction('getVotingEventIDs');
-
-      bool eventExists = false;
-      if (votingEventIDs is List) {
-        for (var id in votingEventIDs) {
-          String idStr = id is List ? id[0].toString() : id.toString();
-          if (idStr == votingEvent.votingEventID) {
-            eventExists = true;
-            break;
-          }
-        }
-      } else if (votingEventIDs is String) {
-        eventExists = votingEventIDs == votingEvent.votingEventID;
-      }
-
-      if (!eventExists) {
-        throw Exception("Smart_Contract_Service (addCandidatesToVotingEvent): Voting event ID '${votingEvent.votingEventID}' not found in blockchain. Available IDs: $votingEventIDs");
+      if (!await checkIfVotingEventExists(votingEvent.votingEventID)) {
+        print("Smart_Contract_Service (addCandidatesToVotingEvent): Voting event ID '${votingEvent.votingEventID}' not found in blockchain.");
+        return false;
       }
 
       // add candidates to voting event in blockchain
@@ -372,6 +325,35 @@ class SmartContractService {
       return true;
     } catch (e) {
       debugPrint("Smart_Contract_Service (addCandidatesToVotingEvent): $e");
+      return false;
+    }
+  }
+
+  Future<bool> voteInBlockchain(Candidate candidate) async {
+    print("Smart_Contract_Service (voteInBlockchain): Voting for candidate in blockchain.");
+
+    try {
+      // check if the voting event exists
+      if (!await checkIfVotingEventExists(candidate.votingEventID)) {
+        print("Smart_Contract_Service (voteInBlockchain): Voting event ID '${candidate.votingEventID}' not found in blockchain.");
+        return false;
+      }
+
+      // vote for the candidate in blockchain
+      final bool success = await writeFunction('castVote', [
+        candidate.votingEventID,
+        candidate.candidateID,
+      ]);
+      
+      if (!success) {
+        print("Smart_Contract_Service (voteInBlockchain): Transaction was rejected or failed.");
+        return false;
+      }
+
+      print("Smart_Contract_Service (voteInBlockchain): Voted successfully.");
+      return true;
+    } catch (e) {
+      debugPrint("Smart_Contract_Service (voteInBlockchain): $e");
       return false;
     }
   }
@@ -450,5 +432,29 @@ class SmartContractService {
     if (!contractLoaded) {
       throw Exception("Smart_Contract_Service: Contract is not initialized correctly.");
     }
+  }
+
+  Future<bool> checkIfVotingEventExists(String votingEventID) async {
+    // check is the voting event id already exists in blockchain
+      final votingEventIDs = await readFunction('getVotingEventIDs');
+
+      bool eventExists = false;
+      if (votingEventIDs is List) {
+        for (var id in votingEventIDs) {
+          String idStr = id is List ? id[0].toString() : id.toString();
+          if (idStr == votingEventID) {
+            eventExists = true;
+            break;
+          }
+        }
+      } else if (votingEventIDs is String) {
+        eventExists = votingEventIDs == votingEventID;
+      }
+
+      if (!eventExists) {
+      throw Exception("Smart_Contract_Service (checkIfVotingEventExists): Voting event ID '$votingEventID' not found in blockchain. Available IDs: $votingEventIDs");
+    }
+
+    return eventExists;
   }
 }

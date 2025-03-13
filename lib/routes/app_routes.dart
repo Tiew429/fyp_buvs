@@ -456,6 +456,7 @@ List<RouteBase> router(String initialRoute, GlobalKey<NavigatorState> navigatorK
       name: RouterPath.votingeventpage.path,
       pageBuilder: (context, state) {
         final user = getUserViewModel()?.user;
+        final isEligibleToVote = getUserViewModel()?.isEligibleForVoting ?? false;
         if (user == null) {
           return buildPageWithAppKitModal(
             context, 
@@ -466,6 +467,7 @@ List<RouteBase> router(String initialRoute, GlobalKey<NavigatorState> navigatorK
         return buildPageWithAnimation(
           VotingEventPage(
             user: user,
+            isEligibleToVote: isEligibleToVote,
             votingEventViewModel: getVotingEventViewModel()!,
           ), 
           state,

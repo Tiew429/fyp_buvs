@@ -27,7 +27,7 @@ class VotingEvent {
     TimeOfDay? startTime,
     TimeOfDay? endTime,
     required String createdBy,
-    VotingEventStatus status = VotingEventStatus.pending,
+    VotingEventStatus status = VotingEventStatus.available,
     List<Student> voters = const [],
     List<Candidate> candidates = const [],
     List<Candidate> pendingCandidates = const [],

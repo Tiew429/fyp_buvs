@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:blockchain_university_voting_system/data/voting_event_status.dart';
 import 'package:blockchain_university_voting_system/models/candidate_model.dart';
+import 'package:blockchain_university_voting_system/models/user_model.dart';
 import 'package:blockchain_university_voting_system/models/voting_event_model.dart';
 import 'package:blockchain_university_voting_system/repository/voting_event_repository.dart';
 import 'package:flutter/material.dart';
@@ -18,12 +19,14 @@ class VotingEventProvider extends ChangeNotifier{
   // getter
   VotingEvent get selectedVotingEvent => _selectedVotingEvent;
   List<VotingEvent> get votingEventList => _votingEventList;
-  List<VotingEvent> get pendingVotingEvents => 
-    _votingEventList.where((event) => event.status == VotingEventStatus.pending).toList();
+  List<VotingEvent> get availableVotingEvents => 
+    _votingEventList.where((event) => event.status == VotingEventStatus.available).toList();
+  List<VotingEvent> get deprecatedVotingEvents => 
+    _votingEventList.where((event) => event.status == VotingEventStatus.deprecated).toList();
 
   // setter
   void selectVotingEvent(VotingEvent votingEvent) {
-    print("Voting_Event_ViewModel: Selecting voting event.");
+    print("Voting_Event_Provider: Selecting voting event.");
     _selectedVotingEvent = votingEvent;
   }
 
@@ -73,7 +76,7 @@ class VotingEventProvider extends ChangeNotifier{
     TimeOfDay? endTime,
     String walletAddress,
   ) async {
-    print("Voting_Event_ViewModel: Creating VotingEvent object.");
+    print("Voting_Event_Provider: Creating VotingEvent object.");
     VotingEvent newVotingEvent = VotingEvent(
       votingEventID: "VE-${_votingEventList.length + 1}",
       title: title,
@@ -94,17 +97,17 @@ class VotingEventProvider extends ChangeNotifier{
   }
 
   Future<void> updateVotingEvent(VotingEvent votingEvent) async {
-    print("Voting_Event_ViewModel: Updating voting event.");
+    print("Voting_Event_Provider: Updating voting event.");
     await _votingEventRepository.updateVotingEvent(votingEvent);
   }
 
   Future<void> deleteVotingEvent(VotingEvent votingEvent) async {
-    print("Voting_Event_ViewModel: Removing voting event.");
+    print("Voting_Event_Provider: Removing voting event.");
     await _votingEventRepository.deleteVotingEvent(votingEvent);
   }
 
   Future<bool> addCandidates(List<Candidate> candidates) async {
-    print("Voting_Event_ViewModel: Adding candidates.");
+    print("Voting_Event_Provider: Adding candidates.");
     List<Candidate> newCandidates = _selectedVotingEvent.candidates.toList();
     newCandidates.addAll(candidates);
     VotingEvent cloneEvent = _selectedVotingEvent.copyWith(
@@ -118,6 +121,10 @@ class VotingEventProvider extends ChangeNotifier{
     }
 
     return success;
+  }
+
+  Future<bool> vote(Candidate candidate) async {
+    return await _votingEventRepository.vote(candidate);
   }
 
   @override
