@@ -43,6 +43,21 @@ class AdminDashboard extends StatelessWidget {
               onTap: () => NavigationHelper.navigateToPendingVotingEventListPage(context), 
               text: AppLocale.pendingVotingEvent.getString(context),
             ),
+            const SizedBox(height: 16,),
+            DashboardBox(
+              onTap: () => NavigationHelper.navigateToNotificationsPage(context),
+              text: "Notifications",
+            ),
+            const SizedBox(height: 16,),
+            DashboardBox(
+              onTap: () => NavigationHelper.navigateToReportPage(context),
+              text: "Report",
+            ),
+            const SizedBox(height: 16,),
+            DashboardBox(
+              onTap: () => NavigationHelper.navigateToAuditListPage(context),
+              text: "Audit",
+            ),
           ],
         ), 
         tablet: Container(),

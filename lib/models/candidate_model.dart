@@ -5,7 +5,7 @@ class Candidate {
   String _bio;
   final String _walletAddress;
   final String _votingEventID;
-  final int _votesReceived;
+  int _votesReceived;
   bool _isConfirmed;
 
   Candidate({
@@ -38,6 +38,7 @@ class Candidate {
   // setter
   void setName(String name) => _name = name;
   void setBio(String bio) => _bio = bio;
+  void setVotesReceived(int votesReceived) => _votesReceived = votesReceived;
   void setIsConfirmed(bool isConfirmed) => _isConfirmed = isConfirmed;
 
   factory Candidate.fromMap(Map<String, dynamic> map, [int votesReceived = 0]) {

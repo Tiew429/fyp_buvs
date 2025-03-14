@@ -178,6 +178,16 @@ class SmartContractService {
     return null;
   }
 
+  Future<List<dynamic>> getVoteResultsFromBlockchain(String votingEventID) async {
+    try {
+      final voteResults = await readFunction('getVoteResults', [votingEventID]);
+      return voteResults; // it should return list of candidate ids and their vote counts
+    } catch (e) {
+      print("Failed to get vote results for event ID: $votingEventID - $e");
+    }
+    return [];
+  }
+
   //--------------------
   // Setter Functions
   //--------------------

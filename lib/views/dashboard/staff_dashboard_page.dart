@@ -11,8 +11,9 @@ class StaffDashboard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.tertiary,
-      body: ResponseWidget(
-        phone: const Text('Nothing here'), 
+      body: ScrollableResponsiveWidget(
+        hasBottomNavigationBar: true,
+        phone: const Text('Nothing here'),
         tablet: Container(),
       ),
     );

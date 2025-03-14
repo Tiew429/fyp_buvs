@@ -135,6 +135,18 @@ class VotingEventRepository {
                   break;
                 }
               }
+
+              List<dynamic> voteResults = await _smartContractService.getVoteResultsFromBlockchain(votingEventID);
+
+              // update the vote count of the candidate
+              for (dynamic voteResult in voteResults) {
+                for (Candidate candidate in candidates) {
+                  if (candidate.candidateID == voteResult[0]) {
+                    candidate.setVotesReceived(voteResult[1]);
+                    print("Candidate votes: ${candidate.votesReceived}");
+                  }
+                }
+              }
             } catch (e) {
               print("Error fetching candidate data for address $addressStr: $e");
             }
@@ -282,4 +294,8 @@ in the variable event
 [5] => status, but in int (0 to 4, refer to voting_event_status.dart in data folder)
 [6] => candidates
 [7] => voters
+
+in the variable voteResults
+[0] => candidate id
+[1] => vote count
 */
