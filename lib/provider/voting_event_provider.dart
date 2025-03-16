@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:blockchain_university_voting_system/data/voting_event_status.dart';
 import 'package:blockchain_university_voting_system/models/candidate_model.dart';
-import 'package:blockchain_university_voting_system/models/user_model.dart';
 import 'package:blockchain_university_voting_system/models/voting_event_model.dart';
 import 'package:blockchain_university_voting_system/repository/voting_event_repository.dart';
 import 'package:flutter/material.dart';
@@ -96,9 +95,34 @@ class VotingEventProvider extends ChangeNotifier{
     return success;
   }
 
-  Future<void> updateVotingEvent(VotingEvent votingEvent) async {
+  Future<bool> updateVotingEvent(VotingEvent votingEvent, VotingEvent oldVotingEvent) async {
     print("Voting_Event_Provider: Updating voting event.");
-    await _votingEventRepository.updateVotingEvent(votingEvent);
+
+    bool updateBlockchain = true;
+
+    try {
+      // check does user update these information
+      // if not, we don't need to update the blockchain
+      print("Voting_Event_Provider: votingEvent.title: ${votingEvent.title}");
+      if (votingEvent.title == oldVotingEvent.title &&
+          votingEvent.startDate == oldVotingEvent.startDate &&
+          votingEvent.endDate == oldVotingEvent.endDate &&
+          votingEvent.status == oldVotingEvent.status &&
+          votingEvent.candidates == oldVotingEvent.candidates &&
+          votingEvent.voters == oldVotingEvent.voters
+      ) {
+        updateBlockchain = false;
+        print("Voting_Event_Provider: updateBlockchain: $updateBlockchain");
+      } else {
+        print("Voting_Event_Provider: updateBlockchain: $updateBlockchain");
+      }
+      
+      bool success = await _votingEventRepository.updateVotingEvent(votingEvent, updateBlockchain);
+      return success;
+    } catch (e) {
+      print("Voting_Event_Provider: Error updating voting event: $e");
+      return false;
+    }
   }
 
   Future<void> deleteVotingEvent(VotingEvent votingEvent) async {

@@ -277,7 +277,9 @@ class _VotingEventCreatePageState extends State<VotingEventCreatePage> {
                     children: [
                       CustomConfirmButton(
                         text: AppLocale.createNew.getString(context), 
-                        onPressed: () => _create(),
+                        onPressed: () async {
+                          await _create();
+                        },
                       ),
                       const SizedBox(width: 20,),
                       CustomCancelButton(

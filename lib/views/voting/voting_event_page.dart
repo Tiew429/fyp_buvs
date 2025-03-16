@@ -1,4 +1,3 @@
-import 'package:blockchain_university_voting_system/data/voting_event_status.dart';
 import 'package:blockchain_university_voting_system/localization/app_locale.dart';
 import 'package:blockchain_university_voting_system/models/candidate_model.dart';
 import 'package:blockchain_university_voting_system/models/user_model.dart';
@@ -12,7 +11,6 @@ import 'package:blockchain_university_voting_system/widgets/custom_animated_butt
 import 'package:blockchain_university_voting_system/widgets/custom_bar_chart.dart';
 import 'package:blockchain_university_voting_system/widgets/progress_circular.dart';
 import 'package:blockchain_university_voting_system/widgets/response_widget.dart';
-import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localization/flutter_localization.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -281,12 +279,12 @@ class _VotingEventPageState extends State<VotingEventPage> {
                             onTap: () => _showCandidateDetails(candidate),
                             backgroundColor: colorScheme.primary,
                             textColor: colorScheme.onPrimary,
-                            canVote: true, // canVote should be, but now using true for test purpose
+                            canVote: canVote, // canVote should be, but now using true for test purpose
                             onVote: () => _vote(candidate),
                           ),
                         )).toList(),
                     ),
-                if (true) // should be ongoing, but true for test purpose
+                if (ongoing) // should be ongoing, but true for test purpose
                   Padding(
                     padding: const EdgeInsets.only(top: 2.0, bottom: 10.0),
                     child: Text("${AppLocale.statistics.getString(context)}:", 
@@ -297,7 +295,7 @@ class _VotingEventPageState extends State<VotingEventPage> {
                     ),
                   ),
                   // statistics container
-                if (true)
+                if (ongoing || isEnded)
                   Container(
                     padding: const EdgeInsets.all(10.0),
                     width: double.infinity,
@@ -334,7 +332,7 @@ class _VotingEventPageState extends State<VotingEventPage> {
                       ],
                     ),
                   ),
-                if (!isEnded)
+                if (!ongoing && !isEnded) // cannot edit or remove candidate when and after voting is ongoing and ended
                   Column(
                     children: [
                       const SizedBox(height: 10.0),

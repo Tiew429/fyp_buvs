@@ -6,6 +6,7 @@ import 'package:blockchain_university_voting_system/provider/student_provider.da
 import 'package:blockchain_university_voting_system/utils/snackbar_util.dart';
 import 'package:blockchain_university_voting_system/provider/voting_event_provider.dart';
 import 'package:blockchain_university_voting_system/widgets/custom_animated_button.dart';
+import 'package:blockchain_university_voting_system/widgets/custom_search_box.dart';
 import 'package:blockchain_university_voting_system/widgets/progress_circular.dart';
 import 'package:blockchain_university_voting_system/widgets/response_widget.dart';
 import 'package:flutter/material.dart';
@@ -53,15 +54,14 @@ class _AddCandidatePageState extends State<AddCandidatePage> {
     setState(() => _isLoadingStudent = true);
     
     try {
-      // Wait for students to be fetched
+      // wait for students to be fetched
       await widget.studentProvider.fetchStudents();
       
-      // Now that students are loaded, update the state with both students and filtered students
       if (mounted) {
         setState(() {
           _students = widget.studentProvider.students;
           
-          // Filter students after they've been loaded
+          // filter students after they've been loaded
           _filteredStudents = _students.where((student) => 
             !_existingCandidateIds.contains(student.userID)
           ).toList();
@@ -179,9 +179,9 @@ class _AddCandidatePageState extends State<AddCandidatePage> {
             ),
           ),
           TextButton(
-            onPressed: () {
+            onPressed: () async {
               Navigator.of(context).pop();
-              _addCandidates(selectedStudents);
+              await _addCandidates(selectedStudents);
             },
             child: Text(AppLocale.confirm.getString(context),
               style: TextStyle(
@@ -202,22 +202,25 @@ class _AddCandidatePageState extends State<AddCandidatePage> {
     
     try {
       // create candidate objects
-      List<Candidate> newCandidates = students.map((student) => 
-        Candidate(
-          candidateID: 'CAND_${_getExistingCandidateIds().length + 1}',
-          userID: student.userID,
-          name: student.name,
-          walletAddress: student.walletAddress,
-          votingEventID: votingEvent.votingEventID,
-          isConfirmed: true, // since it is added by admin or event creator
-        )
-      ).toList();
+      List<Candidate> newCandidates = [];
+      int startingId = _getExistingCandidateIds().length + 1;
+      
+      for (int i = 0; i < students.length; i++) {
+        Student student = students[i];
+        newCandidates.add(
+          Candidate(
+            candidateID: 'CAND_${startingId + i}',
+            userID: student.userID,
+            name: student.name,
+            walletAddress: student.walletAddress,
+            votingEventID: votingEvent.votingEventID,
+            isConfirmed: true, // since it is added by admin or event creator
+          )
+        );
+      }
       
       // in actual application, this should call the provider method to add candidates
       bool success = await widget.votingEventProvider.addCandidates(newCandidates);
-      
-      // simulate delay
-      await Future.delayed(const Duration(seconds: 1));
       
       // update UI
       setState(() {
@@ -335,22 +338,12 @@ class _AddCandidatePageState extends State<AddCandidatePage> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       // search bar
-                      TextField(
+                      CustomSearchBox(
                         controller: _searchController,
                         onChanged: _searchStudents,
-                        decoration: InputDecoration(
-                          hintText: AppLocale.searchStudents.getString(context),
-                          prefixIcon: const Icon(Icons.search),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10.0),
-                          ),
-                          filled: true,
-                          fillColor: colorScheme.surface,
-                        ),
+                        hintText: AppLocale.searchStudents.getString(context),
                       ),
-                      
                       const SizedBox(height: 16),
-                      
                       // student list
                       Flexible(
                         fit: FlexFit.loose,
@@ -373,7 +366,6 @@ class _AddCandidatePageState extends State<AddCandidatePage> {
                                 ),
                               ),
                       ),
-                      
                       // confirm button
                       Padding(
                         padding: const EdgeInsets.only(top: 16.0),

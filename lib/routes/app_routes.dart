@@ -1,5 +1,6 @@
 import 'package:blockchain_university_voting_system/blockchain/wallet_connect_service.dart';
 import 'package:blockchain_university_voting_system/data/router_path.dart';
+import 'package:blockchain_university_voting_system/provider/notification_provider.dart';
 import 'package:blockchain_university_voting_system/provider/student_provider.dart';
 import 'package:blockchain_university_voting_system/provider/wallet_provider.dart';
 import 'package:blockchain_university_voting_system/provider/user_provider.dart';
@@ -161,6 +162,18 @@ List<RouteBase> router(String initialRoute, GlobalKey<NavigatorState> navigatorK
     }
     return null;
   }
+
+  NotificationProvider? getNotificationProvider() {
+    try {
+      if (navigatorKey.currentContext != null) {
+        return Provider.of<NotificationProvider>(navigatorKey.currentContext!, listen: false);
+      }
+    } catch (e) {
+      debugPrint('Error getting NotificationProvider: $e');
+    }
+    return null;
+  }
+  
 
   Page<dynamic> buildPageWithAppKitModal(
     BuildContext context, 
@@ -597,7 +610,10 @@ List<RouteBase> router(String initialRoute, GlobalKey<NavigatorState> navigatorK
       name: RouterPath.notificationspage.path,
       pageBuilder: (context, state) {
         return buildPageWithAnimation(
-          const NotificationsPage(), 
+          NotificationsPage(
+            userProvider: getUserViewModel()!,
+            notificationProvider: getNotificationProvider()!,
+          ), 
           state,
         );
       },
@@ -607,7 +623,10 @@ List<RouteBase> router(String initialRoute, GlobalKey<NavigatorState> navigatorK
       name: RouterPath.sendnotificationpage.path,
       pageBuilder: (context, state) {
         return buildPageWithAnimation(
-          const SendNotificationPage(), 
+          SendNotificationPage(
+            userProvider: getUserViewModel()!,
+            notificationProvider: getNotificationProvider()!,
+          ), 
           state,
         );
       },

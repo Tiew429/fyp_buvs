@@ -232,14 +232,14 @@ class SmartContractService {
     }
   }
 
-  Future<void> updateVotingEventInBlockchain(VotingEvent votingEvent) async {
+  Future<bool> updateVotingEventInBlockchain(VotingEvent votingEvent) async {
     print("Smart_Contract_Service (updateVotingEventInBlockchain): Updating voting event in blockchain.");
 
     try {
       // check if the voting event exists
       if (!await checkIfVotingEventExists(votingEvent.votingEventID)) {
         print("Smart_Contract_Service (updateVotingEventInBlockchain): Voting event ID '${votingEvent.votingEventID}' not found in blockchain.");
-        return;
+        return false;
       }
 
       final BigInt startDate = ConverterUtil.dateTimeToBigInt(votingEvent.startDate!);
@@ -261,10 +261,11 @@ class SmartContractService {
       }
 
       print("Smart_Contract_Service (updateVotingEventInBlockchain): Voting event updated successfully.");
+      return true;
     } catch (e) {
       debugPrint("Smart_Contract_Service (updateVotingEventInBlockchain): $e");
-      // re-throw the exception
-      throw Exception("Failed to update voting event: $e");
+      print("Failed to update voting event: $e");
+      return false;
     }
   }
 
@@ -318,6 +319,12 @@ class SmartContractService {
           throw Exception("Invalid wallet address format: ${candidate.walletAddress}");
         }
       }).toList();
+
+      // for loop to print the candidate ids and wallet addresses
+      for (var i = 0; i < candidateIDs.length; i++) {
+        print("Candidate ID: ${candidateIDs[i]}");
+        print("Candidate Wallet Address: ${candidateWalletAddresses[i]}");
+      }
 
       final bool success = await writeFunction('addCandidates', [
         votingEvent.votingEventID,

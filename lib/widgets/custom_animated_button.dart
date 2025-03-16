@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class CustomAnimatedButton extends StatefulWidget {
   final String text;
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
   final Function(bool)? onLongPress;
   final Color? backgroundColor;
   final Color? fontColor;
@@ -42,7 +42,7 @@ class _CustomAnimatedButtonState extends State<CustomAnimatedButton> {
     });
 
     Future.delayed(const Duration(milliseconds: 300), () {
-      widget.onPressed();
+      widget.onPressed?.call();
       setState(() {
         _isPressed = false;
         _rippleRadius = 0.0;

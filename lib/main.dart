@@ -6,6 +6,7 @@ import 'package:blockchain_university_voting_system/database/shared_preferences.
 import 'package:blockchain_university_voting_system/firebase_options.dart';
 import 'package:blockchain_university_voting_system/localization/app_locale.dart';
 import 'package:blockchain_university_voting_system/models/user_model.dart';
+import 'package:blockchain_university_voting_system/provider/notification_provider.dart';
 import 'package:blockchain_university_voting_system/provider/student_provider.dart';
 import 'package:blockchain_university_voting_system/provider/theme_provider.dart';
 import 'package:blockchain_university_voting_system/provider/wallet_provider.dart';
@@ -65,6 +66,9 @@ Future<void> main() async {
         ),
         Provider<SmartContractService>(
           create: (_) => SmartContractService(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => NotificationProvider(),
         ),
       ],
       child: MainApp(user: user),

@@ -105,6 +105,8 @@ class VotingEventRepository {
             }
           }).toList();
 
+          print("Candidate address strings: $candidateAddressStrings");
+
           final List<String> voterAddressStrings = blockchainVoterAddresses.map((address) {
             if (address is EthereumAddress) {
               return address.hex;
@@ -119,36 +121,46 @@ class VotingEventRepository {
 
           // get candidate details
           final List<Candidate> candidates = [];
-          final List<Candidate> candidatesInFirestore = 
-            (firestoreData['candidates'] as List<dynamic>)
-              .map((candidate) => Candidate.fromMap(candidate)).toList();
+          
+          if (event[6] != null) {
+            // check if 'candidates' field exists in the Firestore document
+            if (firestoreData.exists && firestoreData.get('candidates') != null) {
+              final List<Candidate> candidatesInFirestore = 
+                (firestoreData['candidates'] as List<dynamic>)
+                  .map((candidate) => Candidate.fromMap(candidate)).toList();
 
-          for (String addressStr in candidateAddressStrings) {
-            try {
-              // compare between candidates in blockchain and candidates (array) in firestore
-              // if the candidate is not found in firestore, ignore it
-              // if the candidate is found in firestore, add the candidate to the candidates list
-              for (Candidate candidate in candidatesInFirestore) {
-                if (candidate.walletAddress.toLowerCase() == addressStr.toLowerCase()) {
-                  candidates.add(candidate);
-                  candidatesInFirestore.remove(candidate); // to improve performance
-                  break;
-                }
-              }
-
-              List<dynamic> voteResults = await _smartContractService.getVoteResultsFromBlockchain(votingEventID);
-
-              // update the vote count of the candidate
-              for (dynamic voteResult in voteResults) {
-                for (Candidate candidate in candidates) {
-                  if (candidate.candidateID == voteResult[0]) {
-                    candidate.setVotesReceived(voteResult[1]);
-                    print("Candidate votes: ${candidate.votesReceived}");
+              for (String addressStr in candidateAddressStrings) {
+                try {
+                  // compare between candidates in blockchain and candidates (array) in firestore
+                  // if the candidate is not found in firestore, ignore it
+                  // if the candidate is found in firestore, add the candidate to the candidates list
+                  for (Candidate candidate in candidatesInFirestore) {
+                    if (candidate.walletAddress.toLowerCase() == addressStr.toLowerCase()) {
+                      candidates.add(candidate);
+                      candidatesInFirestore.remove(candidate); // to improve performance
+                      break;
+                    }
                   }
+                } catch (e) {
+                  print("Error fetching candidate data for address $addressStr: $e");
                 }
               }
-            } catch (e) {
-              print("Error fetching candidate data for address $addressStr: $e");
+            } else {
+              print("Voting_Event_Repository (getVotingEventList): 'candidates' field does not exist in Firestore document for event ID: $votingEventID");
+            }
+          }
+
+          if (DateTime.now().isAfter(startDate) && TimeOfDay.now().isAfter(startTime!)) {
+            List<dynamic> voteResults = await _smartContractService.getVoteResultsFromBlockchain(votingEventID);
+
+            // update the vote count of the candidate
+            for (dynamic voteResult in voteResults) {
+              for (Candidate candidate in candidates) {
+                if (candidate.candidateID == voteResult[0]) {
+                  candidate.setVotesReceived(voteResult[1]);
+                  print("Candidate votes: ${candidate.votesReceived}");
+                }
+              }
             }
           }
 
@@ -159,7 +171,7 @@ class VotingEventRepository {
           final VotingEvent votingEvent = VotingEvent(
             votingEventID: votingEventID,
             title: title,
-            description: firestoreData['description'],
+            description: firestoreData.exists && firestoreData.get('description') != null ? firestoreData['description'] : '',
             startDate: startDate,
             endDate: endDate,
             createdBy: createdBy,
@@ -201,14 +213,26 @@ class VotingEventRepository {
     }
   }
 
-  Future<void> updateVotingEvent(VotingEvent votingEvent) async {
+  Future<bool> updateVotingEvent(VotingEvent votingEvent, [bool updateBlockchain = true]) async {
     print("Voting_Event_Repository: Updating voting event in blockchain and firebase.");
 
-    // blockchain update
-    await _smartContractService.updateVotingEventInBlockchain(votingEvent);
+    // if user only update information such as description, start time and end time,
+    // we don't need to update the blockchain (no need to pay for gas)
+    if (updateBlockchain) {
+      // blockchain update
+      bool success1 = await _smartContractService.updateVotingEventInBlockchain(votingEvent);
+      if (!success1) {
+        return false;
+      }
+    }
 
     // firebase update
-    await updateVotingEventInFirebase(votingEvent);
+    bool success2 = await updateVotingEventInFirebase(votingEvent);
+    if (!success2) {
+      return false;
+    }
+
+    return true;
   }
 
   Future<void> deleteVotingEvent(VotingEvent votingEvent) async {
@@ -251,28 +275,38 @@ class VotingEventRepository {
     final startTimeBigInt = ConverterUtil.timeOfDayToBigInt(votingEvent.startTime!);
     final endTimeBigInt = ConverterUtil.timeOfDayToBigInt(votingEvent.endTime!);
 
+    List<Map<String, dynamic>> candidateMaps = [];
+
     // firebase insertion
     await _firestore.collection('votingevents').doc(votingEvent.votingEventID).set({
       'votingEventID': votingEvent.votingEventID,
       'description': votingEvent.description,
       'startTime': startTimeBigInt.toString(),
       'endTime': endTimeBigInt.toString(),
+      'candidates': candidateMaps,
     });
   }
 
-  Future<void> updateVotingEventInFirebase(VotingEvent votingEvent) async {
+  Future<bool> updateVotingEventInFirebase(VotingEvent votingEvent) async {
     print("Voting_Event_Repository: Updating voting event in firebase.");
 
-    // convert TimeOfDay to string representation for Firebase
-    final startTimeBigInt = ConverterUtil.timeOfDayToBigInt(votingEvent.startTime!);
-    final endTimeBigInt = ConverterUtil.timeOfDayToBigInt(votingEvent.endTime!);
+    try {
+      // convert TimeOfDay to string representation for Firebase
+      final startTimeBigInt = ConverterUtil.timeOfDayToBigInt(votingEvent.startTime!);
+      final endTimeBigInt = ConverterUtil.timeOfDayToBigInt(votingEvent.endTime!);
 
-    // firebase updating
-    await _firestore.collection('votingevents').doc(votingEvent.votingEventID).update({
-      'description': votingEvent.description,
-      'startTime': startTimeBigInt.toString(),
-      'endTime': endTimeBigInt.toString(),
-    });
+      // firebase updating
+      await _firestore.collection('votingevents').doc(votingEvent.votingEventID).update({
+        'description': votingEvent.description,
+        'startTime': startTimeBigInt.toString(),
+        'endTime': endTimeBigInt.toString(),
+      });
+
+      return true;
+    } catch (e) {
+      print("Voting_Event_Repository (updateVotingEventInFirebase): $e");
+      return false;
+    }
   }
 
   // Future<void> deleteVotingEventInFirebase(VotingEvent votingEvent) async {

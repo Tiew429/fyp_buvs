@@ -123,12 +123,16 @@ class _EditVotingEventPageState extends State<EditVotingEventPage> {
           minute: int.parse(_endTimeController.text.split(':')[1]),
         ),
       );
-      await widget._votingEventViewModel.updateVotingEvent(updatedEvent);
-      NavigationHelper.navigateBack(context);
-      SnackbarUtil.showSnackBar(context, AppLocale.votingEventUpdatedSuccessfully.getString(context));
+      bool success = await widget._votingEventViewModel.updateVotingEvent(updatedEvent, _votingEvent);
+      if (success) {
+        NavigationHelper.navigateBack(context);
+        SnackbarUtil.showSnackBar(context, AppLocale.votingEventUpdatedSuccessfully.getString(context));
+      } else {
+        SnackbarUtil.showSnackBar(context, AppLocale.failedToUpdateVotingEvent.getString(context));
+      }
     } catch (e) {
       print("Error updating voting event: $e");
-      SnackbarUtil.showSnackBar(context, "Error: ${e.toString()}");
+      SnackbarUtil.showSnackBar(context, AppLocale.failedToUpdateVotingEvent.getString(context));
     } finally {
       setState(() {
         _isLoading = false;
@@ -146,12 +150,11 @@ class _EditVotingEventPageState extends State<EditVotingEventPage> {
         title: Text(AppLocale.editVotingEvent.getString(context)),
       ),
       backgroundColor: colorScheme.tertiary,
-      body: ScrollableResponsiveWidget(
-        phone: Stack(
-          children: [
-            Column(
+      body: Stack(
+        children: [
+          ScrollableResponsiveWidget(
+            phone: Column(
               children: [
-                // same form fields as VotingEventCreatePage
                 CustomTextFormField(
                   controller: _titleController,
                   labelText: AppLocale.title.getString(context),
@@ -212,7 +215,9 @@ class _EditVotingEventPageState extends State<EditVotingEventPage> {
                   children: [
                     CustomConfirmButton(
                       text: AppLocale.update.getString(context),
-                      onPressed: () => _edit(),
+                      onPressed: () async {
+                        await _edit();
+                      },
                     ),
                     const SizedBox(width: 20,),
                     CustomCancelButton(
@@ -223,14 +228,14 @@ class _EditVotingEventPageState extends State<EditVotingEventPage> {
                 ),
               ],
             ),
-            if (_isLoading)
-              ProgressCircular(
-                isLoading: true,
-                message: AppLocale.updatingVotingEvent.getString(context),
-              ),
-          ],
-        ),
-        tablet: Container(),
+            tablet: Container(),
+          ),
+          if (_isLoading)
+            ProgressCircular(
+              isLoading: true,
+              message: AppLocale.updatingVotingEvent.getString(context),
+            ),
+        ],
       ),
     );
   }

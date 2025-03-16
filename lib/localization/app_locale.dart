@@ -38,7 +38,22 @@ mixin AppLocale {
   // home (dashboard, profile, settings)
   static const String home = 'home';
 
+  // settings
+  static const String settings = 'settings';
+  static const String themePreferences = 'theme preferences';
+  static const String darkTheme = 'dark theme';
+  static const String language = 'language';
+  static const String savePreferences = 'save preferences';
+  static const String logout = 'logout';
+
+  // language
+  static const String english = 'english';
+  static const String malay = 'malay';
+  static const String chinese = 'chinese';
+
   // dashboard
+  static const String upcomingVotingEvent = 'upcoming voting event';
+  static const String searcModule = 'search module';
 
   // profile
   static const String profile = 'profile';
@@ -54,21 +69,27 @@ mixin AppLocale {
   static const String cryptocurrencyWalletAccountConnected = 'cryptocurrency wallet account connected';
   static const String setBiometricAuthentication = 'set biometric authentication';
 
-  // settings
-  static const String settings = 'settings';
-  static const String themePreferences = 'theme preferences';
-  static const String darkTheme = 'dark theme';
-  static const String language = 'language';
-  static const String savePreferences = 'save preferences';
-  static const String logout = 'logout';
-
-  // language
-  static const String english = 'english';
-  static const String malay = 'malay';
-  static const String chinese = 'chinese';
+  // user management
+  static const String userManagement = 'user management';
 
   // notications
   static const String notifications = 'notifications';
+  static const String sendNotification = 'send notification';
+  static const String sendingNotification = 'sending notification...';
+  static const String received = 'received';
+  static const String sent = 'sent';
+  static const String notificationDeleted = 'notification deleted';
+  static const String failedToDeleteNotification = 'failed to delete notification';
+  static const String markAsRead = 'mark as read';
+  static const String markAsUnread = 'mark as unread';
+  static const String markAllAsRead = 'mark all as read';
+  static const String markAllAsUnread = 'mark all as unread';
+  static const String notificationSentSuccessfully = 'notification sent successfully';
+  static const String failedToSendNotification = 'failed to send notification';
+  static const String noNotificationsReceived = 'no notifications received';
+  static const String noNotificationsSent = 'no notifications sent';
+  static const String errorSendingNotification = 'error sending notification';
+  static const String sendToAllUsers = 'send to all users';
 
   // votings
   static const String votingList = 'voting list';
@@ -140,6 +161,12 @@ mixin AppLocale {
   static const String errorAddingCandidates = 'error adding candidates';
   static const String addSelectedCandidates = 'add selected candidates';
   static const String addingCandidates = 'adding candidates...';
+
+  // report
+  static const String report = 'report';
+
+  // audit
+  static const String audit = 'audit';
 
   // validator_util
   static const String dontLeaveBlank = 'please don\'t leave this field blank';
@@ -216,6 +243,10 @@ mixin AppLocale {
     malay: 'Malay',
     chinese: 'Chinese',
 
+    // dashboard
+    upcomingVotingEvent: 'Upcoming Voting Event',
+    searcModule: 'Search Module',
+
     // profile
     profile: 'Profile',
     editProfile: 'Edit Profile',
@@ -229,9 +260,28 @@ mixin AppLocale {
     connectWithCryptoWallet: 'Connect with cryptocurrency wallet',
     cryptocurrencyWalletAccountConnected: 'Cryptocurrency wallet account connected',
     setBiometricAuthentication: 'Set biometric authentication',
-    
+
+    // user management
+    userManagement: 'User Management',
+
     // notifications
     notifications: 'Notifications',
+    sendNotification: 'Send Notification',
+    sendingNotification: 'Sending notification...',
+    received: 'Received',
+    sent: 'Sent',
+    notificationSentSuccessfully: 'Notification sent successfully',
+    failedToSendNotification: 'Failed to send notification',
+    markAsRead: 'Mark as read',
+    markAsUnread: 'Mark as unread',
+    markAllAsRead: 'Mark all as read',
+    markAllAsUnread: 'Mark all as unread',
+    notificationDeleted: 'Notification deleted',
+    failedToDeleteNotification: 'Failed to delete notification',
+    noNotificationsReceived: 'No notifications received',
+    noNotificationsSent: 'No notifications sent',
+    errorSendingNotification: 'Error sending notification',
+    sendToAllUsers: 'Send to all users',
 
     // voting
     votingList: 'Voting List',
@@ -303,6 +353,12 @@ mixin AppLocale {
     errorAddingCandidates: 'Error adding candidates',
     addSelectedCandidates: 'Add Selected Candidates',
     addingCandidates: 'Adding candidates...',
+
+    // report
+    report: 'Report',
+
+    // audit
+    audit: 'Audit',
 
     // validator_util
     dontLeaveBlank: 'Please don\'t leave this field blank',
@@ -380,6 +436,10 @@ mixin AppLocale {
     malay: 'Melayu',
     chinese: 'Cina',
 
+    // dashboard
+    upcomingVotingEvent: 'Acara Pengundian Akan Datang',
+    searcModule: 'Cari Modul',
+
     // profile
     profile: 'Profil',
     editProfile: 'Edit Profil',
@@ -394,8 +454,27 @@ mixin AppLocale {
     cryptocurrencyWalletAccountConnected: 'Akun kripto wallet terhubung',
     setBiometricAuthentication: 'Set autentikasi biometrik',
 
+    // user management
+    userManagement: 'Pengurusan Pengguna',
+
     // notifications
     notifications: 'Notifikasi',
+    sendNotification: 'Hantar Notifikasi',
+    sendingNotification: 'Mengirim notifikasi...',
+    received: 'Diterima',
+    sent: 'Dihantar',
+    notificationDeleted: 'Notifikasi berjaya dihapus',
+    failedToDeleteNotification: 'Gagal menghapus notifikasi',
+    markAsRead: 'Tandakan sebagai dibaca',
+    markAsUnread: 'Tandakan sebagai tidak dibaca',
+    markAllAsRead: 'Tandakan semua sebagai dibaca',
+    markAllAsUnread: 'Tandakan semua sebagai tidak dibaca',
+    notificationSentSuccessfully: 'Notifikasi berjaya dihantar',
+    failedToSendNotification: 'Gagal menghantar notifikasi',
+    noNotificationsReceived: 'Tiada notifikasi diterima',
+    noNotificationsSent: 'Tiada notifikasi dihantar',
+    errorSendingNotification: 'Kesalahan menghantar notifikasi',
+    sendToAllUsers: 'Hantar ke semua pengguna',
 
     // voting
     votingList: 'Senarai Undian',
@@ -467,6 +546,12 @@ mixin AppLocale {
     errorAddingCandidates: 'Kesalahan menambahkan calon',
     addSelectedCandidates: 'Tambah Calon yang Dipilih',
     addingCandidates: 'Menambahkan calon...',
+
+    // report
+    report: 'Laporan',
+
+    // audit
+    audit: 'Audit',
 
     // validator_util
     dontLeaveBlank: 'Medan ini tidak boleh kosong',
@@ -544,6 +629,10 @@ mixin AppLocale {
     malay: '马来语',
     chinese: '中文',
 
+    // dashboard
+    upcomingVotingEvent: '即将举行的投票活动',
+    searcModule: '搜索模块',
+
     // profile
     profile: '个人资料',
     editProfile: '编辑个人资料',
@@ -558,8 +647,27 @@ mixin AppLocale {
     cryptocurrencyWalletAccountConnected: '加密货币钱包账户已连接',
     setBiometricAuthentication: '设置生物识别认证',
 
+    // user management
+    userManagement: '用户管理',
+
     // notifications
     notifications: '通知',
+    sendNotification: '发送通知',
+    sendingNotification: '发送通知中...',
+    received: '已接收',
+    sent: '已发送',
+    notificationSentSuccessfully: '通知已发送成功',
+    failedToSendNotification: '发送通知失败',
+    markAsRead: '标记为已读',
+    markAsUnread: '标记为未读',
+    markAllAsRead: '标记所有为已读',
+    markAllAsUnread: '标记所有为未读',
+    notificationDeleted: '通知已删除',
+    failedToDeleteNotification: '删除通知失败',
+    noNotificationsReceived: '没有收到通知',
+    noNotificationsSent: '没有发送通知',
+    errorSendingNotification: '发送通知失败',
+    sendToAllUsers: '发送给所有用户',
 
     // voting
     votingList: '投票列表',
@@ -631,6 +739,12 @@ mixin AppLocale {
     errorAddingCandidates: '添加候选人失败',
     addSelectedCandidates: '添加选定候选人',
     addingCandidates: '添加候选人...',
+
+    // report
+    report: '报告',
+
+    // audit
+    audit: '审计',
 
     // validator_util
     dontLeaveBlank: '此字段不能为空',
