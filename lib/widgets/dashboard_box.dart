@@ -18,6 +18,7 @@ class DashboardBox extends StatelessWidget {
         onTap();
       },
       child: CenteredContainer(
+        width: MediaQuery.of(context).size.width * 0.8,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [

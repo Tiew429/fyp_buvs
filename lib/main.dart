@@ -3,7 +3,6 @@ import 'package:blockchain_university_voting_system/blockchain/wallet_connect_in
 import 'package:blockchain_university_voting_system/data/router_path.dart';
 import 'package:blockchain_university_voting_system/data/theme_color.dart';
 import 'package:blockchain_university_voting_system/database/shared_preferences.dart';
-import 'package:blockchain_university_voting_system/firebase_options.dart';
 import 'package:blockchain_university_voting_system/localization/app_locale.dart';
 import 'package:blockchain_university_voting_system/models/user_model.dart';
 import 'package:blockchain_university_voting_system/provider/notification_provider.dart';
@@ -14,7 +13,7 @@ import 'package:blockchain_university_voting_system/routes/app_routes.dart';
 import 'package:blockchain_university_voting_system/routes/navigation_keys.dart';
 import 'package:blockchain_university_voting_system/provider/user_provider.dart';
 import 'package:blockchain_university_voting_system/provider/voting_event_provider.dart';
-import 'package:firebase_core/firebase_core.dart';
+import 'package:blockchain_university_voting_system/services/firebase_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_localization/flutter_localization.dart';
@@ -29,10 +28,11 @@ Future<void> main() async {
 
   await FlutterLocalization.instance.ensureInitialized();
 
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
-
+  await FirebaseService.setupFirebase();
+  await FirebaseService.initLocalNotifications();
+  await FirebaseService.setupNotificationHandlers();
+  await FirebaseService.initializeNotificationSettings();
+  
   await dotenv.load(fileName: ".env");
 
   // Determine the initial route

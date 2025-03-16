@@ -107,33 +107,33 @@ class WalletConnectService {
       // userviewmodel got user, means user is logged in
       if (userProvider.user != null) {
         // if user's wallet address is not the same as the event's address
-        if (userProvider.user!.walletAddress != getWalletAddress(context) && userProvider.user!.walletAddress.isNotEmpty) {
-          // prompt error and disconnect wallet
-          handleDisconnect(context, false);
-        } else if (userProvider.user!.walletAddress.isEmpty) {
+        if (userProvider.user!.walletAddress.isEmpty) {
           // update wallet address in provider and firestore
           await userProvider.updateUser(userProvider.user!.copyWith(walletAddress: getWalletAddress(context)));
           updateWalletAddress(context);
           return;
+        } else if (userProvider.user!.walletAddress != getWalletAddress(context)) {
+          // prompt error and disconnect wallet
+          print("WalletConnectService: User's wallet address is not the same as the event's address");
+          handleDisconnect(context, false);
+          updateWalletAddress(context);
         } else {
           updateWalletAddress(context);
           return;
         }
       }
-
-      updateWalletAddress(context);
-      authService.loginWithMetamask(context);
+      await authService.loginWithMetamask(context);
     });
 
     _appkitModal!.onModalDisconnect.subscribe((ModalDisconnect? event) {
       if (_appkitModal!.isConnected) {
-        handleDisconnect(context);
+        handleDisconnect(context, false);
       }
     });
 
     _appkitModal!.onModalError.subscribe((ModalError? event) {
       if (event?.message.contains('expired') ?? false) {
-        handleDisconnect(context);
+        handleDisconnect(context, false);
       }
     });
 
@@ -172,14 +172,15 @@ class WalletConnectService {
     final walletProvider = Provider.of<WalletProvider>(context, listen: false);
     
     try {
-      if (_appkitModal?.isConnected ?? false) {
+      if ((_appkitModal?.isConnected ?? false)) {
+        print("WalletConnectService: Disconnecting from wallet");
         unsubscribeFromEvents();
         await _appkitModal?.disconnect();
         walletProvider.removeAddress();
       }
       
       if (context.mounted && logout) {
-        authService.logout(context);
+        await authService.logout(context);
       }
     } catch (e) {
       debugPrint('Error during disconnect handling: $e');

@@ -6,6 +6,7 @@ import 'package:blockchain_university_voting_system/models/user_model.dart' as m
 import 'package:blockchain_university_voting_system/provider/wallet_provider.dart';
 import 'package:blockchain_university_voting_system/repository/user_repository.dart';
 import 'package:blockchain_university_voting_system/routes/navigation_helper.dart';
+import 'package:blockchain_university_voting_system/services/firebase_service.dart';
 import 'package:blockchain_university_voting_system/utils/snackbar_util.dart';
 import 'package:blockchain_university_voting_system/provider/user_provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -165,11 +166,24 @@ class AuthService {
 
   // save login status
   Future<void> setUserAndLoginAndNavigate(context, model_user.User user) async {
-    final userProvider = Provider.of<UserProvider>(context, listen: false);
-    userProvider.setUser(user);
-    userProvider.setInitialRoute('/${RouterPath.homepage.path}');
-    await saveLoginStatus(true, user);
-    NavigationHelper.navigateToHomePage(context);
+    try {
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
+      userProvider.setUser(user);
+      userProvider.setInitialRoute('/${RouterPath.homepage.path}');
+      await saveLoginStatus(true, user);
+      
+      // 尝试保存FCM令牌，但不让它阻止登录过程
+      try {
+        await FirebaseService.saveUserFCMToken(user.userID);
+      } catch (e) {
+        print("FCM token saving failed, but continuing login: $e");
+      }
+      
+      NavigationHelper.navigateToHomePage(context);
+    } catch (e) {
+      print("Error during login and navigation: $e");
+      SnackbarUtil.showSnackBar(context, 'Login process error: $e');
+    }
   }
 
   // method to verify user in firestore

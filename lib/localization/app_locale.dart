@@ -74,10 +74,13 @@ mixin AppLocale {
 
   // notications
   static const String notifications = 'notifications';
+  static const String receiveNotifications = 'receive notifications';
   static const String sendNotification = 'send notification';
   static const String sendingNotification = 'sending notification...';
   static const String received = 'received';
+  static const String receivedNotifications = 'received notifications';
   static const String sent = 'sent';
+  static const String sentNotifications = 'sent notifications';
   static const String notificationDeleted = 'notification deleted';
   static const String failedToDeleteNotification = 'failed to delete notification';
   static const String markAsRead = 'mark as read';
@@ -90,6 +93,21 @@ mixin AppLocale {
   static const String noNotificationsSent = 'no notifications sent';
   static const String errorSendingNotification = 'error sending notification';
   static const String sendToAllUsers = 'send to all users';
+  static const String notificationSettings = 'notification settings';
+  static const String controlWhetherToReceiveAllTypesOfNotifications = 'control whether to receive all types of notifications';
+  static const String enableNotifications = 'enable notifications';
+  static const String enableOrDisableAllNotifications = 'enable or disable all notifications';
+  static const String voteReminder = 'vote reminder';
+  static const String remindYouToParticipateInVotingActivities = 'remind you to participate in voting activities';
+  static const String newCandidate = 'new candidate';
+  static const String notifyYouWhenThereIsANewCandidate = 'notify you when there is a new candidate';
+  static const String newResult = 'new result';
+  static const String notifyYouWhenTheVotingResultsAreAnnounced = 'notify you when the voting results are announced';
+  static const String saveSettings = 'save settings';
+  static const String errorSavingNotificationSettings = 'error saving notification settings';
+  static const String notificationTypes = 'notification types';
+  static const String selectTheNotificationTypesYouWantToReceive = 'select the notification types you want to receive';
+  static const String notificationSettingsSaved = 'notification settings saved';
 
   // votings
   static const String votingList = 'voting list';
@@ -267,10 +285,13 @@ mixin AppLocale {
 
     // notifications
     notifications: 'Notifications',
+    receiveNotifications: 'Receive Notifications',
     sendNotification: 'Send Notification',
     sendingNotification: 'Sending notification...',
     received: 'Received',
+    receivedNotifications: 'Received Notifications',
     sent: 'Sent',
+    sentNotifications: 'Sent Notifications',
     notificationSentSuccessfully: 'Notification sent successfully',
     failedToSendNotification: 'Failed to send notification',
     markAsRead: 'Mark as read',
@@ -283,6 +304,21 @@ mixin AppLocale {
     noNotificationsSent: 'No notifications sent',
     errorSendingNotification: 'Error sending notification',
     sendToAllUsers: 'Send to all users',
+    notificationSettings: 'Notification Settings',
+    controlWhetherToReceiveAllTypesOfNotifications: 'Control whether to receive all types of notifications',
+    enableNotifications: 'Enable Notifications',
+    enableOrDisableAllNotifications: 'Enable or disable all notifications',
+    voteReminder: 'Vote Reminder',
+    remindYouToParticipateInVotingActivities: 'Remind you to participate in voting activities',
+    newCandidate: 'New Candidate',
+    notifyYouWhenThereIsANewCandidate: 'Notify you when there is a new candidate',
+    newResult: 'New Result',
+    notifyYouWhenTheVotingResultsAreAnnounced: 'Notify you when the voting results are announced',
+    saveSettings: 'Save Settings',
+    errorSavingNotificationSettings: 'Error saving notification settings',
+    notificationTypes: 'Notification Types',
+    selectTheNotificationTypesYouWantToReceive: 'Select the notification types you want to receive',
+    notificationSettingsSaved: 'Notification settings saved',
 
     // voting
     votingList: 'Voting List',
@@ -346,8 +382,8 @@ mixin AppLocale {
     noCandidateFound: 'No candidate found',
     votesReceived: 'Votes Received',
     confirmed: 'Confirmed',
-    pending: 'Pending',
     rejected: 'Rejected',
+    pending: 'Pending',
     errorConfirmingCandidate: 'Error confirming candidate',
     errorRejectingCandidate: 'Error rejecting candidate',
     addCandidate: 'Add Candidate',
@@ -461,10 +497,13 @@ mixin AppLocale {
 
     // notifications
     notifications: 'Notifikasi',
+    receiveNotifications: 'Terima Notifikasi',
     sendNotification: 'Hantar Notifikasi',
     sendingNotification: 'Mengirim notifikasi...',
     received: 'Diterima',
+    receivedNotifications: 'Notifikasi Diterima',
     sent: 'Dihantar',
+    sentNotifications: 'Notifikasi Dikirim',
     notificationDeleted: 'Notifikasi berjaya dihapus',
     failedToDeleteNotification: 'Gagal menghapus notifikasi',
     markAsRead: 'Tandakan sebagai dibaca',
@@ -477,6 +516,21 @@ mixin AppLocale {
     noNotificationsSent: 'Tiada notifikasi dihantar',
     errorSendingNotification: 'Kesalahan menghantar notifikasi',
     sendToAllUsers: 'Hantar ke semua pengguna',
+    notificationSettings: 'Tetapan Notifikasi',
+    controlWhetherToReceiveAllTypesOfNotifications: 'Kawal sama ada untuk menerima semua jenis notifikasi',
+    enableNotifications: 'Aktifkan Notifikasi',
+    enableOrDisableAllNotifications: 'Aktifkan atau nyahaktifkan semua notifikasi',
+    voteReminder: 'Peringatan Mengundi',
+    remindYouToParticipateInVotingActivities: 'Ingatkan anda untuk mengambil bahagian dalam aktiviti mengundi',
+    newCandidate: 'Calon Baharu',
+    notifyYouWhenThereIsANewCandidate: 'Beritahu anda apabila terdapat calon baharu',
+    newResult: 'Keputusan Baharu',
+    notifyYouWhenTheVotingResultsAreAnnounced: 'Beritahu anda apabila keputusan pengundian diumumkan',
+    saveSettings: 'Simpan Tetapan',
+    errorSavingNotificationSettings: 'Ralat menyimpan tetapan notifikasi',
+    notificationTypes: 'Jenis Notifikasi',
+    selectTheNotificationTypesYouWantToReceive: 'Pilih jenis notifikasi yang anda ingin terima',
+    notificationSettingsSaved: 'Tetapan notifikasi disimpan',
 
     // voting
     votingList: 'Senarai Undian',
@@ -655,10 +709,13 @@ mixin AppLocale {
 
     // notifications
     notifications: '通知',
+    receiveNotifications: '接收通知',
     sendNotification: '发送通知',
     sendingNotification: '发送通知中...',
     received: '已接收',
+    receivedNotifications: '已接收通知',
     sent: '已发送',
+    sentNotifications: '已发送通知',
     notificationSentSuccessfully: '通知已发送成功',
     failedToSendNotification: '发送通知失败',
     markAsRead: '标记为已读',

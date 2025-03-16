@@ -1,6 +1,9 @@
 import 'package:blockchain_university_voting_system/blockchain/wallet_connect_service.dart';
 import 'package:blockchain_university_voting_system/localization/app_locale.dart';
 import 'package:blockchain_university_voting_system/provider/theme_provider.dart';
+import 'package:blockchain_university_voting_system/services/firebase_service.dart';
+import 'package:blockchain_university_voting_system/database/shared_preferences.dart';
+import 'package:blockchain_university_voting_system/views/settings/notification_settings_page.dart';
 import 'package:blockchain_university_voting_system/widgets/centered_container.dart';
 import 'package:blockchain_university_voting_system/widgets/custom_cancel_button.dart';
 import 'package:blockchain_university_voting_system/widgets/custom_confirm_button.dart';
@@ -35,7 +38,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
     _initialDarkMode = themeProvider.isDarkMode;
     _initialLanguage = localization.currentLocale?.languageCode ?? 'en';
-
+    
     _currentDarkMode = _initialDarkMode;
     _currentLanguage = _initialLanguage;
   }
@@ -75,7 +78,12 @@ class _SettingsPageState extends State<SettingsPage> {
               Row(
                 children: [
                   GestureDetector(
-                    onTap: () {}, // navigate to notification page
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const NotificationSettingsPage()),
+                      );
+                    },
                     child: Row(
                       children: [
                         const Icon(Icons.notifications_none),
@@ -222,7 +230,8 @@ class _SettingsPageState extends State<SettingsPage> {
 
     // check if settings have changed
     bool hasChanged =
-        (_currentDarkMode != _initialDarkMode) || (_currentLanguage != _initialLanguage);
+        (_currentDarkMode != _initialDarkMode) || 
+        (_currentLanguage != _initialLanguage);
 
     if (hasChanged) {
       showDialog(
@@ -248,8 +257,13 @@ class _SettingsPageState extends State<SettingsPage> {
                     child: CustomConfirmButton(
                       onPressed: () {
                         Navigator.pop(context);
+                        
+                        // apply theme settings
                         themeProvider.toggleTheme(_currentDarkMode);
+                        
+                        // apply language settings
                         localization.translate(_currentLanguage);
+                        
                         setState(() {
                           _initialDarkMode = _currentDarkMode;
                           _initialLanguage = _currentLanguage;
@@ -270,5 +284,4 @@ class _SettingsPageState extends State<SettingsPage> {
       );
     }
   }
-
 }

@@ -3,6 +3,7 @@ import 'package:blockchain_university_voting_system/models/candidate_model.dart'
 import 'package:blockchain_university_voting_system/models/student_model.dart';
 import 'package:blockchain_university_voting_system/models/voting_event_model.dart';
 import 'package:blockchain_university_voting_system/routes/navigation_keys.dart';
+import 'package:blockchain_university_voting_system/services/firebase_service.dart';
 import 'package:blockchain_university_voting_system/utils/converter_util.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -205,7 +206,15 @@ class VotingEventRepository {
       await _smartContractService.createVotingEventToBlockchain(votingEvent);
 
       // firebase insertion (after blockchain insertion to avoid problem if transaction is failed)
-      await insertVotingEventToFirebase(votingEvent);
+      bool success = await insertVotingEventToFirebase(votingEvent);
+      
+      if (!success) {
+        return false;
+      }
+      
+      // send notification to all users
+      await FirebaseService.sendNotificationToAllUsers(votingEvent);
+
       return true;
     } catch (e) {
       debugPrint("Voting_Event_Repository (insertNewVotingEvent): $e");
@@ -268,23 +277,30 @@ class VotingEventRepository {
     return await _smartContractService.voteInBlockchain(candidate);
   }
 
-  Future<void> insertVotingEventToFirebase(VotingEvent votingEvent) async {
+  Future<bool> insertVotingEventToFirebase(VotingEvent votingEvent) async {
     print("Voting_Event_Repository: Inserting voting event to firebase.");
 
-    // convert TimeOfDay to string representation for Firebase
-    final startTimeBigInt = ConverterUtil.timeOfDayToBigInt(votingEvent.startTime!);
-    final endTimeBigInt = ConverterUtil.timeOfDayToBigInt(votingEvent.endTime!);
+    try {
+      // convert TimeOfDay to string representation for Firebase
+      final startTimeBigInt = ConverterUtil.timeOfDayToBigInt(votingEvent.startTime!);
+      final endTimeBigInt = ConverterUtil.timeOfDayToBigInt(votingEvent.endTime!);
 
-    List<Map<String, dynamic>> candidateMaps = [];
+      List<Map<String, dynamic>> candidateMaps = [];
 
-    // firebase insertion
-    await _firestore.collection('votingevents').doc(votingEvent.votingEventID).set({
-      'votingEventID': votingEvent.votingEventID,
-      'description': votingEvent.description,
-      'startTime': startTimeBigInt.toString(),
-      'endTime': endTimeBigInt.toString(),
-      'candidates': candidateMaps,
-    });
+      // firebase insertion
+      await _firestore.collection('votingevents').doc(votingEvent.votingEventID).set({
+        'votingEventID': votingEvent.votingEventID,
+        'description': votingEvent.description,
+        'startTime': startTimeBigInt.toString(),
+        'endTime': endTimeBigInt.toString(),
+        'candidates': candidateMaps,
+      });
+
+      return true;
+    } catch (e) {
+      print("Voting_Event_Repository (insertVotingEventToFirebase): $e");
+      return false;
+    }
   }
 
   Future<bool> updateVotingEventInFirebase(VotingEvent votingEvent) async {

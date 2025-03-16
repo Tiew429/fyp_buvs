@@ -21,6 +21,7 @@ class VotingEventBox extends StatelessWidget {
         onTap();
       },
       child: CenteredContainer(
+        width: MediaQuery.of(context).size.width * 0.8,
         containerPaddingVertical: 10.0,
         child: Text("${AppLocale.title.getString(context)}: ${votingEvent.title}\n${AppLocale.date.getString(context)}: ${
           votingEvent.startDate!.day}/${votingEvent.startDate!.month}/${votingEvent.startDate!.year

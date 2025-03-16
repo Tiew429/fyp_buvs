@@ -38,3 +38,30 @@ Future<void> clearLoginStatus() async {
     print("Error clearing login status: $e");
   }
 }
+
+// 通知设置相关
+const String _notificationsEnabledKey = 'notifications_enabled';
+
+// 保存通知设置
+Future<void> saveNotificationsEnabled(bool enabled) async {
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.setBool(_notificationsEnabledKey, enabled);
+}
+
+// 获取通知设置
+Future<bool?> getNotificationsEnabled() async {
+  final prefs = await SharedPreferences.getInstance();
+  return prefs.getBool(_notificationsEnabledKey);
+}
+
+// 特定通知类型设置相关
+Future<void> saveSpecificNotificationEnabled(String notificationType, bool enabled) async {
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.setBool('notification_${notificationType}_enabled', enabled);
+}
+
+// 获取特定通知类型设置
+Future<bool?> getSpecificNotificationEnabled(String notificationType) async {
+  final prefs = await SharedPreferences.getInstance();
+  return prefs.getBool('notification_${notificationType}_enabled');
+}

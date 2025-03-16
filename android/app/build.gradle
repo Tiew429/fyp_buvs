@@ -14,12 +14,13 @@ android {
     ndkVersion = "27.0.12077973"
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        coreLibraryDesugaringEnabled true
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_11
+        jvmTarget = JavaVersion.VERSION_17
     }
 
     defaultConfig {
@@ -49,4 +50,6 @@ flutter {
 dependencies {
     implementation "com.google.guava:guava:31.1-jre" // Guava annotations
     implementation "com.google.crypto.tink:tink-android:1.7.0" // Tink library
+
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.4'
 }
