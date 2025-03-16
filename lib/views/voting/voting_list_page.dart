@@ -39,8 +39,13 @@ class _VotingListPageState extends State<VotingListPage> {
   void initState() {
     super.initState();
     _searchController = TextEditingController();
-    setState(() => _isLoading = true);
-    _loadVotingEvents();
+    
+    // delay loading data until build is complete
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _loadVotingEvents();
+      }
+    });
   }
 
   Future<void> _loadVotingEvents() async {

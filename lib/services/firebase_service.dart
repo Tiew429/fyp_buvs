@@ -241,6 +241,7 @@ class FirebaseService {
             
         if (userDoc.exists && userDoc.data()!.containsKey('fcmToken')) {
           userToken = userDoc.data()!['fcmToken'];
+          print('Found FCM token for user $userId: ${userToken?.substring(0, 10)}...');
           break;
         }
       }
@@ -250,8 +251,31 @@ class FirebaseService {
         return;
       }
 
-      // Prepare notification data
-      final notification = {
+      // 直接将通知保存到Firestore，这会触发Cloud Functions发送通知
+      // 或者用户下次打开应用时会收到此通知
+      try {
+        await FirebaseFirestore.instance.collection('notifications').add({
+          'title': 'New Voting Event',
+          'body': 'A new voting event "${votingEvent.title}" has been created',
+          'userId': userId,
+          'fcmToken': userToken,
+          'data': {
+            'type': 'voting_event',
+            'event_id': votingEvent.votingEventID,
+          },
+          'createdAt': FieldValue.serverTimestamp(),
+          'isRead': false,
+        });
+        print('Notification saved to Firestore for user $userId');
+      } catch (e) {
+        print('Error saving notification to Firestore: $e');
+      }
+
+      // 注意：以下方法在客户端不会工作，需要通过服务器或Cloud Functions发送
+      // 但我们保留这段代码以提醒开发者
+      /*
+      // 正确的通知格式应该是：
+      final message = {
         'notification': {
           'title': 'New Voting Event',
           'body': 'A new voting event "${votingEvent.title}" has been created'
@@ -263,12 +287,9 @@ class FirebaseService {
         'token': userToken
       };
 
-      // Send notification through Firebase Cloud Messaging
-      await FirebaseMessaging.instance.sendMessage(
-        to: userToken,
-        data: notification as Map<String, String>,
-      );
-      print('Notification sent to user $userId');
+      // 这需要通过Firebase Admin SDK从服务器端发送
+      // 客户端代码无法直接通过FCM发送消息给其他用户
+      */
 
     } catch (e) {
       print('Error sending notification to user $userId: $e');
@@ -278,7 +299,10 @@ class FirebaseService {
   // Send notification to all users based on notification type
   static Future<void> sendNotificationToAllUsers(VotingEvent votingEvent) async {
     try {
+      print('Starting to send notifications for voting event: ${votingEvent.title}');
       final roles = model_user.UserRoleExtension.getAllUserRoles();
+      int successCount = 0;
+      int totalUsers = 0;
       
       // For each role collection
       for (var role in roles) {
@@ -289,18 +313,50 @@ class FirebaseService {
             .collection(role.name)
             .get();
 
+        print('Found ${usersSnapshot.docs.length} users in role ${role.name}');
+        totalUsers += usersSnapshot.docs.length;
+        
         // Send to each user who has notifications enabled
         for (var userDoc in usersSnapshot.docs) {
-          // Check if user has notifications enabled
-          bool notificationsEnabled = await getSpecificNotificationEnabled('vote_reminder') ?? true;
-          
-          if (notificationsEnabled && userDoc.data().containsKey('fcmToken')) {
-            await sendNotificationToUser(userDoc.id, votingEvent);
+          try {
+            // 首先检查主通知开关是否开启
+            bool mainNotificationsEnabled = await getNotificationsEnabled() ?? true;
+            
+            // 然后检查特定类型的通知是否开启
+            bool voteNotificationsEnabled = await getSpecificNotificationEnabled('vote_reminder') ?? true;
+            
+            print('User ${userDoc.id} notifications: main=$mainNotificationsEnabled, vote=$voteNotificationsEnabled');
+            
+            // 只有两者都开启时才发送通知
+            if (mainNotificationsEnabled && voteNotificationsEnabled && userDoc.data().containsKey('fcmToken')) {
+              await sendNotificationToUser(userDoc.id, votingEvent);
+              successCount++;
+            }
+          } catch (e) {
+            print('Error checking notification settings for user ${userDoc.id}: $e');
           }
         }
       }
 
-      print('Notifications sent to all eligible users');
+      // 同时也将通知发送给"all_users"
+      try {
+        await FirebaseFirestore.instance.collection('notifications').add({
+          'title': 'New Voting Event',
+          'body': 'A new voting event "${votingEvent.title}" has been created',
+          'userId': 'all_users',  // 指定为所有用户
+          'data': {
+            'type': 'voting_event',
+            'event_id': votingEvent.votingEventID,
+          },
+          'createdAt': FieldValue.serverTimestamp(),
+          'isRead': false,
+        });
+        print('Notification saved for all users');
+      } catch (e) {
+        print('Error saving notification for all users: $e');
+      }
+
+      print('Notifications sent to $successCount out of $totalUsers eligible users');
     } catch (e) {
       print('Error sending notifications to all users: $e');
     }

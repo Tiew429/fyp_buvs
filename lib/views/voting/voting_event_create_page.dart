@@ -173,14 +173,24 @@ class _VotingEventCreatePageState extends State<VotingEventCreatePage> {
       );
 
       if (success) {
-        NavigationHelper.navigateBack(context);
-        SnackbarUtil.showSnackBar(context, AppLocale.votingEventCreatedSuccessfully.getString(context));
+        // refresh voting event list
+        await widget._votingEventViewModel.loadVotingEvents();
+        
+        if (mounted) {
+          // navigate back to voting list page
+          NavigationHelper.navigateBack(context);
+          SnackbarUtil.showSnackBar(context, AppLocale.votingEventCreatedSuccessfully.getString(context));
+        }
       } else {
-        SnackbarUtil.showSnackBar(context, AppLocale.failedToCreateVotingEvent.getString(context));
+        if (mounted) {
+          SnackbarUtil.showSnackBar(context, AppLocale.failedToCreateVotingEvent.getString(context));
+        }
       }
     } catch (e) {
       print("Error creating voting event: $e");
-      SnackbarUtil.showSnackBar(context, "Error: ${e.toString()}");
+      if (mounted) {
+        SnackbarUtil.showSnackBar(context, "Error: ${e.toString()}");
+      }
     } finally {
       // ensure loading is set to false even if there's an error
       if (mounted) {

@@ -140,7 +140,10 @@ class AuthService {
     final walletProvider = Provider.of<WalletProvider>(context, listen: false);
     String? walletAddress = walletProvider.walletAddress;
 
-    if (walletAddress == null) return;
+    if (walletAddress == null) {
+      print("AuthService: Wallet address is null");
+      return;
+    }
     
     try {
       model_user.User? userRetrieved = await userRepo.retrieveUser(walletAddress);

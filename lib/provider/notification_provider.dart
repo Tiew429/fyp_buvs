@@ -104,8 +104,6 @@ class NotificationProvider extends ChangeNotifier {
       bool success = await _notificationRepository.markNotificationAsRead(notificationID, userID);
       
       if (success) {
-        // Update local notification status
-        // In a real app, you might have a 'read' status in your notification model
         _errorMessage = null;
       } else {
         _errorMessage = 'Failed to mark notification as read';

@@ -2,6 +2,7 @@ import 'package:blockchain_university_voting_system/provider/wallet_provider.dar
 import 'package:blockchain_university_voting_system/routes/navigation_keys.dart';
 import 'package:blockchain_university_voting_system/services/auth_service.dart';
 import 'package:blockchain_university_voting_system/provider/user_provider.dart';
+import 'package:blockchain_university_voting_system/utils/snackbar_util.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:reown_appkit/reown_appkit.dart';
@@ -109,6 +110,7 @@ class WalletConnectService {
         // if user's wallet address is not the same as the event's address
         if (userProvider.user!.walletAddress.isEmpty) {
           // update wallet address in provider and firestore
+          print("WalletConnectService: User's wallet address is empty, updating wallet address");
           await userProvider.updateUser(userProvider.user!.copyWith(walletAddress: getWalletAddress(context)));
           updateWalletAddress(context);
           return;
@@ -116,24 +118,28 @@ class WalletConnectService {
           // prompt error and disconnect wallet
           print("WalletConnectService: User's wallet address is not the same as the event's address");
           handleDisconnect(context, false);
-          updateWalletAddress(context);
+          SnackbarUtil.showSnackBar(context, "Wallet address is not the same as the event's address");
+          return;
         } else {
+          print("WalletConnectService: User's wallet address is the same as the event's address");
           updateWalletAddress(context);
           return;
         }
       }
-      await authService.loginWithMetamask(context);
+      print("WalletConnectService: User is not logged in, logging in with Metamask");
+      updateWalletAddress(context);
+      authService.loginWithMetamask(context);
     });
 
     _appkitModal!.onModalDisconnect.subscribe((ModalDisconnect? event) {
       if (_appkitModal!.isConnected) {
-        handleDisconnect(context, false);
+        handleDisconnect(context, true);
       }
     });
 
     _appkitModal!.onModalError.subscribe((ModalError? event) {
       if (event?.message.contains('expired') ?? false) {
-        handleDisconnect(context, false);
+        handleDisconnect(context, true);
       }
     });
 

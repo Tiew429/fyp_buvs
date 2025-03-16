@@ -17,7 +17,7 @@ class ScrollableWidget extends StatelessWidget {
         constraints: BoxConstraints(
           minHeight: hasBottomNavigationBar? 
             (MediaQuery.of(context).size.height - kBottomNavigationBarHeight - 30) 
-            : MediaQuery.of(context).size.height - 60, // ensures minimum height matches screen size
+            : MediaQuery.of(context).size.height - 90, // ensures minimum height matches screen size
         ),
         child: Padding(
           padding: const EdgeInsets.all(20),

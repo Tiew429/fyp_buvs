@@ -14,6 +14,7 @@ class VotingEventProvider extends ChangeNotifier{
   List<VotingEvent> _votingEventList = [];
   Timer? _pollingTimer;
   bool polling = false;
+  bool _isLoading = false;
 
   // getter
   VotingEvent get selectedVotingEvent => _selectedVotingEvent;
@@ -22,6 +23,7 @@ class VotingEventProvider extends ChangeNotifier{
     _votingEventList.where((event) => event.status == VotingEventStatus.available).toList();
   List<VotingEvent> get deprecatedVotingEvents => 
     _votingEventList.where((event) => event.status == VotingEventStatus.deprecated).toList();
+  bool get isLoading => _isLoading;
 
   // setter
   void selectVotingEvent(VotingEvent votingEvent) {
@@ -31,28 +33,73 @@ class VotingEventProvider extends ChangeNotifier{
 
   // polling method
   void startPolling() {
-    // fetch the latest data immediately
-    loadVotingEvents();
+    print("Voting_Event_Provider: Starting polling.");
+    // 取消现有的轮询
+    _pollingTimer?.cancel();
+    
+    // 立即获取最新数据
+    _forceRefreshVotingEvents();
 
-    if (!polling) {
-      polling = true;
-      // set a timer to fetch data periodically
-      _pollingTimer = Timer.periodic(
-        const Duration(minutes: 3), 
-        (timer) 
-      {
-        loadVotingEvents();
-      });
+    // 设置定时器定期获取数据
+    _pollingTimer = Timer.periodic(
+      const Duration(minutes: 2), 
+      (timer) {
+        print("Voting_Event_Provider: Polling for new data.");
+        _forceRefreshVotingEvents();
+      }
+    );
+    
+    polling = true;
+  }
+  
+  void stopPolling() {
+    if (_pollingTimer != null) {
+      _pollingTimer!.cancel();
+      _pollingTimer = null;
+      polling = false;
+      print("Voting_Event_Provider: Stopped polling.");
+    }
+  }
+
+  // 强制刷新投票事件列表，忽略缓存
+  Future<void> _forceRefreshVotingEvents() async {
+    try {
+      _isLoading = true;
+      notifyListeners();
+      
+      _votingEventList = await _votingEventRepository.getVotingEventList();
+      print("Voting_Event_Provider: Refreshed with ${_votingEventList.length} events.");
+      
+      _isLoading = false;
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Error forcibly refreshing voting events: $e');
+      _isLoading = false;
+      notifyListeners();
     }
   }
 
   Future<void> loadVotingEvents() async {
+    if (_isLoading) return;
+    
     try {
-      _votingEventList = await _votingEventRepository.getVotingEventList();
+      _isLoading = true;
       notifyListeners();
+      
+      // 总是从数据源获取最新数据
+      _votingEventList = await _votingEventRepository.getVotingEventList();
+      print("Voting_Event_Provider: Loaded ${_votingEventList.length} events.");
+      
+      _isLoading = false;
+      notifyListeners();
+      
+      // 如果尚未开始轮询，启动轮询
+      if (!polling) {
+        startPolling();
+      }
     } catch (e) {
       debugPrint('Error loading voting events: $e');
-      _votingEventList = [];
+      _isLoading = false;
       notifyListeners();
     }
   }
