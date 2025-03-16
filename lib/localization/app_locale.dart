@@ -93,6 +93,7 @@ mixin AppLocale {
 
   // votings
   static const String votingList = 'voting list';
+  static const String searchVotingEventTitle = 'search voting event title';
   static const String createNew = 'create new';
   static const String createVotingEvent = 'create voting event';
   static const String title = 'title';
@@ -285,6 +286,7 @@ mixin AppLocale {
 
     // voting
     votingList: 'Voting List',
+    searchVotingEventTitle: 'Search voting event title',
     createNew: 'Create New',
     createVotingEvent: 'Create Voting Event',
     title: 'Title',
@@ -478,6 +480,7 @@ mixin AppLocale {
 
     // voting
     votingList: 'Senarai Undian',
+    searchVotingEventTitle: 'Cari judul acara undian',
     createNew: 'Cipta Baharu',
     createVotingEvent: 'Cipta Undian',
     title: 'Judul',
@@ -671,8 +674,9 @@ mixin AppLocale {
 
     // voting
     votingList: '投票列表',
+    searchVotingEventTitle: '搜索投票活动标题',
     createNew: '新建',
-    createVotingEvent: '创建投票事件',
+    createVotingEvent: '创建投票活动',
     title: '标题',
     description: '描述',
     startDate: '开始日期',

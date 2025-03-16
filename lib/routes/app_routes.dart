@@ -63,17 +63,17 @@ Future<void> navigateWithPreload(
   {Object? extra, bool needsAppKitModal = false}
 ) async {
   // 显示加载指示器
-  final overlayEntry = OverlayEntry(
-    builder: (context) => Container(
-      color: Colors.black.withOpacity(0.3),
-      child: const Center(
-        child: CircularProgressIndicator(),
-      ),
-    ),
-  );
+  // final overlayEntry = OverlayEntry(
+  //   builder: (context) => Container(
+  //     color: Colors.black.withOpacity(0.3),
+  //     child: const Center(
+  //       child: CircularProgressIndicator(),
+  //     ),
+  //   ),
+  // );
   
-  // 在当前页面上显示加载指示器
-  Overlay.of(context).insert(overlayEntry);
+  // // 在当前页面上显示加载指示器
+  // Overlay.of(context).insert(overlayEntry);
   
   try {
     // 如果需要AppKitModal，先预加载
@@ -86,7 +86,7 @@ Future<void> navigateWithPreload(
     await Future.delayed(const Duration(milliseconds: 100));
     
     // 移除加载指示器
-    overlayEntry.remove();
+    // overlayEntry.remove();
     
     // 执行导航
     if (context.mounted) {
@@ -94,7 +94,7 @@ Future<void> navigateWithPreload(
     }
   } catch (e) {
     // 发生错误时移除加载指示器
-    overlayEntry.remove();
+    // overlayEntry.remove();
     debugPrint('Navigation error: $e');
     
     // 显示错误消息

@@ -1,0 +1,2 @@
+C:/Project/Clone_From_Github/FYP/fyp_buvs/android/app/.cxx/RelWithDebInfo/6o1x5q5b/arm64-v8a/CMakeFiles/edit_cache.dir
+C:/Project/Clone_From_Github/FYP/fyp_buvs/android/app/.cxx/RelWithDebInfo/6o1x5q5b/arm64-v8a/CMakeFiles/rebuild_cache.dir

@@ -5,6 +5,7 @@ import 'package:blockchain_university_voting_system/provider/wallet_provider.dar
 import 'package:blockchain_university_voting_system/routes/navigation_helper.dart';
 import 'package:blockchain_university_voting_system/provider/voting_event_provider.dart';
 import 'package:blockchain_university_voting_system/widgets/custom_animated_button.dart';
+import 'package:blockchain_university_voting_system/widgets/custom_search_box.dart';
 import 'package:blockchain_university_voting_system/widgets/response_widget.dart';
 import 'package:blockchain_university_voting_system/widgets/voting_event_box.dart';
 import 'package:flutter/material.dart';
@@ -31,18 +32,22 @@ class VotingListPage extends StatefulWidget {
 class _VotingListPageState extends State<VotingListPage> {
   bool _isLoading = true;
   late List<VotingEvent> _votingEventList;
+  late TextEditingController _searchController;
+  List<VotingEvent> _filteredVotingEventList = [];
 
   @override
   void initState() {
     super.initState();
+    _searchController = TextEditingController();
+    setState(() => _isLoading = true);
     _loadVotingEvents();
   }
 
   Future<void> _loadVotingEvents() async {
-    setState(() => _isLoading = true);
     await widget._votingEventViewModel.loadVotingEvents();
     setState(() {
       _votingEventList = widget._votingEventViewModel.votingEventList;
+      _filteredVotingEventList = _votingEventList;
       _isLoading = false;
     });
   }
@@ -83,13 +88,27 @@ class _VotingListPageState extends State<VotingListPage> {
                           ),
                         ),
                       ]
-                    : _votingEventList.map((event) => VotingEventBox(
-                        onTap: () {
-                          widget._votingEventViewModel.selectVotingEvent(event);
-                          NavigationHelper.navigateToVotingEventPage(context);
+                    : [
+                        CustomSearchBox(
+                          controller: _searchController,
+                          onChanged: (value) {
+                            setState(() {
+                              _filteredVotingEventList = _votingEventList
+                                  .where((event) => event.title.toLowerCase()
+                                      .contains(value.toLowerCase()))
+                                  .toList();
+                            });
+                          },
+                          hintText: AppLocale.searchVotingEventTitle.getString(context)
+                        ),
+                        ..._filteredVotingEventList.map((event) => VotingEventBox(
+                            onTap: () {
+                              widget._votingEventViewModel.selectVotingEvent(event);
+                              NavigationHelper.navigateToVotingEventPage(context);
                         },
                         votingEvent: event,
-                      )).toList(),
+                      )),
+                    ],
                 ), 
         tablet: Container(),
       ),

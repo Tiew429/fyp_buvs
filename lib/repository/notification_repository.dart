@@ -13,38 +13,45 @@ class NotificationRepository {
   // Fetch all notifications for a specific user
   Future<List<NotificationModel>> getNotificationsForUser(String userId) async {
     try {
-      // Query notifications where the receiverIDs array contains the userId
-      QuerySnapshot snapshot = await _notificationsCollection
+      // 查询直接发送给该用户的通知
+      QuerySnapshot userNotifications = await _notificationsCollection
           .where('receiverIDs', arrayContains: userId)
           .orderBy('createdAt', descending: true)
           .get();
       
-      // Add log to see what was found
-      print("Found ${snapshot.docs.length} notifications for user $userId");
-      
-      // Query notifications where the receiverIDs array contains 'all_users'
-      QuerySnapshot allUsersSnapshot = await _notificationsCollection
+      // 查询发送给所有用户的通知
+      QuerySnapshot allUsersNotifications = await _notificationsCollection
           .where('receiverIDs', arrayContains: 'all_users')
           .orderBy('createdAt', descending: true)
           .get();
       
-      // Merge results
-      snapshot.docs.addAll(allUsersSnapshot.docs);
+      // 创建一个合并的文档列表
+      List<DocumentSnapshot> allDocs = [];
+      allDocs.addAll(userNotifications.docs);
+      allDocs.addAll(allUsersNotifications.docs);
       
-      return snapshot.docs.map((doc) {
+      // 按创建时间排序（最新的在前）
+      allDocs.sort((a, b) {
+        final aTime = (a.data() as Map<String, dynamic>)['createdAt'] as Timestamp;
+        final bTime = (b.data() as Map<String, dynamic>)['createdAt'] as Timestamp;
+        return bTime.compareTo(aTime); // 降序排列
+      });
+      
+      // 转换为通知对象
+      return allDocs.map((doc) {
         Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
         
-        // Convert Timestamp to DateTime
+        // 转换 Timestamp 到 DateTime
         DateTime createdAt = (data['createdAt'] as Timestamp).toDate();
         DateTime? updatedAt;
         if (data['updatedAt'] != null) {
           updatedAt = (data['updatedAt'] as Timestamp).toDate();
         }
         
-        // Convert list of receiverIDs
+        // 转换接收者ID列表
         List<String> receiverIDs = List<String>.from(data['receiverIDs'] ?? []);
         
-        // Convert list of imageURLs if they exist
+        // 转换图片URL列表
         List<String>? imageURLs;
         if (data['imageURLs'] != null) {
           imageURLs = List<String>.from(data['imageURLs']);

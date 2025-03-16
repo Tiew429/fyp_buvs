@@ -29,11 +29,14 @@ class NotificationsPage extends StatefulWidget {
 class _NotificationsPageState extends State<NotificationsPage> with SingleTickerProviderStateMixin {
   late TabController _tabController;
   bool _isLoading = true;
+  late TextEditingController _searchController;
+  String _searchQuery = '';
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    _searchController = TextEditingController();
     
     // Don't call _loadNotifications() directly in initState
     // Instead, schedule it for after the first build
@@ -47,6 +50,7 @@ class _NotificationsPageState extends State<NotificationsPage> with SingleTicker
   @override
   void dispose() {
     _tabController.dispose();
+    _searchController.dispose();
     super.dispose();
   }
 
@@ -110,6 +114,15 @@ class _NotificationsPageState extends State<NotificationsPage> with SingleTicker
     }
   }
 
+  List<NotificationModel> _filterNotifications(List<NotificationModel> notifications) {
+    if (_searchQuery.isEmpty) return notifications;
+    
+    return notifications.where((notification) {
+      return notification.title.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+             notification.message.toLowerCase().contains(_searchQuery.toLowerCase());
+    }).toList();
+  }
+
   @override
   Widget build(BuildContext context) {
     ColorScheme colorScheme = Theme.of(context).colorScheme;
@@ -140,39 +153,68 @@ class _NotificationsPageState extends State<NotificationsPage> with SingleTicker
         ) : null,
       ),
       backgroundColor: colorScheme.tertiary,
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : Consumer<NotificationProvider>(
-              builder: (context, provider, child) {
-                return RefreshIndicator(
-                  onRefresh: _loadNotifications,
-                  child: widget.userProvider.user?.role == UserRole.admin ||
-                        widget.userProvider.user?.role == UserRole.staff
-                    ? TabBarView(
-                      controller: _tabController,
-                      children: [
-                        // Received notifications tab
-                        _buildNotificationsList(
-                          provider.receivedNotifications,
-                          _onTapReceivedNotification,
-                          AppLocale.noNotificationsReceived.getString(context),
-                        ),
-                        
-                        // Sent notifications tab
-                        _buildNotificationsList(
-                          provider.sentNotifications,
-                          _onTapSentNotification,
-                          AppLocale.noNotificationsSent.getString(context),
-                        ),
-                      ],
-                    ) : _buildNotificationsList(
-                        provider.receivedNotifications, 
-                        _onTapReceivedNotification, 
-                        AppLocale.noNotificationsReceived.getString(context),
-                      ),
-                );
-              }
+      body: Column(
+        children: [
+          // Search Box
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: TextField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                hintText: 'Search notifications...',
+                prefixIcon: const Icon(Icons.search),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10.0),
+                ),
+                filled: true,
+                fillColor: colorScheme.surface,
+              ),
+              onChanged: (value) {
+                setState(() {
+                  _searchQuery = value;
+                });
+              },
             ),
+          ),
+          
+          // Notification Content
+          Expanded(
+            child: _isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : Consumer<NotificationProvider>(
+                  builder: (context, provider, child) {
+                    return RefreshIndicator(
+                      onRefresh: _loadNotifications,
+                      child: widget.userProvider.user?.role == UserRole.admin ||
+                            widget.userProvider.user?.role == UserRole.staff
+                        ? TabBarView(
+                          controller: _tabController,
+                          children: [
+                            // Received notifications tab
+                            _buildNotificationsList(
+                              _filterNotifications(provider.receivedNotifications),
+                              _onTapReceivedNotification,
+                              AppLocale.noNotificationsReceived.getString(context),
+                            ),
+                            
+                            // Sent notifications tab
+                            _buildNotificationsList(
+                              _filterNotifications(provider.sentNotifications),
+                              _onTapSentNotification,
+                              AppLocale.noNotificationsSent.getString(context),
+                            ),
+                          ],
+                        ) : _buildNotificationsList(
+                            _filterNotifications(provider.receivedNotifications), 
+                            _onTapReceivedNotification, 
+                            AppLocale.noNotificationsReceived.getString(context),
+                          ),
+                    );
+                  }
+                ),
+          ),
+        ],
+      ),
       floatingActionButton: widget.userProvider.user?.role == UserRole.admin ||
               widget.userProvider.user?.role == UserRole.staff
           ? FloatingActionButton(
