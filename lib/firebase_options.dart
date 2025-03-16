@@ -83,4 +83,5 @@ class DefaultFirebaseOptions {
     authDomain: 'blockchain-voting-system-f1dfe.firebaseapp.com',
     storageBucket: 'blockchain-voting-system-f1dfe.firebasestorage.app',
   );
+
 }

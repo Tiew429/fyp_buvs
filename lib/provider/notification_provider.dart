@@ -53,7 +53,7 @@ class NotificationProvider extends ChangeNotifier {
       );
       
       if (success) {
-        // Refresh sent notifications
+        // refresh sent notifications
         _sentNotifications = await _notificationRepository.getNotificationsSentByUser(senderID);
         _errorMessage = null;
       } else {
@@ -77,11 +77,11 @@ class NotificationProvider extends ChangeNotifier {
       bool success = await _notificationRepository.deleteNotification(notificationID);
       
       if (success) {
-        // Remove from local lists
+        // remove from local lists
         _receivedNotifications.removeWhere((n) => n.notificationID == notificationID);
         _sentNotifications.removeWhere((n) => n.notificationID == notificationID);
         
-        // Notify listeners about the change
+        // notify listeners about the change
         notifyListeners();
         _errorMessage = null;
       } else {
@@ -98,7 +98,7 @@ class NotificationProvider extends ChangeNotifier {
     }
   }
   
-  // Mark a notification as read
+  // mark a notification as read
   Future<bool> markNotificationAsRead(String notificationID, String userID) async {
     try {
       bool success = await _notificationRepository.markNotificationAsRead(notificationID, userID);

@@ -95,7 +95,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                   const Icon(Icons.person),
                   const SizedBox(width: 8),
                   SizedBox(
-                    width: 70,
+                    width: 40,
                     child: Text(AppLocale.avatar.getString(context)),
                   ),
                   const SizedBox(width: 16),

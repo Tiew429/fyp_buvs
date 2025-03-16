@@ -132,8 +132,6 @@ class _SendNotificationPageState extends State<SendNotificationPage> with Single
         // Get receivers
         List<String> receiverIds = [];
         if (_isAllUsers) {
-          // In a real app, you would get all user IDs here
-          // For now, we'll use a placeholder approach
           receiverIds = ['all_users'];
         } else {
           receiverIds = _selectedReceivers;
@@ -147,7 +145,7 @@ class _SendNotificationPageState extends State<SendNotificationPage> with Single
           return;
         }
         
-        // Send the notification
+        // send the notification
         bool success = await widget.notificationProvider.sendNotification(
           title: _titleController.text,
           message: _messageController.text,
@@ -158,7 +156,7 @@ class _SendNotificationPageState extends State<SendNotificationPage> with Single
         );
         
         if (success && mounted) {
-          // Clear form and show success message
+          // clear form and show success message
           _titleController.clear();
           _messageController.clear();
           setState(() {
@@ -171,7 +169,7 @@ class _SendNotificationPageState extends State<SendNotificationPage> with Single
             duration: const Duration(seconds: 2),
           );
           
-          // Go back to notifications page after a short delay
+          // go back to notifications page after a short delay
           Future.delayed(const Duration(seconds: 1), () {
             if (mounted) {
               Navigator.of(context).pop();

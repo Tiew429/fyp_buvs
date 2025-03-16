@@ -6,6 +6,7 @@ import 'package:blockchain_university_voting_system/utils/snackbar_util.dart';
 import 'package:blockchain_university_voting_system/provider/voting_event_provider.dart';
 import 'package:blockchain_university_voting_system/widgets/candidate_box.dart';
 import 'package:blockchain_university_voting_system/widgets/custom_animated_button.dart';
+import 'package:blockchain_university_voting_system/widgets/empty_state_widget.dart';
 import 'package:blockchain_university_voting_system/widgets/response_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localization/flutter_localization.dart';
@@ -109,30 +110,24 @@ class _ManageCandidatePageState extends State<ManageCandidatePage> with SingleTi
         : _isLoading
             ? const Center(child: CircularProgressIndicator())
             : Column(
-              children: _confirmedCandidates.isEmpty ?
-                [
-                  Center(
-                    child: Text(
-                      AppLocale.noConfirmedCandidateAvailable.getString(context),
-                      style: TextStyle(
-                        color: colorScheme.onTertiary,
-                        fontSize: 16,
-                      ),
+                children: _confirmedCandidates.isEmpty ?
+                  [
+                    EmptyStateWidget(
+                      message: AppLocale.noConfirmedCandidateAvailable.getString(context),
+                      icon: Icons.person,
+                    )
+                  ]
+                : _confirmedCandidates.map((candidate) => Padding(
+                    padding: const EdgeInsets.only(bottom: 12.0),
+                    child: CandidateBox(
+                      candidate: candidate,
+                      status: CandidateStatus.confirmed,
+                      onTap: () => _showCandidateDetails(candidate),
+                      backgroundColor: colorScheme.primary,
+                      textColor: colorScheme.onPrimary,
+                      canVote: false,
                     ),
-                  ),
-                ]
-              : _confirmedCandidates.map((candidate) => Padding(
-                  padding: const EdgeInsets.only(bottom: 12.0),
-                  child: CandidateBox(
-                    candidate: candidate,
-                    status: CandidateStatus.confirmed,
-                    onTap: () => _showCandidateDetails(candidate),
-                    backgroundColor: colorScheme.primary,
-                    textColor: colorScheme.onPrimary,
-                    canVote: false,
-                  ),
-                ),
-              ).toList(),
+                ),).toList(),
             ),
       tablet: Container(),
     );

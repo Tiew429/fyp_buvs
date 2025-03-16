@@ -7,6 +7,7 @@ import 'package:blockchain_university_voting_system/provider/wallet_provider.dar
 import 'package:blockchain_university_voting_system/repository/user_repository.dart';
 import 'package:blockchain_university_voting_system/routes/navigation_helper.dart';
 import 'package:blockchain_university_voting_system/services/firebase_service.dart';
+import 'package:blockchain_university_voting_system/utils/firebase_path_util.dart';
 import 'package:blockchain_university_voting_system/utils/snackbar_util.dart';
 import 'package:blockchain_university_voting_system/provider/user_provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -29,12 +30,7 @@ class AuthService {
     final roles = model_user.UserRoleExtension.getAllUserRoles();
 
     for (var role in roles) {
-      final usernameQuery = await _firestore
-          .collection('users')
-          .doc(role.name)
-          .collection(role.name)
-          .where('username', isEqualTo: username)
-          .get();
+      final usernameQuery = await FirebasePathUtil.getUserCollection(role).where('username', isEqualTo: username).get();
 
       if (usernameQuery.docs.isNotEmpty) {
         return usernameQuery.docs.first['email'] as String;
@@ -56,12 +52,7 @@ class AuthService {
   Future<bool> _isUsernameTaken(String username) async {
     final roles = model_user.UserRoleExtension.getAllUserRoles();
     for (var role in roles) {
-      final usernameQuery = await _firestore
-          .collection('users')
-          .doc(role.name)
-          .collection(role.name)
-          .where('username', isEqualTo: username)
-          .get();
+      final usernameQuery = await FirebasePathUtil.getUserCollection(role).where('username', isEqualTo: username).get();
       if (usernameQuery.docs.isNotEmpty) {
         return true;
       }
@@ -73,12 +64,7 @@ class AuthService {
   Future<bool> _isEmailTaken(String email) async {
     final roles = model_user.UserRoleExtension.getAllUserRoles();
     for (var role in roles) {
-      final emailQuery = await _firestore
-          .collection('users')
-          .doc(role.name)
-          .collection(role.name)
-          .where('email', isEqualTo: email)
-          .get();
+      final emailQuery = await FirebasePathUtil.getUserCollection(role).where('email', isEqualTo: email).get();
       if (emailQuery.docs.isNotEmpty) {
         return true;
       }
@@ -175,7 +161,7 @@ class AuthService {
       userProvider.setInitialRoute('/${RouterPath.homepage.path}');
       await saveLoginStatus(true, user);
       
-      // 尝试保存FCM令牌，但不让它阻止登录过程
+      // save FCM token
       try {
         await FirebaseService.saveUserFCMToken(user.userID);
       } catch (e) {
@@ -197,12 +183,7 @@ class AuthService {
     List<model_user.UserRole> roles = model_user.UserRoleExtension.getAllUserRoles();
 
     for (model_user.UserRole role in roles) {
-      DocumentSnapshot userDoc = await _firestore
-        .collection('users')
-        .doc(role.name)
-        .collection(role.name)
-        .doc(userId)
-        .get();
+      DocumentSnapshot userDoc = await FirebasePathUtil.getUserCollection(role).doc(userId).get();
 
       if (userDoc.exists) {
         var userData = userDoc.data() as Map<String, dynamic>;
@@ -237,7 +218,7 @@ class AuthService {
     model_user.UserRole role = model_user.UserRole.student,
   ]) async {
     try {
-      // Check if username or email is already taken
+      // check if username or email is already taken
       final bool usernameExists = await _isUsernameTaken(username);
       if (usernameExists) {
         SnackbarUtil.showSnackBar(context, 'Username is already taken');
@@ -250,11 +231,11 @@ class AuthService {
         return;
       }
 
-      // Create user in Firestore + FirebaseAuth
+      // create user in firestore + firebase authentication
       await userRepo.createUser(
-        // Basically, the user will be a student. Admin and staff will be added earlier while deploying the app (admin) and added while inviting (staff).
+        // basically, the user will be a student. Admin and staff will be added earlier while deploying the app (admin) and added while inviting (staff).
         Student(
-          userID: '', // Will be assigned internally in createUser method
+          userID: '', // will be assigned internally in createUser method
           name: username,
           email: email,
           role: role,
@@ -287,12 +268,7 @@ class AuthService {
       // check email exists in each role collection
       List<model_user.UserRole> roles = model_user.UserRoleExtension.getAllUserRoles();
       for (model_user.UserRole role in roles) {
-        final emailQuery = await _firestore
-          .collection('users')
-          .doc(role.name)
-          .collection(role.name)
-          .where('email', isEqualTo: emailReset)
-          .get();
+        final emailQuery = await FirebasePathUtil.getUserCollection(role).where('email', isEqualTo: emailReset).get();
           
         if (emailQuery.docs.isNotEmpty) {
           emailExists = true;
@@ -311,17 +287,17 @@ class AuthService {
 
     // 2. send verification code to email
     try {
-      // Generate a random 6-digit code
+      // generate a random 6-digit code
       String verificationCode = (100000 + DateTime.now().microsecond % 900000).toString();
 
-      // Store the verification code in Firestore
+      // store the verification code in Firestore
       await _firestore.collection('verificationCodes').doc(emailReset).set({
         'code': verificationCode,
         'createdAt': FieldValue.serverTimestamp(),
         'isUsed': false
       });
 
-      // Check if environment variables are available
+      // check if environment variables are available
       final senderEmail = dotenv.env['GMAIL_MAIL'];
       final senderPassword = dotenv.env['GMAIL_PASSWORD'];
       
@@ -329,10 +305,10 @@ class AuthService {
         throw Exception('Email credentials not configured. Please check .env file.');
       }
 
-      // Create smtp server for gmail
+      // create smtp server for gmail
       final smtpServer = gmail(senderEmail, senderPassword);
 
-      // Create message with HTML formatting
+      // create message with HTML formatting
       final message = Message()
         ..from = Address(senderEmail, 'Blockchain University Voting System')
         ..recipients.add(emailReset)
@@ -344,7 +320,7 @@ class AuthService {
           <p>If you didn't request this code, please ignore this email.</p>
         ''';
 
-      // Send email with verification code
+      // send email with verification code
       await send(message, smtpServer);
 
       SnackbarUtil.showSnackBar(context, 'Verification code sent to your email');

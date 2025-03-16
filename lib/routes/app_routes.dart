@@ -2,6 +2,7 @@ import 'package:blockchain_university_voting_system/blockchain/wallet_connect_se
 import 'package:blockchain_university_voting_system/data/router_path.dart';
 import 'package:blockchain_university_voting_system/provider/notification_provider.dart';
 import 'package:blockchain_university_voting_system/provider/student_provider.dart';
+import 'package:blockchain_university_voting_system/provider/user_management_provider.dart';
 import 'package:blockchain_university_voting_system/provider/wallet_provider.dart';
 import 'package:blockchain_university_voting_system/provider/user_provider.dart';
 import 'package:blockchain_university_voting_system/provider/voting_event_provider.dart';
@@ -170,6 +171,17 @@ List<RouteBase> router(String initialRoute, GlobalKey<NavigatorState> navigatorK
       }
     } catch (e) {
       debugPrint('Error getting NotificationProvider: $e');
+    }
+    return null;
+  }
+
+  UserManagementProvider? getUserManagementProvider() {
+    try {
+      if (navigatorKey.currentContext != null) {
+        return Provider.of<UserManagementProvider>(navigatorKey.currentContext!, listen: false);
+      }
+    } catch (e) {
+      debugPrint('Error getting UserManagementProvider: $e');
     }
     return null;
   }
@@ -544,7 +556,10 @@ List<RouteBase> router(String initialRoute, GlobalKey<NavigatorState> navigatorK
       name: RouterPath.usermanagementpage.path,
       pageBuilder: (context, state) {
         return buildPageWithAnimation(
-          const UserManagementPage(), 
+          UserManagementPage(
+            userProvider: getUserViewModel()!,
+            userManagementProvider: getUserManagementProvider()!,
+          ), 
           state,
         );
       },
@@ -564,7 +579,10 @@ List<RouteBase> router(String initialRoute, GlobalKey<NavigatorState> navigatorK
       name: RouterPath.profilepageviewpage.path,
       pageBuilder: (context, state) {
         return buildPageWithAnimation(
-          const ProfilePageViewPage(), 
+          ProfilePageViewPage(
+            userProvider: getUserViewModel()!,
+            userManagementProvider: getUserManagementProvider()!,
+          ), 
           state,
         );
       },

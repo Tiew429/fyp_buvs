@@ -8,6 +8,7 @@ import 'package:blockchain_university_voting_system/models/user_model.dart';
 import 'package:blockchain_university_voting_system/provider/notification_provider.dart';
 import 'package:blockchain_university_voting_system/provider/student_provider.dart';
 import 'package:blockchain_university_voting_system/provider/theme_provider.dart';
+import 'package:blockchain_university_voting_system/provider/user_management_provider.dart';
 import 'package:blockchain_university_voting_system/provider/wallet_provider.dart';
 import 'package:blockchain_university_voting_system/routes/app_routes.dart';
 import 'package:blockchain_university_voting_system/routes/navigation_keys.dart';
@@ -69,6 +70,9 @@ Future<void> main() async {
         ),
         ChangeNotifierProvider(
           create: (_) => NotificationProvider(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => UserManagementProvider(),
         ),
       ],
       child: MainApp(user: user),
