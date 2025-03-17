@@ -45,7 +45,7 @@ class _SendNotificationPageState extends State<SendNotificationPage> with Single
     _titleController = TextEditingController();
     _messageController = TextEditingController();
     
-    // Setup animations
+    // setup animations
     _animationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 400),
@@ -83,7 +83,7 @@ class _SendNotificationPageState extends State<SendNotificationPage> with Single
         });
       }
     } catch (e) {
-      SnackbarUtil.showSnackBar(context, 'Error picking images: $e');
+      SnackbarUtil.showSnackBar(context, '${AppLocale.errorPickingImages.getString(context)}: $e');
     }
   }
   
@@ -102,7 +102,7 @@ class _SendNotificationPageState extends State<SendNotificationPage> with Single
         });
       }
     } catch (e) {
-      SnackbarUtil.showSnackBar(context, 'Error taking photo: $e');
+      SnackbarUtil.showSnackBar(context, '${AppLocale.errorTakingPhoto.getString(context)}: $e');
     }
   }
   
@@ -122,14 +122,17 @@ class _SendNotificationPageState extends State<SendNotificationPage> with Single
         final String? currentUserId = widget.userProvider.user?.userID;
         
         if (currentUserId == null) {
-          SnackbarUtil.showSnackBar(context, 'Cannot send notification: User not logged in');
+          SnackbarUtil.showSnackBar(
+            context, 
+            '${AppLocale.cannotSendNotification.getString(context)}: ${AppLocale.userNotLoggedIn.getString(context)}',
+          );
           setState(() {
             _isLoading = false;
           });
           return;
         }
         
-        // Get receivers
+        // get receivers
         List<String> receiverIds = [];
         if (_isAllUsers) {
           receiverIds = ['all_users'];
@@ -138,7 +141,10 @@ class _SendNotificationPageState extends State<SendNotificationPage> with Single
         }
         
         if (receiverIds.isEmpty) {
-          SnackbarUtil.showSnackBar(context, 'Please select at least one receiver');
+          SnackbarUtil.showSnackBar(
+            context, 
+            AppLocale.pleaseSelectAtLeastOneReceiver.getString(context),
+          );
           setState(() {
             _isLoading = false;
           });
@@ -216,37 +222,37 @@ class _SendNotificationPageState extends State<SendNotificationPage> with Single
                       // Title field
                       CustomTextFormField(
                         controller: _titleController,
-                        labelText: 'Title',
+                        labelText: AppLocale.title.getString(context),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Please enter a title';
+                            return AppLocale.pleaseEnterATitle.getString(context);
                           }
                           return null;
                         },
                       ),
                       const SizedBox(height: 16),
                       
-                      // Message field
+                      // message field
                       CustomTextFormField(
                         controller: _messageController,
-                        labelText: 'Message',
+                        labelText: AppLocale.message.getString(context),
                         maxLines: 5,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Please enter a message';
+                            return AppLocale.pleaseEnterAMessage.getString(context);
                           }
                           return null;
                         },
                       ),
                       const SizedBox(height: 16),
                       
-                      // Notification type
+                      // notification type
                       Text(
-                        'Notification Type',
+                        AppLocale.notificationTypes.getString(context),
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
-                          color: colorScheme.onTertiary,
+                          color: colorScheme.onPrimary,
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -262,19 +268,19 @@ class _SendNotificationPageState extends State<SendNotificationPage> with Single
                         items: [
                           DropdownMenuItem(
                             value: 'general',
-                            child: Text('General'),
+                            child: Text(AppLocale.general.getString(context)),
                           ),
                           DropdownMenuItem(
                             value: 'announcement',
-                            child: Text('Announcement'),
+                            child: Text(AppLocale.announcement.getString(context)),
                           ),
                           DropdownMenuItem(
                             value: 'event',
-                            child: Text('Event'),
+                            child: Text(AppLocale.event.getString(context)),
                           ),
                           DropdownMenuItem(
                             value: 'alert',
-                            child: Text('Alert'),
+                            child: Text(AppLocale.alert.getString(context)),
                           ),
                         ],
                         onChanged: (value) {
@@ -289,11 +295,11 @@ class _SendNotificationPageState extends State<SendNotificationPage> with Single
                       
                       // Receivers
                       Text(
-                        'Send To',
+                        AppLocale.sendTo.getString(context),
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
-                          color: colorScheme.onTertiary,
+                          color: colorScheme.onPrimary,
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -309,8 +315,8 @@ class _SendNotificationPageState extends State<SendNotificationPage> with Single
                       ),
                       
                       if (!_isAllUsers) ...[
-                        // User selection would go here
-                        // In a real app, you'd implement a user selection UI
+                        // user selection
+                        // in a real app, you'd implement a user selection UI
                         const Padding(
                           padding: EdgeInsets.all(8.0),
                           child: Text('User selection is not implemented in this demo'),
@@ -319,13 +325,13 @@ class _SendNotificationPageState extends State<SendNotificationPage> with Single
                       
                       const SizedBox(height: 16),
                       
-                      // Image selection
+                      // image selection
                       Text(
-                        'Attach Images (Optional)',
+                        AppLocale.attachImagesOptional.getString(context),
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
-                          color: colorScheme.onTertiary,
+                          color: colorScheme.onPrimary,
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -333,20 +339,32 @@ class _SendNotificationPageState extends State<SendNotificationPage> with Single
                         children: [
                           ElevatedButton.icon(
                             onPressed: _pickImages,
-                            icon: const Icon(Icons.photo_library),
-                            label: const Text('Gallery'),
+                            icon: Icon(Icons.photo_library, 
+                              color: colorScheme.onPrimary,
+                            ),
+                            label: Text(AppLocale.gallery.getString(context), 
+                              style: TextStyle(
+                                color: colorScheme.onPrimary,
+                              ),
+                            ),
                           ),
                           const SizedBox(width: 8),
                           ElevatedButton.icon(
                             onPressed: _takePhoto,
-                            icon: const Icon(Icons.camera_alt),
-                            label: const Text('Camera'),
+                            icon: Icon(Icons.camera_alt, 
+                              color: colorScheme.onPrimary,
+                            ),
+                            label: Text(AppLocale.camera.getString(context), 
+                              style: TextStyle(
+                                color: colorScheme.onPrimary,
+                              ),
+                            ),
                           ),
                         ],
                       ),
                       const SizedBox(height: 16),
                       
-                      // Selected images
+                      // selected images
                       if (_selectedImages.isNotEmpty) ...[
                         SizedBox(
                           height: 120,

@@ -63,14 +63,30 @@ mixin AppLocale {
   static const String role = 'role';
   static const String walletAddress = 'wallet address';
   static const String bio = 'bio';
+  static const String verified = 'verified';
+  static const String notVerified = 'not verified';
   static const String bioDescription = 'description of your profile';
   static const String haveNotConnectedWithCryptoWallet = 'haven\'t connect with cryptocurrency wallet';
   static const String connectWithCryptoWallet = 'connect with cryptocurrency wallet';
   static const String cryptocurrencyWalletAccountConnected = 'cryptocurrency wallet account connected';
   static const String setBiometricAuthentication = 'set biometric authentication';
+  static const String department = 'department';
+  static const String eligibleForVoting = 'eligible for voting';
+  static const String userInformation = 'user information';
+  static const String blockchainInformation = 'blockchain information';
+  static const String staffDetails = 'staff details';
+  static const String studentDetails = 'student details';
+  static const String verificationStatus = 'verification status';
 
   // user management
   static const String userManagement = 'user management';
+  static const String verifyUserInformation = 'verify user information';
+  static const String userVerificationInformation = 'user verification information';
+  static const String freezeAccount = 'freeze account';
+  static const String areYouSureYouWantToFreezeThisAccount = 'are you sure you want to freeze this account?';
+  static const String thisWillPreventTheUserFromLoggingIn = 'this will prevent the user from logging in.';
+  static const String holdToConfirmFreezing = 'hold to confirm freezing';
+  static const String holdToFreeze = 'hold to freeze';
 
   // notications
   static const String notifications = 'notifications';
@@ -108,6 +124,16 @@ mixin AppLocale {
   static const String notificationTypes = 'notification types';
   static const String selectTheNotificationTypesYouWantToReceive = 'select the notification types you want to receive';
   static const String notificationSettingsSaved = 'notification settings saved';
+  static const String cannotSendNotification = 'cannot send notification';
+  static const String pleaseSelectAtLeastOneReceiver = 'please select at least one receiver';
+  static const String message = 'message';
+  static const String pleaseEnterATitle = 'please enter a title';
+  static const String pleaseEnterAMessage = 'please enter a message';
+  static const String sendTo = 'send to';
+  static const String general = 'general';
+  static const String announcement = 'announcement';
+  static const String event = 'event';
+  static const String alert = 'alert';
 
   // votings
   static const String votingList = 'voting list';
@@ -207,6 +233,66 @@ mixin AppLocale {
   // others
   static const String pleaseConnectYourWallet = 'please connect your wallet';
   static const String close = 'close';
+  static const String errorPickingImages = 'error picking images';
+  static const String errorTakingPhoto = 'error taking photo';
+  static const String userNotLoggedIn = 'user not logged in';
+  static const String attachImagesOptional = 'attach images (optional)';
+  static const String gallery = 'gallery';
+  static const String camera = 'camera';
+  static const String of = '\'s';
+  static const String walletAddressCopiedToClipboard = 'wallet address copied to clipboard';
+  static const String accountHasBeenFrozen = 'account has been frozen';
+
+  // user verification
+  static const String userHasNotUploadedDocumentsYet = 'user has not uploaded documents yet';
+  static const String thisUserIsVerified = 'this user is verified';
+  static const String userDocuments = 'user documents';
+  static const String tapOnAnImageToEnlarge = 'tap on an image to enlarge';
+  static const String identityCard = 'identity card';
+  static const String studentCard = 'student card';
+  static const String staffCard = 'staff card';
+  static const String errorLoadingImage = 'error loading image';
+  static const String verifyUser = 'verify user';
+  static const String rejectVerification = 'reject verification';
+  static const String yourAccountIsVerified = 'your account is verified';
+  static const String verificationInProgress = 'verification in progress';
+  static const String pleaseWaitForAdminToVerifyYourAccount = 'please wait for admin to verify your account';
+  static const String reuploadDocuments = 're-upload documents';
+  static const String uploadDocumentsForVerification = 'upload documents for verification';
+  static const String pleaseUploadClearImagesOfYourDocuments = 'please upload clear images of your documents';
+  static const String upload = 'upload';
+  static const String noImageSelected = 'no image selected';
+  static const String submitForVerification = 'submit for verification';
+  static const String verificationFailed = 'verification failed';
+  static const String yourVerificationWasRejected = 'your verification was rejected';
+  static const String reason = 'reason';
+  static const String pleaseUploadCorrectDocuments = 'please upload correct documents';
+  static const String iUnderstand = 'i understand';
+  static const String pleaseUploadBothDocuments = 'please upload both documents';
+  static const String documentsSubmittedSuccessfully = 'documents submitted successfully';
+  static const String errorUploadingDocuments = 'error uploading documents';
+  static const String userVerifiedSuccessfully = 'user verified successfully';
+  static const String failedToRejectVerification = 'failed to reject verification';
+  static const String errorVerifyingUser = 'error verifying user'; 
+  static const String errorRejectingVerification = 'error rejecting verification';
+  static const String rejectionReason = 'rejection reason';
+  static const String pleaseProvideReasonForRejection = 'please provide a reason for rejection';
+  static const String enterReason = 'enter reason';
+  static const String pleaseEnterAReason = 'please enter a reason';
+  static const String submit = 'submit';
+  static const String verificationRejected = 'verification rejected';
+
+  // User management page strings
+  static const String searchStaff = 'search staff';
+  static const String noStaffMembersFound = 'no staff members found';
+  static const String viewDetails = 'view details';
+  static const String edit = 'edit';
+  static const String confirmDelete = 'confirm delete';
+  static const String areYouSureDeleteUser = 'are you sure you want to delete this user';
+  static const String userDeletedSuccessfully = 'user deleted successfully';
+  static const String failedToDeleteUser = 'failed to delete user';
+  static const String noPermissionToAccessPage = 'no permission to access page';
+  static const String failedToLoadUsers = 'failed to load users';
 
   // english-en
   static const Map<String, dynamic> en = {
@@ -274,14 +360,30 @@ mixin AppLocale {
     role: 'Role',
     walletAddress: 'Wallet Address',
     bio: 'Bio',
+    verified: 'Verified',
+    notVerified: 'Not Verified',
     bioDescription: 'Description of your profile',
     haveNotConnectedWithCryptoWallet: 'Haven\'t connect with cryptocurrency wallet',
     connectWithCryptoWallet: 'Connect with cryptocurrency wallet',
     cryptocurrencyWalletAccountConnected: 'Cryptocurrency wallet account connected',
     setBiometricAuthentication: 'Set biometric authentication',
+    department: 'Department',
+    eligibleForVoting: 'Eligible for Voting',
+    userInformation: 'User Information',
+    blockchainInformation: 'Blockchain Information',
+    staffDetails: 'Staff Details',
+    studentDetails: 'Student Details',
+    verificationStatus: 'Verification Status',
 
     // user management
     userManagement: 'User Management',
+    verifyUserInformation: 'Verify User Information',
+    userVerificationInformation: 'User Verification Information',
+    freezeAccount: 'Freeze Account',
+    areYouSureYouWantToFreezeThisAccount: 'Are you sure you want to freeze this account?',
+    thisWillPreventTheUserFromLoggingIn: 'This will prevent the user from logging in.',
+    holdToConfirmFreezing: 'Hold to confirm freezing',
+    holdToFreeze: 'Hold to Freeze',
 
     // notifications
     notifications: 'Notifications',
@@ -319,6 +421,16 @@ mixin AppLocale {
     notificationTypes: 'Notification Types',
     selectTheNotificationTypesYouWantToReceive: 'Select the notification types you want to receive',
     notificationSettingsSaved: 'Notification settings saved',
+    cannotSendNotification: 'Cannot send notification',
+    pleaseSelectAtLeastOneReceiver: 'Please select at least one receiver',
+    message: 'Message',
+    pleaseEnterATitle: 'Please enter a title',
+    pleaseEnterAMessage: 'Please enter a message',
+    sendTo: 'Send To',
+    general: 'General',
+    announcement: 'Announcement',
+    event: 'Event',
+    alert: 'Alert',
 
     // voting
     votingList: 'Voting List',
@@ -365,7 +477,7 @@ mixin AppLocale {
     winner: 'Winner',
 
     // student
-    notEligibleForVoting: 'Not eligible for voting',
+    notEligibleForVoting: 'Not eligible for voting', 
     pleaseSelectAtLeastOneStudent: 'Please select at least one student',
     searchStudents: 'Search students',
     noStudentsFound: 'No students found',
@@ -418,6 +530,66 @@ mixin AppLocale {
     // others
     pleaseConnectYourWallet: 'Please connect your wallet',
     close: 'Close',
+    errorPickingImages: 'Error picking images',
+    errorTakingPhoto: 'Error taking photo',
+    userNotLoggedIn: 'User not logged in',
+    attachImagesOptional: 'Attach images (optional)',
+    gallery: 'Gallery',
+    camera: 'Camera',
+    of: '\'s',
+    walletAddressCopiedToClipboard: 'Wallet address copied to clipboard',
+    accountHasBeenFrozen: 'Account has been frozen',
+
+    // user verification
+    userHasNotUploadedDocumentsYet: 'User has not uploaded documents yet',
+    thisUserIsVerified: 'This user is verified',
+    userDocuments: 'User Documents',
+    tapOnAnImageToEnlarge: 'Tap on an image to enlarge',
+    identityCard: 'Identity Card',
+    studentCard: 'Student Card',
+    staffCard: 'Staff Card',
+    errorLoadingImage: 'Error loading image',
+    verifyUser: 'Verify User',
+    rejectVerification: 'Reject Verification',
+    yourAccountIsVerified: 'Your account is verified',
+    verificationInProgress: 'Verification in progress',
+    pleaseWaitForAdminToVerifyYourAccount: 'Please wait for admin to verify your account',
+    reuploadDocuments: 'Re-upload Documents',
+    uploadDocumentsForVerification: 'Upload Documents for Verification',
+    pleaseUploadClearImagesOfYourDocuments: 'Please upload clear images of your documents',
+    upload: 'Upload',
+    noImageSelected: 'No image selected',
+    submitForVerification: 'Submit for Verification',
+    verificationFailed: 'Verification Failed',
+    yourVerificationWasRejected: 'Your verification was rejected',
+    reason: 'Reason',
+    pleaseUploadCorrectDocuments: 'Please upload correct documents',
+    iUnderstand: 'I understand',
+    pleaseUploadBothDocuments: 'Please upload both documents',
+    documentsSubmittedSuccessfully: 'Documents submitted successfully',
+    errorUploadingDocuments: 'Error uploading documents',
+    userVerifiedSuccessfully: 'User verified successfully',
+    failedToRejectVerification: 'Failed to reject verification',
+    errorVerifyingUser: 'Error verifying user',
+    errorRejectingVerification: 'Error rejecting verification',
+    rejectionReason: 'Rejection Reason',
+    pleaseProvideReasonForRejection: 'Please provide a reason for rejection',
+    enterReason: 'Enter reason',
+    pleaseEnterAReason: 'Please enter a reason',
+    submit: 'Submit',
+    verificationRejected: 'Verification rejected',
+
+    // User management page strings
+    searchStaff: 'Search staff...',
+    noStaffMembersFound: 'No staff members found',
+    viewDetails: 'View Details',
+    edit: 'Edit',
+    confirmDelete: 'Confirm Delete',
+    areYouSureDeleteUser: 'Are you sure you want to delete this user?',
+    userDeletedSuccessfully: 'User deleted successfully',
+    failedToDeleteUser: 'Failed to delete user',
+    noPermissionToAccessPage: 'You do not have permission to access this page',
+    failedToLoadUsers: 'Failed to load users',
   };
 
   // malay-ms
@@ -486,14 +658,30 @@ mixin AppLocale {
     role: 'Peranan',
     walletAddress: 'Alamat Wallet',
     bio: 'Bio',
+    verified: 'Diluluskan',
+    notVerified: 'Belum Diluluskan',
     bioDescription: 'Deskripsi profil anda',
     haveNotConnectedWithCryptoWallet: 'Belum terhubung dengan kripto wallet',
     connectWithCryptoWallet: 'Hubungkan dengan kripto wallet',
     cryptocurrencyWalletAccountConnected: 'Akun kripto wallet terhubung',
     setBiometricAuthentication: 'Set autentikasi biometrik',
+    department: 'Departemen',
+    eligibleForVoting: 'Layak untuk pengundian',
+    userInformation: 'Maklumat Pengguna',
+    blockchainInformation: 'Maklumat Blockchain',
+    staffDetails: 'Maklumat Kakitangan',
+    studentDetails: 'Maklumat Pelajar',
+    verificationStatus: 'Status Pengesahan',
 
     // user management
     userManagement: 'Pengurusan Pengguna',
+    verifyUserInformation: 'Sahkan Maklumat Pengguna',
+    userVerificationInformation: 'Maklumat Pengesahan Pengguna',
+    freezeAccount: 'Dingin Akun',
+    areYouSureYouWantToFreezeThisAccount: 'Adakah anda yakin untuk membekukan akaun ini?',
+    thisWillPreventTheUserFromLoggingIn: 'Ini akan mencegah pengguna untuk log masuk.',
+    holdToConfirmFreezing: 'Tahan untuk mengesahkan pembekuan',
+    holdToFreeze: 'Tahan untuk membekukan',
 
     // notifications
     notifications: 'Notifikasi',
@@ -531,6 +719,16 @@ mixin AppLocale {
     notificationTypes: 'Jenis Notifikasi',
     selectTheNotificationTypesYouWantToReceive: 'Pilih jenis notifikasi yang anda ingin terima',
     notificationSettingsSaved: 'Tetapan notifikasi disimpan',
+    cannotSendNotification: 'Tidak dapat mengirim notifikasi',
+    pleaseSelectAtLeastOneReceiver: 'Sila pilih sekurang-kurangnya satu penerima',
+    message: 'Pesan',
+    pleaseEnterATitle: 'Sila masukkan judul',
+    pleaseEnterAMessage: 'Sila masukkan pesan',
+    sendTo: 'Hantar kepada',
+    general: 'Umum',
+    announcement: 'Pengumuman',
+    event: 'Acara',
+    alert: 'Peringatan',
 
     // voting
     votingList: 'Senarai Undian',
@@ -630,6 +828,66 @@ mixin AppLocale {
     // others
     pleaseConnectYourWallet: 'Sila hubungkan kripto wallet anda',
     close: 'Tutup',
+    errorPickingImages: 'Kesalahan memilih gambar',
+    errorTakingPhoto: 'Kesalahan mengambil gambar',
+    userNotLoggedIn: 'Pengguna tidak log masuk',
+    attachImagesOptional: 'Lampirkan gambar (pilihan)',
+    gallery: 'Galeri',
+    camera: 'Kamera',
+    of: '\'s',
+    walletAddressCopiedToClipboard: 'Alamat wallet disalin ke papan klip',
+    accountHasBeenFrozen: 'Akaun telah dibekukan',
+
+    // user verification
+    userHasNotUploadedDocumentsYet: 'Pengguna belum memuat naik dokumen',
+    thisUserIsVerified: 'Pengguna ini telah disahkan',
+    userDocuments: 'Dokumen Pengguna',
+    tapOnAnImageToEnlarge: 'Ketik pada imej untuk membesarkan',
+    identityCard: 'Kad Pengenalan',
+    studentCard: 'Kad Pelajar',
+    staffCard: 'Kad Staf',
+    errorLoadingImage: 'Ralat memuat imej',
+    verifyUser: 'Sahkan Pengguna',
+    rejectVerification: 'Tolak Pengesahan',
+    yourAccountIsVerified: 'Akaun anda telah disahkan',
+    verificationInProgress: 'Pengesahan sedang diproses',
+    pleaseWaitForAdminToVerifyYourAccount: 'Sila tunggu admin untuk mengesahkan akaun anda',
+    reuploadDocuments: 'Muat Naik Semula Dokumen',
+    uploadDocumentsForVerification: 'Muat Naik Dokumen untuk Pengesahan',
+    pleaseUploadClearImagesOfYourDocuments: 'Sila muat naik imej dokumen yang jelas',
+    upload: 'Muat Naik',
+    noImageSelected: 'Tiada imej dipilih',
+    submitForVerification: 'Hantar untuk Pengesahan',
+    verificationFailed: 'Pengesahan Gagal',
+    yourVerificationWasRejected: 'Pengesahan anda telah ditolak',
+    reason: 'Sebab',
+    pleaseUploadCorrectDocuments: 'Sila muat naik dokumen yang betul',
+    iUnderstand: 'Saya faham',
+    pleaseUploadBothDocuments: 'Sila muat naik kedua-dua dokumen',
+    documentsSubmittedSuccessfully: 'Dokumen berjaya dihantar',
+    errorUploadingDocuments: 'Ralat memuat naik dokumen',
+    userVerifiedSuccessfully: 'Pengguna berjaya disahkan',
+    failedToRejectVerification: 'Gagal menolak pengesahan',
+    errorVerifyingUser: 'Ralat mengesahkan pengguna',
+    errorRejectingVerification: 'Ralat menolak pengesahan',
+    rejectionReason: 'Sebab Penolakan',
+    pleaseProvideReasonForRejection: 'Sila berikan sebab penolakan',
+    enterReason: 'Masukkan sebab',
+    pleaseEnterAReason: 'Sila masukkan sebab',
+    submit: 'Hantar',
+    verificationRejected: 'Pengesahan ditolak',
+
+    // User management page strings
+    searchStaff: 'Cari staf...',
+    noStaffMembersFound: 'Tiada staf ditemui',
+    viewDetails: 'Lihat Butiran',
+    edit: 'Edit',
+    confirmDelete: 'Sahkan Padam',
+    areYouSureDeleteUser: 'Adakah anda pasti mahu memadamkan pengguna ini?',
+    userDeletedSuccessfully: 'Pengguna berjaya dipadam',
+    failedToDeleteUser: 'Gagal memadam pengguna',
+    noPermissionToAccessPage: 'Anda tidak mempunyai kebenaran untuk mengakses halaman ini',
+    failedToLoadUsers: 'Gagal memuatkan pengguna',
   };
 
   // chinese-zh
@@ -698,14 +956,30 @@ mixin AppLocale {
     role: '角色',
     walletAddress: '钱包地址',
     bio: '个人简介',
+    verified: '已验证',
+    notVerified: '未验证',
     bioDescription: '个人简介',
     haveNotConnectedWithCryptoWallet: '尚未连接到加密货币钱包',
     connectWithCryptoWallet: '连接到加密货币钱包',
     cryptocurrencyWalletAccountConnected: '加密货币钱包账户已连接',
     setBiometricAuthentication: '设置生物识别认证',
+    department: '部门',
+    eligibleForVoting: '符合投票资格',
+    userInformation: '用户信息',
+    blockchainInformation: '区块链信息',
+    staffDetails: '职员详情',
+    studentDetails: '学生详情',
+    verificationStatus: '验证状态',
 
     // user management
     userManagement: '用户管理',
+    verifyUserInformation: '验证用户信息',
+    userVerificationInformation: '用户验证信息',
+    freezeAccount: '冻结账户',
+    areYouSureYouWantToFreezeThisAccount: '您确定要冻结此账户吗？',
+    thisWillPreventTheUserFromLoggingIn: '这将阻止用户登录。',
+    holdToConfirmFreezing: '按住确认冻结',
+    holdToFreeze: '按住冻结',
 
     // notifications
     notifications: '通知',
@@ -743,6 +1017,16 @@ mixin AppLocale {
     notificationTypes: '通知类型',
     selectTheNotificationTypesYouWantToReceive: '选择您想要接收的通知类型',
     notificationSettingsSaved: '通知设置已保存',
+    cannotSendNotification: '无法发送通知',
+    pleaseSelectAtLeastOneReceiver: '请至少选择一个接收者',
+    message: '消息',
+    pleaseEnterATitle: '请输入标题',
+    pleaseEnterAMessage: '请输入消息',
+    sendTo: '发送给',
+    general: '一般',
+    announcement: '公告',
+    event: '事件',
+    alert: '警报',
 
     // voting
     votingList: '投票列表',
@@ -842,5 +1126,65 @@ mixin AppLocale {
     // others
     pleaseConnectYourWallet: '请连接您的钱包',
     close: '关闭',
+    errorPickingImages: '选择图片时出错',
+    errorTakingPhoto: '拍照时出错',
+    userNotLoggedIn: '用户未登录',
+    attachImagesOptional: '附加图片（可选）',
+    gallery: '画廊',
+    camera: '相机',
+    of: '的',
+    walletAddressCopiedToClipboard: '钱包地址已复制到剪贴板',
+    accountHasBeenFrozen: '账户已被冻结',
+
+    // user verification
+    userHasNotUploadedDocumentsYet: '用户尚未上传文件',
+    thisUserIsVerified: '此用户已验证',
+    userDocuments: '用户文件',
+    tapOnAnImageToEnlarge: '点击图片放大',
+    identityCard: '身份证',
+    studentCard: '学生证',
+    staffCard: '员工证',
+    errorLoadingImage: '加载图片错误',
+    verifyUser: '验证用户',
+    rejectVerification: '拒绝验证',
+    yourAccountIsVerified: '您的账户已验证',
+    verificationInProgress: '验证进行中',
+    pleaseWaitForAdminToVerifyYourAccount: '请等待管理员验证您的账户',
+    reuploadDocuments: '重新上传文件',
+    uploadDocumentsForVerification: '上传文件以进行验证',
+    pleaseUploadClearImagesOfYourDocuments: '请上传清晰的文件图片',
+    upload: '上传',
+    noImageSelected: '未选择图片',
+    submitForVerification: '提交验证',
+    verificationFailed: '验证失败',
+    yourVerificationWasRejected: '您的验证被拒绝',
+    reason: '原因',
+    pleaseUploadCorrectDocuments: '请上传正确的文件',
+    iUnderstand: '我明白了',
+    pleaseUploadBothDocuments: '请上传两份文件',
+    documentsSubmittedSuccessfully: '文件已成功提交',
+    errorUploadingDocuments: '上传文件错误',
+    userVerifiedSuccessfully: '用户验证成功',
+    failedToRejectVerification: '拒绝验证失败',
+    errorVerifyingUser: '验证用户错误',
+    errorRejectingVerification: '拒绝验证错误',
+    rejectionReason: '拒绝原因',
+    pleaseProvideReasonForRejection: '请提供拒绝原因',
+    enterReason: '输入原因',
+    pleaseEnterAReason: '请输入原因',
+    submit: '提交',
+    verificationRejected: '验证已拒绝',
+
+    // User management page strings
+    searchStaff: '搜索职员...',
+    noStaffMembersFound: '未找到职员',
+    viewDetails: '查看详情',
+    edit: '编辑',
+    confirmDelete: '确认删除',
+    areYouSureDeleteUser: '您确定要删除此用户吗？',
+    userDeletedSuccessfully: '用户已成功删除',
+    failedToDeleteUser: '删除用户失败',
+    noPermissionToAccessPage: '您无权访问此页面',
+    failedToLoadUsers: '加载用户失败',
   };
 }

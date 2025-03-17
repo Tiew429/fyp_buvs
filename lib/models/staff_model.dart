@@ -21,12 +21,12 @@ class Staff extends User {
 
   factory Staff.fromJson(Map<String, dynamic> json) {
     return Staff(
-      userID: json['userID'],
-      name: json['username'],
-      email: json['email'],
-      walletAddress: json['walletAddress'],
-      isVerified: json['isVerified'],
-      department: json['department'],
+      userID: json['userID'] ?? '',
+      name: json['name'] ?? json['username'] ?? '',
+      email: json['email'] ?? '',
+      walletAddress: json['walletAddress'] ?? '',
+      isVerified: json['isVerified'] ?? false,
+      department: json['department'] ?? 'General',
     );
   }
 }

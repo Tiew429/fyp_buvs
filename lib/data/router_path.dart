@@ -17,6 +17,7 @@ enum RouterPath {
   usermanagementpage,
   invitenewuserpage,
   profilepageviewpage,
+  userverificationpage,
   reportpage,
   auditlistpage,
   votingeventauditlogspage,

@@ -1,12 +1,16 @@
+import 'package:blockchain_university_voting_system/localization/app_locale.dart';
 import 'package:blockchain_university_voting_system/models/staff_model.dart';
 import 'package:blockchain_university_voting_system/models/student_model.dart';
 import 'package:blockchain_university_voting_system/models/user_model.dart';
 import 'package:blockchain_university_voting_system/provider/user_management_provider.dart';
 import 'package:blockchain_university_voting_system/provider/user_provider.dart';
+import 'package:blockchain_university_voting_system/routes/navigation_helper.dart';
 import 'package:blockchain_university_voting_system/widgets/centered_container.dart';
 import 'package:blockchain_university_voting_system/widgets/scrollable_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_localization/flutter_localization.dart';
+import 'dart:async';
 
 class ProfilePageViewPage extends StatefulWidget {
   final UserProvider userProvider;
@@ -25,6 +29,8 @@ class ProfilePageViewPage extends StatefulWidget {
 class _ProfilePageViewPageState extends State<ProfilePageViewPage> {
   late final dynamic _user;
   late final UserRole _userRole;
+  bool _isFreezing = false;
+  double _freezeProgress = 0.0;
 
   @override
   void initState() {
@@ -47,7 +53,7 @@ class _ProfilePageViewPageState extends State<ProfilePageViewPage> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: const Text("Profile"),
+        title: Text("${_user.name} ${AppLocale.of.getString(context)} ${AppLocale.profile.getString(context)}"),
         backgroundColor: colorScheme.secondary,
       ),
       backgroundColor: colorScheme.tertiary,
@@ -58,46 +64,202 @@ class _ProfilePageViewPageState extends State<ProfilePageViewPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // Avatar section
+                // avatar section
                 _buildAvatar(),
                 
                 const SizedBox(height: 20),
                 
-                // User's basic info
+                // user's basic info
                 _buildInfoCard(
-                  title: "User Information",
-                  children: [
-                    _buildInfoRow("Name", _user.name),
-                    _buildInfoRow("Email", _user.email),
+                  AppLocale.userInformation.getString(context),
+                  [
+                    _buildInfoRow(AppLocale.name.getString(context), _user.name),
+                    _buildInfoRow(AppLocale.email.getString(context), _user.email),
                     if (_user.bio != null && _user.bio.isNotEmpty)
-                      _buildInfoRow("Bio", _user.bio),
-                    _buildInfoRow("Role", _userRole.toString().split('.').last.toUpperCase()),
+                      _buildInfoRow(AppLocale.bio.getString(context), _user.bio),
+                    _buildInfoRow(AppLocale.role.getString(context), _userRole.toString().split('.').last.toUpperCase()),
                   ],
                 ),
                 
                 const SizedBox(height: 16),
                 
-                // Blockchain info
+                // blockchain info
                 _buildInfoCard(
-                  title: "Blockchain Information",
-                  children: [
-                    _buildWalletRow("Wallet Address", _user.walletAddress),
-                    _buildInfoRow("Verified", _user.isVerified ? "Yes" : "No", 
+                  AppLocale.blockchainInformation.getString(context),
+                  [
+                    _buildWalletRow(AppLocale.walletAddress.getString(context), _user.walletAddress),
+                    _buildInfoRow(AppLocale.verified.getString(context), _user.isVerified ? "Yes" : "No", 
                       valueColor: _user.isVerified ? Colors.green : Colors.red),
                   ],
                 ),
                 
                 const SizedBox(height: 16),
                 
-                // Role-specific information
-                if (_user is Staff) _buildStaffInfo(_user as Staff),
-                if (_user is Student) _buildStudentInfo(_user as Student),
+                // role-specific information
+                if (_user is Staff) _buildStaffInfo(_user),
+                if (_user is Student) _buildStudentInfo(_user),
+                
+                const SizedBox(height: 24),
+                
+                // action buttons
+                if(_canManageUser()) _buildActionButtons(),
               ],
             ),
           ),
         ),
       ),
     );
+  }
+  
+  bool _canManageUser() {
+    return widget.userProvider.user?.role == UserRole.admin || 
+      (widget.userProvider.user?.role == UserRole.staff && widget.userProvider.user!.isVerified &&
+      widget.userProvider.user?.userID != widget.userManagementProvider.selectedUser?.userID);
+  }
+  
+  Widget _buildActionButtons() {
+    ColorScheme colorScheme = Theme.of(context).colorScheme;
+
+    return Column(
+      children: [
+        // verification button
+        ElevatedButton.icon(
+          onPressed: () => NavigationHelper.navigateToUserVerificationPage(context),
+          icon: const Icon(Icons.verified_user),
+          label: Text(AppLocale.verifyUserInformation.getString(context)),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: colorScheme.secondary,
+            foregroundColor: colorScheme.onPrimary,
+            minimumSize: const Size(double.infinity, 48),
+          ),
+        ),
+        
+        const SizedBox(height: 12),
+        
+        // freeze account button
+        GestureDetector(
+          onLongPressStart: (_) => _showFreezeDialog(),
+          child: ElevatedButton.icon(
+            onPressed: () => _showFreezeDialog(),
+            icon: const Icon(Icons.block),
+            label: Text(AppLocale.freezeAccount.getString(context)),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: colorScheme.onPrimary,
+              minimumSize: const Size(double.infinity, 48),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+  
+  void _showFreezeDialog() {
+    ColorScheme colorScheme = Theme.of(context).colorScheme;
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: Text(AppLocale.freezeAccount.getString(context)),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(AppLocale.areYouSureYouWantToFreezeThisAccount.getString(context)),
+                  Text(AppLocale.thisWillPreventTheUserFromLoggingIn.getString(context)),
+                  const SizedBox(height: 16),
+                  if (_isFreezing) ...[
+                    Text(AppLocale.holdToConfirmFreezing.getString(context), 
+                      style: TextStyle(
+                        color: colorScheme.onPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    LinearProgressIndicator(value: _freezeProgress),
+                  ],
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    // reset freezing state
+                    setState(() {
+                      _isFreezing = false;
+                      _freezeProgress = 0.0;
+                    });
+                  },
+                  child: Text(AppLocale.cancel.getString(context), 
+                    style: TextStyle(
+                      color: colorScheme.onPrimary,
+                    ),
+                  ),
+                ),
+                GestureDetector(
+                  onLongPressStart: (_) {
+                    setState(() {
+                      _isFreezing = true;
+                      _freezeProgress = 0.0;
+                    });
+                    _startFreezeProgress(setState);
+                  },
+                  onLongPressEnd: (_) {
+                    setState(() {
+                      _isFreezing = false;
+                      _freezeProgress = 0.0;
+                    });
+                  },
+                  child: ElevatedButton(
+                    onPressed: null, // disable normal press
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.red,
+                    ),
+                    child: Text(AppLocale.holdToFreeze.getString(context), 
+                      style: TextStyle(
+                        color: colorScheme.onPrimary,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+  
+  void _startFreezeProgress(StateSetter dialogSetState) {
+    // simulate progress over 3 seconds
+    const totalDuration = 3000; // 3 seconds
+    const updateInterval = 100; // update every 100ms
+    
+    int elapsed = 0;
+    
+    // setup a timer that updates progress
+    Timer.periodic(const Duration(milliseconds: updateInterval), (timer) {
+      if (!_isFreezing) {
+        timer.cancel();
+        return;
+      }
+      
+      elapsed += updateInterval;
+      dialogSetState(() {
+        _freezeProgress = elapsed / totalDuration;
+      });
+      
+      if (elapsed >= totalDuration) {
+        timer.cancel();
+        Navigator.of(context).pop(); // close dialog
+        
+        // implement freeze account functionality
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(AppLocale.accountHasBeenFrozen.getString(context))),
+        );
+      }
+    });
   }
   
   Widget _buildAvatar() {
@@ -143,17 +305,15 @@ class _ProfilePageViewPageState extends State<ProfilePageViewPage> {
   Color _getUserRoleColor() {
     switch (_userRole) {
       case UserRole.admin:
-        return Colors.red;
-      case UserRole.staff:
         return Colors.blue;
+      case UserRole.staff:
+        return Colors.yellow;
       case UserRole.student:
         return Colors.green;
-      default:
-        return Colors.grey;
     }
   }
   
-  Widget _buildInfoCard({required String title, required List<Widget> children}) {
+  Widget _buildInfoCard(String title, List<Widget> children) {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -217,7 +377,6 @@ class _ProfilePageViewPageState extends State<ProfilePageViewPage> {
   }
   
   Widget _buildWalletRow(String label, String value) {
-    // Format wallet address to be shorter
     final String displayValue = value.length > 12
         ? '${value.substring(0, 2)}...${value.substring(value.length - 6)}'
         : value;
@@ -242,15 +401,15 @@ class _ProfilePageViewPageState extends State<ProfilePageViewPage> {
               children: [
                 Text(displayValue),
                 const SizedBox(width: 8),
-                InkWell(
+                displayValue.isNotEmpty ? InkWell(
                   onTap: () {
                     Clipboard.setData(ClipboardData(text: value));
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Wallet address copied to clipboard')),
+                      SnackBar(content: Text(AppLocale.walletAddressCopiedToClipboard.getString(context))),
                     );
                   },
                   child: const Icon(Icons.copy, size: 16),
-                ),
+                ) : const SizedBox.shrink(),
               ],
             ),
           ),
@@ -261,19 +420,19 @@ class _ProfilePageViewPageState extends State<ProfilePageViewPage> {
   
   Widget _buildStaffInfo(Staff staff) {
     return _buildInfoCard(
-      title: "Staff Details",
-      children: [
-        _buildInfoRow("Department", staff.department ?? "Not specified"),
+      AppLocale.staffDetails.getString(context),
+      [
+        _buildInfoRow(AppLocale.department.getString(context), staff.department),
       ],
     );
   }
   
   Widget _buildStudentInfo(Student student) {
     return _buildInfoCard(
-      title: "Student Details",
-      children: [
+      AppLocale.studentDetails.getString(context),
+      [
         _buildInfoRow(
-          "Eligible For Voting", 
+          AppLocale.eligibleForVoting.getString(context), 
           student.isEligibleForVoting ? "Yes" : "No",
           valueColor: student.isEligibleForVoting ? Colors.green : Colors.red,
         ),

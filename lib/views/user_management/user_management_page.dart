@@ -29,13 +29,13 @@ class UserManagementPage extends StatefulWidget {
 class _UserManagementPageState extends State<UserManagementPage> with SingleTickerProviderStateMixin {
   late TabController _tabController;
   
-  // Lists for different user types
+  // lists for different user types
   List<Staff> _staffList = [];
   List<Staff> _filteredStaffList = [];
   List<Student> _studentList = [];
   List<Student> _filteredStudentList = [];
   
-  // Search controllers
+  // search controllers
   late TextEditingController _staffSearchController;
   late TextEditingController _studentSearchController;
   
@@ -82,7 +82,7 @@ class _UserManagementPageState extends State<UserManagementPage> with SingleTick
       print('Error loading users: $e');
       setState(() => _isLoading = false);
       if (mounted) {
-        SnackbarUtil.showSnackBar(context, 'Failed to load users: $e');
+        SnackbarUtil.showSnackBar(context, '${AppLocale.failedToLoadUsers.getString(context)}: $e');
       }
     }
   }
@@ -117,6 +117,34 @@ class _UserManagementPageState extends State<UserManagementPage> with SingleTick
         student.email.toLowerCase().contains(query.toLowerCase())
       ).toList();
     });
+  }
+
+  // helper method to get localized role name
+  String _getLocalizedRoleName(UserRole role) {
+    switch (role) {
+      case UserRole.admin:
+        return AppLocale.admin.getString(context);
+      case UserRole.staff:
+        return AppLocale.staff.getString(context);
+      case UserRole.student:
+        return AppLocale.student.getString(context);
+    }
+  }
+
+  Color _getRoleColor(UserRole role) {
+    switch (role) {
+      case UserRole.admin:
+        return Colors.red;
+      case UserRole.staff:
+        return Colors.blue;
+      case UserRole.student:
+        return Colors.green;
+    }
+  }
+  
+  void _handleUserAction(String userID) {
+    widget.userManagementProvider.selectUser(userID);
+    NavigationHelper.navigateToProfilePageViewPage(context);
   }
 
   @override
@@ -157,8 +185,8 @@ class _UserManagementPageState extends State<UserManagementPage> with SingleTick
               ],
             )
         : ScrollableResponsiveWidget(
-            phone: const Center(
-              child: Text('You do not have permission to access this page'),
+            phone: Center(
+              child: Text(AppLocale.noPermissionToAccessPage.getString(context)),
             ), 
             tablet: Container(),
           ),
@@ -182,13 +210,13 @@ class _UserManagementPageState extends State<UserManagementPage> with SingleTick
             child: CustomSearchBox(
               controller: _staffSearchController,
               onChanged: _searchStaff,
-              hintText: 'Search staff...',
+              hintText: AppLocale.searchStaff.getString(context),
             ),
           ),
           Expanded(
             child: _filteredStaffList.isEmpty
-              ? const EmptyStateWidget(
-                  message: 'No staff members found',
+              ? EmptyStateWidget(
+                  message: AppLocale.noStaffMembersFound.getString(context),
                   icon: Icons.people,
                 )
               : ScrollableResponsiveWidget(
@@ -196,8 +224,8 @@ class _UserManagementPageState extends State<UserManagementPage> with SingleTick
                     children: 
                       _staffList.isEmpty ?
                         [
-                          const EmptyStateWidget(
-                            message: 'No staff members found',
+                          EmptyStateWidget(
+                            message: AppLocale.noStaffMembersFound.getString(context),
                             icon: Icons.people,
                           )
                         ]
@@ -224,13 +252,13 @@ class _UserManagementPageState extends State<UserManagementPage> with SingleTick
             child: CustomSearchBox(
               controller: _studentSearchController,
               onChanged: _searchStudents,
-              hintText: 'Search students...',
+              hintText: AppLocale.searchStudents.getString(context),
             ),
           ),
           Expanded(
             child: _filteredStudentList.isEmpty
-              ? const EmptyStateWidget(
-                  message: 'No students found',
+              ? EmptyStateWidget(
+                  message: AppLocale.noStudentsFound.getString(context),
                   icon: Icons.school,
                 )
               : ScrollableResponsiveWidget(
@@ -238,8 +266,8 @@ class _UserManagementPageState extends State<UserManagementPage> with SingleTick
                     children: 
                       _studentList.isEmpty ?
                         [
-                          const EmptyStateWidget(
-                            message: 'No students found',
+                          EmptyStateWidget(
+                            message: AppLocale.noStudentsFound.getString(context),
                             icon: Icons.school,
                           )
                         ]
@@ -281,118 +309,30 @@ class _UserManagementPageState extends State<UserManagementPage> with SingleTick
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       elevation: 2,
-      child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor: colorScheme.primary,
-          child: Text(
-            name.isNotEmpty ? name[0].toUpperCase() : '?',
-            style: TextStyle(color: colorScheme.onPrimary),
+      child: GestureDetector(
+        onTap: () => _handleUserAction(userID),
+        child: ListTile(
+          leading: CircleAvatar(
+            backgroundColor: colorScheme.primary,
+            child: Text(
+              name.isNotEmpty ? name[0].toUpperCase() : '?',
+              style: TextStyle(color: colorScheme.onPrimary),
+            ),
           ),
-        ),
-        title: Text(name),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(email),
-            Text('Role: ${role.name}', 
-              style: TextStyle(
-                color: _getRoleColor(role),
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
-        trailing: PopupMenuButton<String>(
-          onSelected: (value) => _handleUserAction(value, userID, role),
-          itemBuilder: (context) => [
-            const PopupMenuItem(
-              value: 'view',
-              child: Row(
-                children: [
-                  Icon(Icons.visibility),
-                  SizedBox(width: 8),
-                  Text('View Details'),
-                ],
-              ),
-            ),
-            if (widget.userProvider.user?.role == UserRole.admin)
-              const PopupMenuItem(
-                value: 'edit',
-                child: Row(
-                  children: [
-                    Icon(Icons.edit),
-                    SizedBox(width: 8),
-                    Text('Edit'),
-                  ],
+          title: Text(name),
+          subtitle: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(email),
+              Text('${AppLocale.role.getString(context)}: ${_getLocalizedRoleName(role)}', 
+                style: TextStyle(
+                  color: _getRoleColor(role),
+                  fontWeight: FontWeight.bold,
                 ),
               ),
-            if (widget.userProvider.user?.role == UserRole.admin && role != UserRole.admin)
-              const PopupMenuItem(
-                value: 'delete',
-                child: Row(
-                  children: [
-                    Icon(Icons.delete, color: Colors.red),
-                    SizedBox(width: 8),
-                    Text('Delete', style: TextStyle(color: Colors.red)),
-                  ],
-                ),
-              ),
-          ],
+            ],
+          ),
         ),
-        onTap: () => _handleUserAction('view', userID, role),
-      ),
-    );
-  }
-  
-  Color _getRoleColor(UserRole role) {
-    switch (role) {
-      case UserRole.admin:
-        return Colors.red;
-      case UserRole.staff:
-        return Colors.blue;
-      case UserRole.student:
-        return Colors.green;
-    }
-  }
-  
-  void _handleUserAction(String action, String userID, UserRole role) {
-    switch (action) {
-      case 'view':
-        widget.userManagementProvider.selectUser(userID);
-        NavigationHelper.navigateToProfilePageViewPage(context);
-        break;
-      case 'delete':
-        _showDeleteConfirmation(userID, role);
-        break;
-    }
-  }
-  
-  void _showDeleteConfirmation(String userID, UserRole role) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Confirm Delete'),
-        content: Text('Are you sure you want to delete this ${role.name}?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () async {
-              Navigator.pop(context);
-              // Delete the user
-              try {
-                await widget.userManagementProvider.deleteUser(userID, role);
-                SnackbarUtil.showSnackBar(context, '${role.name} deleted successfully');
-                _loadUsers(); // Reload the lists
-              } catch (e) {
-                SnackbarUtil.showSnackBar(context, 'Failed to delete user: $e');
-              }
-            },
-            child: const Text('Delete', style: TextStyle(color: Colors.red)),
-          ),
-        ],
       ),
     );
   }

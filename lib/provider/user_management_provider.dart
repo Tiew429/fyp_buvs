@@ -2,7 +2,9 @@ import 'package:blockchain_university_voting_system/models/staff_model.dart';
 import 'package:blockchain_university_voting_system/models/student_model.dart';
 import 'package:blockchain_university_voting_system/models/user_model.dart';
 import 'package:blockchain_university_voting_system/repository/user_management_repository.dart';
+import 'package:blockchain_university_voting_system/utils/send_email_util.dart';
 import 'package:flutter/material.dart';
+import 'dart:io';
 
 class UserManagementProvider extends ChangeNotifier {
 
@@ -66,6 +68,117 @@ class UserManagementProvider extends ChangeNotifier {
       print("selected user: $_selectedUser");
     } catch (e) {
       print("User_Management_Provider: $e");
+    }
+  }
+
+  Future<bool> verifyUser(String userID) async {
+    try {
+      final isVerified = await _userManagementRepository.verifyUser(userID);
+      if (isVerified) {
+        _selectedUser.isVerified = true;
+        await SendEmailUtil.sendEmail(
+          _selectedUser.email,
+          'Account Verified',
+          '<h2>Blockchain University Voting System</h2> <p>Your account has been verified</p>',
+        );
+        notifyListeners();
+      }
+      return isVerified;
+    } catch (e) {
+      print("User_Management_Provider: $e");
+      return false;
+    }
+  }
+  
+  Future<bool> rejectUserVerification(String userID, String reason) async {
+    try {
+      final role = _selectedUser.role;
+      final isRejected = await _userManagementRepository.rejectUserVerification(userID, role, reason);
+      
+      if (isRejected) {
+        await SendEmailUtil.sendEmail(
+          _selectedUser.email,
+          'Verification Rejected',
+          '<h2>Blockchain University Voting System</h2> <p>Your verification has been rejected.</p> <p><strong>Reason:</strong> $reason</p> <p>Please upload correct documents to complete your verification.</p>',
+        );
+        notifyListeners();
+      }
+      return isRejected;
+    } catch (e) {
+      print("Error rejecting user verification: $e");
+      return false;
+    }
+  }
+  
+  Future<bool> markVerificationDialogShown(String userID, UserRole role) async {
+    try {
+      return await _userManagementRepository.markVerificationDialogShown(userID, role);
+    } catch (e) {
+      print("Error marking dialog as shown: $e");
+      return false;
+    }
+  }
+  
+  Future<bool> updateDocumentUploadStatus(String userID, UserRole role) async {
+    try {
+      return await _userManagementRepository.updateDocumentUploadStatus(userID, role);
+    } catch (e) {
+      print("Error updating document upload status: $e");
+      return false;
+    }
+  }
+  
+  Future<Map<String, dynamic>> getVerificationStatus(String userID, UserRole role) async {
+    try {
+      return await _userManagementRepository.getVerificationStatus(userID, role);
+    } catch (e) {
+      print("Error getting verification status: $e");
+      return {
+        'verificationFailed': false,
+        'hasUploadedDocuments': false,
+        'failReason': '',
+        'failedDialogShown': false,
+      };
+    }
+  }
+  
+  Future<Map<String, String?>> loadUserDocuments(String userId, UserRole role) async {
+    try {
+      return await _userManagementRepository.loadUserDocuments(userId, role);
+    } catch (e) {
+      print("Error loading user documents: $e");
+      return {
+        'idCardUrl': null,
+        'userCardUrl': null,
+      };
+    }
+  }
+  
+  Future<Map<String, String?>> uploadUserDocuments(
+    String userId, 
+    UserRole role, 
+    File idCardImage, 
+    File userCardImage
+  ) async {
+    try {
+      final urls = await _userManagementRepository.uploadUserDocuments(
+        userId, 
+        role, 
+        idCardImage, 
+        userCardImage
+      );
+      
+      if (urls['idCardUrl'] != null && urls['userCardUrl'] != null) {
+        await updateDocumentUploadStatus(userId, role);
+      }
+      
+      return urls;
+    } catch (e) {
+      print("Error uploading user documents: $e");
+      return {
+        'idCardUrl': null,
+        'userCardUrl': null,
+      };
     }
   }
 }

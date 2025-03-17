@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:blockchain_university_voting_system/data/router_path.dart';
 import 'package:blockchain_university_voting_system/database/shared_preferences.dart';
 import 'package:blockchain_university_voting_system/localization/app_locale.dart';
@@ -8,6 +10,7 @@ import 'package:blockchain_university_voting_system/repository/user_repository.d
 import 'package:blockchain_university_voting_system/routes/navigation_helper.dart';
 import 'package:blockchain_university_voting_system/services/firebase_service.dart';
 import 'package:blockchain_university_voting_system/utils/firebase_path_util.dart';
+import 'package:blockchain_university_voting_system/utils/send_email_util.dart';
 import 'package:blockchain_university_voting_system/utils/snackbar_util.dart';
 import 'package:blockchain_university_voting_system/provider/user_provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -288,7 +291,12 @@ class AuthService {
     // 2. send verification code to email
     try {
       // generate a random 6-digit code
-      String verificationCode = (100000 + DateTime.now().microsecond % 900000).toString();
+      var rnd = Random();
+      var next = rnd.nextInt(900000);
+      while (next < 100000) {
+        next *= 10;
+      }
+      String verificationCode = next.toString();
 
       // store the verification code in Firestore
       await _firestore.collection('verificationCodes').doc(emailReset).set({
@@ -297,31 +305,11 @@ class AuthService {
         'isUsed': false
       });
 
-      // check if environment variables are available
-      final senderEmail = dotenv.env['GMAIL_MAIL'];
-      final senderPassword = dotenv.env['GMAIL_PASSWORD'];
-      
-      if (senderEmail == null || senderPassword == null) {
-        throw Exception('Email credentials not configured. Please check .env file.');
-      }
-
-      // create smtp server for gmail
-      final smtpServer = gmail(senderEmail, senderPassword);
-
-      // create message with HTML formatting
-      final message = Message()
-        ..from = Address(senderEmail, 'Blockchain University Voting System')
-        ..recipients.add(emailReset)
-        ..subject = 'Verification Code'
-        ..html = '''
-          <h2>Blockchain University Voting System</h2>
-          <p>Your verification code is: <strong>$verificationCode</strong></p>
-          <p>This code will expire in 10 minutes.</p>
-          <p>If you didn't request this code, please ignore this email.</p>
-        ''';
-
-      // send email with verification code
-      await send(message, smtpServer);
+      await SendEmailUtil.sendEmail(
+        emailReset,
+        'Verification Code',
+        '<h2>Blockchain University Voting System</h2> <p>Your verification code is $verificationCode</p> <p>This code will expire in 10 minutes.</p> <p>If you didn\'t request this code, please ignore this email.</p>',
+      );
 
       SnackbarUtil.showSnackBar(context, 'Verification code sent to your email');
     } catch (e) {

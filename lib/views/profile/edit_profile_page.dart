@@ -214,6 +214,26 @@ class _EditProfilePageState extends State<EditProfilePage> {
             const SizedBox(
               height: 20,
             ),
+            if (widget._user.role == UserRole.staff || widget._user.role == UserRole.student)
+              // if the user is staff or student, then show the verification status button
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Row(
+                  children: [
+                    const Icon(Icons.verified_user),
+                    const SizedBox(width: 8),
+                    Text(AppLocale.verificationStatus.getString(context)),
+                    const SizedBox(width: 30),
+                    CustomConfirmButton(
+                      text: widget._user.isVerified
+                          ? AppLocale.verified.getString(context)
+                          : AppLocale.notVerified.getString(context),
+                      onPressed: () => NavigationHelper.navigateToUserVerificationPage(context),
+                    ),
+                  ],
+                ),
+              ),
+            const SizedBox(height: 20),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12.0),
               child: Row(

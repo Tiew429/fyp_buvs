@@ -93,6 +93,10 @@ class NavigationHelper {
   static void navigateToProfilePageViewPage(BuildContext context) {
     context.push('/${RouterPath.profilepageviewpage.path}');
   }
+  static void navigateToUserVerificationPage(BuildContext context) {
+    context.push('/${RouterPath.userverificationpage.path}');
+  }
+  
 
   // Report
   static void navigateToReportPage(BuildContext context) {
