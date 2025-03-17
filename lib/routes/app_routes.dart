@@ -110,13 +110,13 @@ Future<void> navigateWithPreload(
 
 List<RouteBase> router(String initialRoute, GlobalKey<NavigatorState> navigatorKey) {
   // Create builder function that will be called when context is available
-  UserProvider? getUserViewModel() {
+  UserProvider? getUserProvider() {
     try {
       if (navigatorKey.currentContext != null) {
         return Provider.of<UserProvider>(navigatorKey.currentContext!, listen: false);
       }
     } catch (e) {
-      debugPrint('Error getting UserViewModel: $e');
+      debugPrint('Error getting UserProvider: $e');
     }
     return null;
   }
@@ -398,7 +398,7 @@ List<RouteBase> router(String initialRoute, GlobalKey<NavigatorState> navigatorK
       path: '/${RouterPath.homepage.path}',
       name: RouterPath.homepage.path,
       pageBuilder: (context, state) {
-        final userViewModel = getUserViewModel();
+        final userViewModel = getUserProvider();
         final user = userViewModel?.user;
         if (user == null) {
           return buildPageWithAppKitModal(
@@ -410,7 +410,12 @@ List<RouteBase> router(String initialRoute, GlobalKey<NavigatorState> navigatorK
         return buildPageWithAppKitModal(
           context, 
           state, 
-          (appKitModal) => HomePage(user: user, appKitModal: appKitModal)
+          (appKitModal) => HomePage(
+            user: user, 
+            appKitModal: appKitModal,
+            userProvider: getUserProvider()!,
+            userManagementProvider: getUserManagementProvider()!,
+          )
         );
       },
     ),
@@ -418,7 +423,7 @@ List<RouteBase> router(String initialRoute, GlobalKey<NavigatorState> navigatorK
       path: '/${RouterPath.editprofilepage.path}',
       name: RouterPath.editprofilepage.path,
       pageBuilder: (context, state) {
-        final user = getUserViewModel()?.user;
+        final user = getUserProvider()?.user;
         if (user == null) {
           return buildPageWithAppKitModal(
             context, 
@@ -438,7 +443,7 @@ List<RouteBase> router(String initialRoute, GlobalKey<NavigatorState> navigatorK
       path: '/${RouterPath.votinglistpage.path}',
       name: RouterPath.votinglistpage.path,
       pageBuilder: (context, state) {
-        final user = getUserViewModel()?.user;
+        final user = getUserProvider()?.user;
         if (user == null) {
           return buildPageWithAppKitModal(
             context, 
@@ -460,7 +465,7 @@ List<RouteBase> router(String initialRoute, GlobalKey<NavigatorState> navigatorK
       path: '/${RouterPath.votingeventcreatepage.path}',
       name: RouterPath.votingeventcreatepage.path,
       pageBuilder: (context, state) {
-        final user = getUserViewModel()?.user;
+        final user = getUserProvider()?.user;
         if (user == null) {
           return buildPageWithAppKitModal(
             context, 
@@ -481,8 +486,8 @@ List<RouteBase> router(String initialRoute, GlobalKey<NavigatorState> navigatorK
       path: '/${RouterPath.votingeventpage.path}',
       name: RouterPath.votingeventpage.path,
       pageBuilder: (context, state) {
-        final user = getUserViewModel()?.user;
-        final isEligibleToVote = getUserViewModel()?.isEligibleForVoting ?? false;
+        final user = getUserProvider()?.user;
+        final isEligibleToVote = getUserProvider()?.isEligibleForVoting ?? false;
         if (user == null) {
           return buildPageWithAppKitModal(
             context, 
@@ -558,7 +563,7 @@ List<RouteBase> router(String initialRoute, GlobalKey<NavigatorState> navigatorK
       pageBuilder: (context, state) {
         return buildPageWithAnimation(
           UserManagementPage(
-            userProvider: getUserViewModel()!,
+            userProvider: getUserProvider()!,
             userManagementProvider: getUserManagementProvider()!,
           ), 
           state,
@@ -581,7 +586,7 @@ List<RouteBase> router(String initialRoute, GlobalKey<NavigatorState> navigatorK
       pageBuilder: (context, state) {
         return buildPageWithAnimation(
           ProfilePageViewPage(
-            userProvider: getUserViewModel()!,
+            userProvider: getUserProvider()!,
             userManagementProvider: getUserManagementProvider()!,
           ), 
           state,
@@ -594,7 +599,7 @@ List<RouteBase> router(String initialRoute, GlobalKey<NavigatorState> navigatorK
       pageBuilder: (context, state) {
         return buildPageWithAnimation(
           UserVerificationPage(
-            userProvider: getUserViewModel()!,
+            userProvider: getUserProvider()!,
             userManagementProvider: getUserManagementProvider()!,
           ), 
           state,
@@ -643,7 +648,7 @@ List<RouteBase> router(String initialRoute, GlobalKey<NavigatorState> navigatorK
       pageBuilder: (context, state) {
         return buildPageWithAnimation(
           NotificationsPage(
-            userProvider: getUserViewModel()!,
+            userProvider: getUserProvider()!,
             notificationProvider: getNotificationProvider()!,
           ), 
           state,
@@ -656,7 +661,7 @@ List<RouteBase> router(String initialRoute, GlobalKey<NavigatorState> navigatorK
       pageBuilder: (context, state) {
         return buildPageWithAnimation(
           SendNotificationPage(
-            userProvider: getUserViewModel()!,
+            userProvider: getUserProvider()!,
             notificationProvider: getNotificationProvider()!,
           ), 
           state,

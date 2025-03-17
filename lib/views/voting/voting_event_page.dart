@@ -361,15 +361,15 @@ class _VotingEventPageState extends State<VotingEventPage> {
                 const SizedBox(height: 10.0),
                 if (isEnded) // should be isEnded, but true for test purpose
                   Row(
-                  children: [
-                    const Spacer(),
-                    CustomAnimatedButton(
-                      onPressed: () => _exportToReport(), 
-                      backgroundColor: Colors.red,
-                      text: AppLocale.exportToReport.getString(context),
-                    ),
-                  ],
-                ),
+                    children: [
+                      const Spacer(),
+                      CustomAnimatedButton(
+                        onPressed: () => _exportToReport(), 
+                        backgroundColor: Colors.red,
+                        text: AppLocale.exportToReport.getString(context),
+                      ),
+                    ],
+                  ),
               ],
             ),
             if (isLoading)

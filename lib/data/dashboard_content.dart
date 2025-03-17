@@ -1,6 +1,7 @@
 enum AdminDashboardContent {
   userManagement,
   votingEvent,
+  pendingVotingEvent,
   notifications,
   report,
   audit;
@@ -11,6 +12,7 @@ enum AdminDashboardContent {
 enum StaffDashboardContent {
   userManagement,
   votingEvent,
+  pendingVotingEvent,
   notifications,
   report,
   audit;

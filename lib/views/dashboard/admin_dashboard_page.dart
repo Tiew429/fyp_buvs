@@ -1,6 +1,5 @@
 import 'package:blockchain_university_voting_system/localization/app_locale.dart';
 import 'package:blockchain_university_voting_system/routes/navigation_helper.dart';
-import 'package:blockchain_university_voting_system/widgets/centered_container.dart';
 import 'package:blockchain_university_voting_system/widgets/custom_search_box.dart';
 import 'package:blockchain_university_voting_system/widgets/dashboard_box.dart';
 import 'package:blockchain_university_voting_system/widgets/response_widget.dart';
@@ -45,6 +44,8 @@ class _AdminDashboardState extends State<AdminDashboard> {
     _dashboardItems = [
       {
         'text': AppLocale.votingEvent.getString(context),
+        'icon': Icons.how_to_vote,
+        'description': AppLocale.manageCandidate.getString(context),
         'onTap': () => NavigationHelper.navigateToVotingListPage(context),
         'searchTerms': {
           'en': ['voting event', 'elections', 'vote', 'ballot'],
@@ -54,6 +55,8 @@ class _AdminDashboardState extends State<AdminDashboard> {
       },
       {
         'text': AppLocale.pendingVotingEvent.getString(context),
+        'icon': Icons.pending_actions,
+        'description': AppLocale.approve.getString(context),
         'onTap': () => NavigationHelper.navigateToPendingVotingEventListPage(context),
         'searchTerms': {
           'en': ['pending voting', 'upcoming elections', 'scheduled votes'],
@@ -63,6 +66,8 @@ class _AdminDashboardState extends State<AdminDashboard> {
       },
       {
         'text': AppLocale.userManagement.getString(context),
+        'icon': Icons.people_alt,
+        'description': AppLocale.verifyUserInformation.getString(context),
         'onTap': () => NavigationHelper.navigateToUserManagementPage(context),
         'searchTerms': {
           'en': ['user management', 'manage users', 'accounts', 'students'],
@@ -72,6 +77,8 @@ class _AdminDashboardState extends State<AdminDashboard> {
       },
       {
         'text': AppLocale.notifications.getString(context),
+        'icon': Icons.notifications_active,
+        'description': AppLocale.sendNotification.getString(context),
         'onTap': () => NavigationHelper.navigateToNotificationsPage(context),
         'searchTerms': {
           'en': ['notifications', 'alerts', 'messages'],
@@ -81,6 +88,8 @@ class _AdminDashboardState extends State<AdminDashboard> {
       },
       {
         'text': AppLocale.report.getString(context),
+        'icon': Icons.assessment,
+        'description': AppLocale.statistics.getString(context),
         'onTap': () => NavigationHelper.navigateToReportPage(context),
         'searchTerms': {
           'en': ['report', 'analytics', 'statistics', 'results'],
@@ -90,6 +99,8 @@ class _AdminDashboardState extends State<AdminDashboard> {
       },
       {
         'text': AppLocale.audit.getString(context),
+        'icon': Icons.security,
+        'description': AppLocale.verify.getString(context),
         'onTap': () => NavigationHelper.navigateToAuditListPage(context),
         'searchTerms': {
           'en': ['audit', 'verification', 'check', 'logs'],
@@ -144,14 +155,24 @@ class _AdminDashboardState extends State<AdminDashboard> {
         hasBottomNavigationBar: true,
         phone: Column(
           children: [
-            CenteredContainer(
-              child: Text(AppLocale.upcomingVotingEvent.getString(context)),
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Text(
+                AppLocale.upcomingVotingEvent.getString(context),
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).colorScheme.onTertiary,
+                ),
+              ),
             ),
-            const SizedBox(height: 16),
-            CustomSearchBox(
-              controller: _searchController,
-              onChanged: _onSearchChanged,
-              hintText: AppLocale.searcModule.getString(context),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: CustomSearchBox(
+                controller: _searchController,
+                onChanged: _onSearchChanged,
+                hintText: AppLocale.searcModule.getString(context),
+              ),
             ),
             const SizedBox(height: 16),
             
@@ -161,7 +182,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Text(
-                    'No matching options found.',
+                    AppLocale.noMatchingOptionsFound.getString(context),
                     style: TextStyle(
                       color: Theme.of(context).colorScheme.onTertiary,
                       fontSize: 16,
@@ -169,17 +190,17 @@ class _AdminDashboardState extends State<AdminDashboard> {
                   ),
                 ),
               ),
-            
-            // only display filtered dashboard items
-            ..._filteredDashboardItems.map((item) => Column(
-              children: [
-                DashboardBox(
-                  onTap: item['onTap'], 
-                  text: item['text'],
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Column(
+                  children: _filteredDashboardItems.map((item) => DashboardBox(
+                    onTap: item['onTap'],
+                    text: item['text'],
+                    icon: item['icon'],
+                    description: item['description'],
+                  )).toList(),
                 ),
-                const SizedBox(height: 16),
-              ],
-            )),
+              ),
           ],
         ), 
         tablet: Container(),

@@ -54,6 +54,7 @@ mixin AppLocale {
   // dashboard
   static const String upcomingVotingEvent = 'upcoming voting event';
   static const String searcModule = 'search module';
+  static const String noMatchingOptionsFound = 'no matching options found';
 
   // profile
   static const String profile = 'profile';
@@ -87,6 +88,11 @@ mixin AppLocale {
   static const String thisWillPreventTheUserFromLoggingIn = 'this will prevent the user from logging in.';
   static const String holdToConfirmFreezing = 'hold to confirm freezing';
   static const String holdToFreeze = 'hold to freeze';
+  static const String failedToLoadUsers = 'failed to load users';
+  static const String noPermissionToAccessPage = 'no permission to access page';
+  static const String noStaffMembersFound = 'no staff members found';
+  static const String noPermissionToAccessUserManagement = 'no permission to access user management';
+  static const String searchStaff = 'search staff';
 
   // notications
   static const String notifications = 'notifications';
@@ -282,18 +288,6 @@ mixin AppLocale {
   static const String submit = 'submit';
   static const String verificationRejected = 'verification rejected';
 
-  // User management page strings
-  static const String searchStaff = 'search staff';
-  static const String noStaffMembersFound = 'no staff members found';
-  static const String viewDetails = 'view details';
-  static const String edit = 'edit';
-  static const String confirmDelete = 'confirm delete';
-  static const String areYouSureDeleteUser = 'are you sure you want to delete this user';
-  static const String userDeletedSuccessfully = 'user deleted successfully';
-  static const String failedToDeleteUser = 'failed to delete user';
-  static const String noPermissionToAccessPage = 'no permission to access page';
-  static const String failedToLoadUsers = 'failed to load users';
-
   // english-en
   static const Map<String, dynamic> en = {
     // roles
@@ -351,6 +345,7 @@ mixin AppLocale {
     // dashboard
     upcomingVotingEvent: 'Upcoming Voting Event',
     searcModule: 'Search Module',
+    noMatchingOptionsFound: 'No matching options found',
 
     // profile
     profile: 'Profile',
@@ -477,7 +472,7 @@ mixin AppLocale {
     winner: 'Winner',
 
     // student
-    notEligibleForVoting: 'Not eligible for voting', 
+    notEligibleForVoting: 'Not eligible for voting',
     pleaseSelectAtLeastOneStudent: 'Please select at least one student',
     searchStudents: 'Search students',
     noStudentsFound: 'No students found',
@@ -578,18 +573,6 @@ mixin AppLocale {
     pleaseEnterAReason: 'Please enter a reason',
     submit: 'Submit',
     verificationRejected: 'Verification rejected',
-
-    // User management page strings
-    searchStaff: 'Search staff...',
-    noStaffMembersFound: 'No staff members found',
-    viewDetails: 'View Details',
-    edit: 'Edit',
-    confirmDelete: 'Confirm Delete',
-    areYouSureDeleteUser: 'Are you sure you want to delete this user?',
-    userDeletedSuccessfully: 'User deleted successfully',
-    failedToDeleteUser: 'Failed to delete user',
-    noPermissionToAccessPage: 'You do not have permission to access this page',
-    failedToLoadUsers: 'Failed to load users',
   };
 
   // malay-ms
@@ -649,6 +632,7 @@ mixin AppLocale {
     // dashboard
     upcomingVotingEvent: 'Acara Pengundian Akan Datang',
     searcModule: 'Cari Modul',
+    noMatchingOptionsFound: 'Tiada pilihan yang padan ditemui',
 
     // profile
     profile: 'Profil',
@@ -876,18 +860,6 @@ mixin AppLocale {
     pleaseEnterAReason: 'Sila masukkan sebab',
     submit: 'Hantar',
     verificationRejected: 'Pengesahan ditolak',
-
-    // User management page strings
-    searchStaff: 'Cari staf...',
-    noStaffMembersFound: 'Tiada staf ditemui',
-    viewDetails: 'Lihat Butiran',
-    edit: 'Edit',
-    confirmDelete: 'Sahkan Padam',
-    areYouSureDeleteUser: 'Adakah anda pasti mahu memadamkan pengguna ini?',
-    userDeletedSuccessfully: 'Pengguna berjaya dipadam',
-    failedToDeleteUser: 'Gagal memadam pengguna',
-    noPermissionToAccessPage: 'Anda tidak mempunyai kebenaran untuk mengakses halaman ini',
-    failedToLoadUsers: 'Gagal memuatkan pengguna',
   };
 
   // chinese-zh
@@ -947,6 +919,7 @@ mixin AppLocale {
     // dashboard
     upcomingVotingEvent: '即将举行的投票活动',
     searcModule: '搜索模块',
+    noMatchingOptionsFound: '找不到匹配的选项',
 
     // profile
     profile: '个人资料',
@@ -1174,17 +1147,5 @@ mixin AppLocale {
     pleaseEnterAReason: '请输入原因',
     submit: '提交',
     verificationRejected: '验证已拒绝',
-
-    // User management page strings
-    searchStaff: '搜索职员...',
-    noStaffMembersFound: '未找到职员',
-    viewDetails: '查看详情',
-    edit: '编辑',
-    confirmDelete: '确认删除',
-    areYouSureDeleteUser: '您确定要删除此用户吗？',
-    userDeletedSuccessfully: '用户已成功删除',
-    failedToDeleteUser: '删除用户失败',
-    noPermissionToAccessPage: '您无权访问此页面',
-    failedToLoadUsers: '加载用户失败',
   };
 }
