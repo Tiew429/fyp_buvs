@@ -121,6 +121,7 @@ class VotingEventProvider extends ChangeNotifier{
     TimeOfDay? startTime,
     TimeOfDay? endTime,
     String walletAddress,
+    String userID,
   ) async {
     print("Voting_Event_Provider: Creating VotingEvent object.");
     VotingEvent newVotingEvent = VotingEvent(
@@ -134,7 +135,7 @@ class VotingEventProvider extends ChangeNotifier{
       createdBy: walletAddress,
     );
 
-    bool success = await _votingEventRepository.insertNewVotingEvent(newVotingEvent);
+    bool success = await _votingEventRepository.insertNewVotingEvent(userID, newVotingEvent);
     if (success) {
       _votingEventList.add(newVotingEvent);
     }
@@ -175,6 +176,33 @@ class VotingEventProvider extends ChangeNotifier{
   Future<void> deleteVotingEvent(VotingEvent votingEvent) async {
     print("Voting_Event_Provider: Removing voting event.");
     await _votingEventRepository.deleteVotingEvent(votingEvent);
+  }
+
+  Future<bool> deprecateVotingEvent(VotingEvent votingEvent) async {
+    print("Voting_Event_Provider: Deprecating voting event.");
+    try {
+      // create a copy with deprecated status
+      VotingEvent deprecatedEvent = votingEvent.copyWith(
+        status: VotingEventStatus.deprecated,
+      );
+      
+      // update the event using existing method
+      bool success = await updateVotingEvent(deprecatedEvent, votingEvent);
+      
+      if (success) {
+        // update the local list
+        int index = _votingEventList.indexWhere((event) => event.votingEventID == votingEvent.votingEventID);
+        if (index != -1) {
+          _votingEventList[index] = deprecatedEvent;
+          notifyListeners();
+        }
+      }
+      
+      return success;
+    } catch (e) {
+      print("Voting_Event_Provider: Error deprecating voting event: $e");
+      return false;
+    }
   }
 
   Future<bool> addCandidates(List<Candidate> candidates) async {

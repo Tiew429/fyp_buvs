@@ -22,7 +22,8 @@ enum RouterPath {
   auditlistpage,
   votingeventauditlogspage,
   notificationspage,
-  sendnotificationpage;
+  sendnotificationpage,
+  notificationsettingspage;
 
   String get path => name;
 }

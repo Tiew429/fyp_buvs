@@ -1,9 +1,7 @@
 import 'package:blockchain_university_voting_system/blockchain/wallet_connect_service.dart';
 import 'package:blockchain_university_voting_system/localization/app_locale.dart';
 import 'package:blockchain_university_voting_system/provider/theme_provider.dart';
-import 'package:blockchain_university_voting_system/services/firebase_service.dart';
-import 'package:blockchain_university_voting_system/database/shared_preferences.dart';
-import 'package:blockchain_university_voting_system/views/settings/notification_settings_page.dart';
+import 'package:blockchain_university_voting_system/routes/navigation_helper.dart';
 import 'package:blockchain_university_voting_system/widgets/custom_cancel_button.dart';
 import 'package:blockchain_university_voting_system/widgets/custom_confirm_button.dart';
 import 'package:blockchain_university_voting_system/widgets/scrollable_widget.dart';
@@ -51,7 +49,8 @@ class _SettingsPageState extends State<SettingsPage> {
     return Scaffold(
       backgroundColor: colorScheme.tertiary,
       appBar: AppBar(
-        backgroundColor: colorScheme.primary,
+        backgroundColor: colorScheme.secondary,
+        centerTitle: true,
         title: Text(
           AppLocale.settings.getString(context),
           style: TextStyle(color: colorScheme.onPrimary),
@@ -128,7 +127,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      color: colorScheme.onTertiary,
+                      color: colorScheme.onPrimary,
                     ),
                   ),
                   const SizedBox(height: 15),
@@ -139,10 +138,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     title: AppLocale.notifications.getString(context),
                     icon: Icons.notifications_outlined,
                     onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => const NotificationSettingsPage()),
-                      );
+                      NavigationHelper.navigateToNotifionSettingsPage(context);
                     },
                     showArrow: true,
                   ),
@@ -155,7 +151,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      color: colorScheme.onTertiary,
+                      color: colorScheme.onPrimary,
                     ),
                   ),
                   const SizedBox(height: 15),
@@ -216,7 +212,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      color: colorScheme.onTertiary,
+                      color: colorScheme.onPrimary,
                     ),
                   ),
                   const SizedBox(height: 15),
@@ -290,7 +286,7 @@ class _SettingsPageState extends State<SettingsPage> {
               child: Icon(
                 icon,
                 size: 20,
-                color: isWarning ? Colors.red : colorScheme.primary,
+                color: isWarning ? Colors.red : colorScheme.secondary,
               ),
             ),
             const SizedBox(width: 16),
@@ -300,7 +296,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
-                  color: isWarning ? Colors.red : colorScheme.onSurface,
+                  color: isWarning ? Colors.red : colorScheme.onPrimary,
                 ),
               ),
             ),
@@ -308,7 +304,7 @@ class _SettingsPageState extends State<SettingsPage> {
               Icon(
                 Icons.arrow_forward_ios,
                 size: 16,
-                color: colorScheme.onSurface.withOpacity(0.5),
+                color: colorScheme.onPrimary.withOpacity(0.5),
               ),
           ],
         ),
@@ -348,13 +344,13 @@ class _SettingsPageState extends State<SettingsPage> {
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: colorScheme.primary.withOpacity(0.1),
+                color: colorScheme.secondary.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(
                 icon,
                 size: 20,
-                color: colorScheme.primary,
+                color: colorScheme.secondary,
               ),
             ),
             const SizedBox(width: 16),
@@ -364,15 +360,15 @@ class _SettingsPageState extends State<SettingsPage> {
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
-                  color: colorScheme.onSurface,
+                  color: colorScheme.onPrimary,
                 ),
               ),
             ),
             Switch(
               value: value,
               onChanged: onChanged,
-              activeColor: colorScheme.primary,
-              inactiveThumbColor: colorScheme.onSurface.withOpacity(0.5),
+              activeColor: colorScheme.onPrimary,
+              inactiveThumbColor: colorScheme.onPrimary,
             ),
           ],
         ),
@@ -410,13 +406,13 @@ class _SettingsPageState extends State<SettingsPage> {
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: colorScheme.primary.withOpacity(0.1),
+              color: colorScheme.secondary.withOpacity(0.1),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(
               icon,
               size: 20,
-              color: colorScheme.primary,
+              color: colorScheme.secondary,
             ),
           ),
           const SizedBox(width: 16),
@@ -426,7 +422,7 @@ class _SettingsPageState extends State<SettingsPage> {
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
-                color: colorScheme.onSurface,
+                color: colorScheme.onPrimary,
               ),
             ),
           ),
@@ -449,7 +445,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     'Error',
                     style: TextStyle(
                       fontWeight: FontWeight.w500,
-                      color: colorScheme.onSurface,
+                      color: colorScheme.onPrimary,
                     ),
                   ),
                 ),

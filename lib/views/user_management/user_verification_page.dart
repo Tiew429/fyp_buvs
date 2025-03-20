@@ -1,6 +1,4 @@
 import 'package:blockchain_university_voting_system/localization/app_locale.dart';
-import 'package:blockchain_university_voting_system/models/staff_model.dart';
-import 'package:blockchain_university_voting_system/models/student_model.dart';
 import 'package:blockchain_university_voting_system/models/user_model.dart';
 import 'package:blockchain_university_voting_system/provider/user_management_provider.dart';
 import 'package:blockchain_university_voting_system/provider/user_provider.dart';

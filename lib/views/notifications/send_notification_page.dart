@@ -1,7 +1,10 @@
 import 'dart:io';
 import 'package:blockchain_university_voting_system/localization/app_locale.dart';
+import 'package:blockchain_university_voting_system/models/user_model.dart';
 import 'package:blockchain_university_voting_system/provider/notification_provider.dart';
 import 'package:blockchain_university_voting_system/provider/user_provider.dart';
+import 'package:blockchain_university_voting_system/provider/user_management_provider.dart';
+import 'package:blockchain_university_voting_system/services/firebase_service.dart';
 import 'package:blockchain_university_voting_system/utils/snackbar_util.dart';
 import 'package:blockchain_university_voting_system/widgets/custom_animated_button.dart';
 import 'package:blockchain_university_voting_system/widgets/custom_text_form_field.dart';
@@ -10,6 +13,7 @@ import 'package:blockchain_university_voting_system/widgets/response_widget.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_localization/flutter_localization.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
 
 class SendNotificationPage extends StatefulWidget {
   final UserProvider userProvider;
@@ -31,6 +35,7 @@ class _SendNotificationPageState extends State<SendNotificationPage> with Single
   late TextEditingController _messageController;
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
+  late UserManagementProvider _userManagementProvider;
   
   List<File> _selectedImages = [];
   final _imagePicker = ImagePicker();
@@ -38,12 +43,22 @@ class _SendNotificationPageState extends State<SendNotificationPage> with Single
   final List<String> _selectedReceivers = [];
   bool _isLoading = false;
   bool _isAllUsers = true;
+  String _sendMethod = 'topic'; // 'topic' or 'users'
+  
+  // available notification types from Firebase Service
+  final List<String> _availableTypes = FirebaseService.getAvailableNotificationTypes()
+      .where((type) => type != 'all_notifications') // exclude the main toggle
+      .toList();
   
   @override
   void initState() {
     super.initState();
     _titleController = TextEditingController();
     _messageController = TextEditingController();
+    _userManagementProvider = Provider.of<UserManagementProvider>(context, listen: false);
+    
+    // load users for selection
+    _loadUsers();
     
     // setup animations
     _animationController = AnimationController(
@@ -59,6 +74,22 @@ class _SendNotificationPageState extends State<SendNotificationPage> with Single
     );
     
     _animationController.forward();
+  }
+  
+  Future<void> _loadUsers() async {
+    setState(() => _isLoading = true);
+    
+    try {
+      // load users from provider
+      await _userManagementProvider.loadUsers();
+      setState(() => _isLoading = false);
+    } catch (e) {
+      debugPrint('Error loading users: $e');
+      if (mounted) {
+        setState(() => _isLoading = false);
+        SnackbarUtil.showSnackBar(context, 'Failed to load users: $e');
+      }
+    }
   }
   
   @override
@@ -111,6 +142,46 @@ class _SendNotificationPageState extends State<SendNotificationPage> with Single
       _selectedImages.removeAt(index);
     });
   }
+
+  // add or remove user from selected receivers
+  void _toggleUserSelection(String userId) {
+    setState(() {
+      if (_selectedReceivers.contains(userId)) {
+        _selectedReceivers.remove(userId);
+      } else {
+        _selectedReceivers.add(userId);
+      }
+    });
+  }
+
+  // helper to get an icon for a notification type
+  IconData _getIconForType(String type) {
+    switch (type) {
+      case 'vote_reminder':
+        return Icons.how_to_vote;
+      case 'new_candidate':
+        return Icons.person_add;
+      case 'new_result':
+        return Icons.bar_chart;
+      case 'system':
+        return Icons.settings;
+      case 'general':
+        return Icons.notifications;
+      case 'announcement':
+        return Icons.campaign;
+      case 'event':
+        return Icons.event;
+      case 'verification':
+        return Icons.verified_user;
+      default:
+        return Icons.notifications;
+    }
+  }
+  
+  // format notification type for display
+  String _formatTypeForDisplay(String type) {
+    return AppLocale.formatTypeDisplay(type, context);
+  }
   
   Future<void> _sendNotification() async {
     if (_formKey.currentState!.validate()) {
@@ -134,21 +205,26 @@ class _SendNotificationPageState extends State<SendNotificationPage> with Single
         
         // get receivers
         List<String> receiverIds = [];
-        if (_isAllUsers) {
-          receiverIds = ['all_users'];
-        } else {
-          receiverIds = _selectedReceivers;
-        }
         
-        if (receiverIds.isEmpty) {
-          SnackbarUtil.showSnackBar(
-            context, 
-            AppLocale.pleaseSelectAtLeastOneReceiver.getString(context),
-          );
-          setState(() {
-            _isLoading = false;
-          });
-          return;
+        if (_isAllUsers) {
+          // send to all users
+          receiverIds = ['all_users'];
+        } else if (_sendMethod == 'topic') {
+          // send to a specific topic
+          receiverIds = ['topic_$_notificationType'];
+        } else {
+          // send to specific users
+          if (_selectedReceivers.isEmpty) {
+            SnackbarUtil.showSnackBar(
+              context, 
+              AppLocale.pleaseSelectAtLeastOneReceiver.getString(context),
+            );
+            setState(() {
+              _isLoading = false;
+            });
+            return;
+          }
+          receiverIds = _selectedReceivers;
         }
         
         // send the notification
@@ -219,7 +295,7 @@ class _SendNotificationPageState extends State<SendNotificationPage> with Single
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Title field
+                      // title field
                       CustomTextFormField(
                         controller: _titleController,
                         labelText: AppLocale.title.getString(context),
@@ -246,126 +322,384 @@ class _SendNotificationPageState extends State<SendNotificationPage> with Single
                       ),
                       const SizedBox(height: 16),
                       
-                      // notification type
+                      // notification type section
                       Text(
-                        AppLocale.notificationTypes.getString(context),
-                        style: TextStyle(
+                        AppLocale.notificationType.getString(context),
+                        style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
-                          color: colorScheme.onPrimary,
                         ),
                       ),
                       const SizedBox(height: 8),
-                      DropdownButtonFormField<String>(
-                        value: _notificationType,
-                        decoration: InputDecoration(
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          filled: true,
-                          fillColor: colorScheme.surface,
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: colorScheme.surface,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: colorScheme.outline.withOpacity(0.3)),
                         ),
-                        items: [
-                          DropdownMenuItem(
-                            value: 'general',
-                            child: Text(AppLocale.general.getString(context)),
-                          ),
-                          DropdownMenuItem(
-                            value: 'announcement',
-                            child: Text(AppLocale.announcement.getString(context)),
-                          ),
-                          DropdownMenuItem(
-                            value: 'event',
-                            child: Text(AppLocale.event.getString(context)),
-                          ),
-                          DropdownMenuItem(
-                            value: 'alert',
-                            child: Text(AppLocale.alert.getString(context)),
-                          ),
-                        ],
-                        onChanged: (value) {
-                          if (value != null) {
-                            setState(() {
-                              _notificationType = value;
-                            });
-                          }
-                        },
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              AppLocale.selectNotificationTopic.getString(context),
+                              style: TextStyle(
+                                color: colorScheme.onSurface.withOpacity(0.7),
+                                fontSize: 14,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Wrap(
+                              spacing: 8,
+                              runSpacing: 8,
+                              children: _availableTypes.map((type) {
+                                final bool isSelected = _notificationType == type;
+                                return GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      _notificationType = type;
+                                    });
+                                  },
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                    decoration: BoxDecoration(
+                                      color: isSelected 
+                                          ? colorScheme.primary.withOpacity(0.2) 
+                                          : colorScheme.surface,
+                                      borderRadius: BorderRadius.circular(16),
+                                      border: Border.all(
+                                        color: isSelected 
+                                            ? colorScheme.primary 
+                                            : colorScheme.outline.withOpacity(0.5),
+                                      ),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(
+                                          _getIconForType(type),
+                                          size: 16,
+                                          color: isSelected ? colorScheme.primary : colorScheme.onSurface,
+                                        ),
+                                        const SizedBox(width: 4),
+                                        Text(
+                                          _formatTypeForDisplay(type),
+                                          style: TextStyle(
+                                            color: isSelected ? colorScheme.primary : colorScheme.onSurface,
+                                            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              }).toList(),
+                            ),
+                          ],
+                        ),
                       ),
                       const SizedBox(height: 16),
-                      
-                      // Receivers
+
+                      // receivers section
                       Text(
-                        AppLocale.sendTo.getString(context),
-                        style: TextStyle(
+                        AppLocale.receivers.getString(context),
+                        style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
-                          color: colorScheme.onPrimary,
                         ),
                       ),
-                      const SizedBox(height: 8),
+                      
+                      // all users option
                       SwitchListTile(
-                        title: Text(AppLocale.sendToAllUsers.getString(context)),
+                        title: Text(AppLocale.allUsers.getString(context)),
+                        subtitle: Text(AppLocale.sendToAllUsersInSystem.getString(context)),
                         value: _isAllUsers,
-                        onChanged: (value) {
+                        onChanged: (bool value) {
                           setState(() {
                             _isAllUsers = value;
                           });
                         },
-                        activeColor: colorScheme.primary,
+                        dense: true,
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 0),
                       ),
                       
                       if (!_isAllUsers) ...[
-                        // user selection
-                        // in a real app, you'd implement a user selection UI
-                        const Padding(
-                          padding: EdgeInsets.all(8.0),
-                          child: Text('User selection is not implemented in this demo'),
+                        // sending method tabs
+                        Container(
+                          decoration: BoxDecoration(
+                            color: colorScheme.surface,
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: colorScheme.outline.withOpacity(0.3)),
+                          ),
+                          child: Column(
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Text(
+                                  '${AppLocale.selectHowYouWantToSendThisNotification.getString(context)}:',
+                                  style: TextStyle(
+                                    color: colorScheme.onSurface.withOpacity(0.7),
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              ),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: InkWell(
+                                      onTap: () {
+                                        setState(() {
+                                          _sendMethod = 'topic';
+                                        });
+                                      },
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(vertical: 12),
+                                        decoration: BoxDecoration(
+                                          color: _sendMethod == 'topic' 
+                                              ? colorScheme.primary.withOpacity(0.2) 
+                                              : Colors.transparent,
+                                          borderRadius: const BorderRadius.only(
+                                            topLeft: Radius.circular(8),
+                                            bottomLeft: Radius.circular(8),
+                                          ),
+                                        ),
+                                        alignment: Alignment.center,
+                                        child: Row(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: [
+                                            Icon(
+                                              Icons.topic,
+                                              color: _sendMethod == 'topic' 
+                                                  ? colorScheme.primary 
+                                                  : colorScheme.onSurface,
+                                              size: 16,
+                                            ),
+                                            const SizedBox(width: 4),
+                                            Text(
+                                              AppLocale.byTopic.getString(context),
+                                              style: TextStyle(
+                                                color: _sendMethod == 'topic' 
+                                                    ? colorScheme.primary 
+                                                    : colorScheme.onSurface,
+                                                fontWeight: _sendMethod == 'topic' 
+                                                    ? FontWeight.bold 
+                                                    : FontWeight.normal,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  Expanded(
+                                    child: InkWell(
+                                      onTap: () {
+                                        setState(() {
+                                          _sendMethod = 'users';
+                                          // Reset selected receivers when switching to user selection
+                                          _selectedReceivers.clear();
+                                        });
+                                      },
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(vertical: 12),
+                                        decoration: BoxDecoration(
+                                          color: _sendMethod == 'users' 
+                                              ? colorScheme.primary.withOpacity(0.2) 
+                                              : Colors.transparent,
+                                          borderRadius: const BorderRadius.only(
+                                            topRight: Radius.circular(8),
+                                            bottomRight: Radius.circular(8),
+                                          ),
+                                        ),
+                                        alignment: Alignment.center,
+                                        child: Row(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: [
+                                            Icon(
+                                              Icons.people,
+                                              color: _sendMethod == 'users' 
+                                                  ? colorScheme.primary 
+                                                  : colorScheme.onSurface,
+                                              size: 16,
+                                            ),
+                                            const SizedBox(width: 4),
+                                            Text(
+                                              AppLocale.specificUsers.getString(context),
+                                              style: TextStyle(
+                                                color: _sendMethod == 'users' 
+                                                    ? colorScheme.primary 
+                                                    : colorScheme.onSurface,
+                                                fontWeight: _sendMethod == 'users' 
+                                                    ? FontWeight.bold 
+                                                    : FontWeight.normal,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
+                        const SizedBox(height: 8),
+                        
+                        // Show different UI based on send method
+                        if (_sendMethod == 'topic')
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 8.0),
+                            child: Card(
+                              child: Padding(
+                                padding: const EdgeInsets.all(12.0),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Icon(_getIconForType(_notificationType), 
+                                            color: colorScheme.primary),
+                                        const SizedBox(width: 8),
+                                        Text(
+                                          '${AppLocale.sendingToTopic.getString(context)}: ${_formatTypeForDisplay(_notificationType)}',
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      '${AppLocale.thisNotificationWillBeSentToAllUsersWhoAreSubscribedTo.getString(context)} ${_formatTypeForDisplay(_notificationType)} ${AppLocale.topic.getString(context)}.',
+                                      style: TextStyle(
+                                        color: colorScheme.onSurface.withOpacity(0.7),
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          )
+                        else
+                          Consumer<UserManagementProvider>(
+                            builder: (context, provider, child) {
+                              final staffList = provider.staffList;
+                              final studentList = provider.studentList;
+                              
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(
+                                          '${AppLocale.selectedUsers.getString(context)}: ${_selectedReceivers.length}',
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            color: colorScheme.primary,
+                                          ),
+                                        ),
+                                        if (_selectedReceivers.isNotEmpty)
+                                          TextButton(
+                                            onPressed: () {
+                                              setState(() {
+                                                _selectedReceivers.clear();
+                                              });
+                                            },
+                                            child: Text(AppLocale.clearAll.getString(context)),
+                                          ),
+                                      ],
+                                    ),
+                                  ),
+                                  
+                                  // User selection section
+                                  Container(
+                                    constraints: const BoxConstraints(maxHeight: 250),
+                                    child: ListView(
+                                      shrinkWrap: true,
+                                      children: [
+                                        if (staffList.isNotEmpty) ...[
+                                          Padding(
+                                            padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
+                                            child: Text(
+                                              AppLocale.staffSection.getString(context),
+                                              style: const TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 16,
+                                              ),
+                                            ),
+                                          ),
+                                          ...staffList.map((staff) => _buildUserSelectionTile(
+                                            userId: staff.userID,
+                                            name: staff.name,
+                                            email: staff.email,
+                                            role: UserRole.staff,
+                                          )),
+                                        ],
+                                        
+                                        if (studentList.isNotEmpty) ...[
+                                          Padding(
+                                            padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
+                                            child: Text(
+                                              AppLocale.studentsSection.getString(context),
+                                              style: const TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 16,
+                                              ),
+                                            ),
+                                          ),
+                                          ...studentList.map((student) => _buildUserSelectionTile(
+                                            userId: student.userID,
+                                            name: student.name,
+                                            email: student.email,
+                                            role: UserRole.student,
+                                          )),
+                                        ],
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              );
+                            },
+                          ),
                       ],
                       
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 24),
                       
-                      // image selection
-                      Text(
-                        AppLocale.attachImagesOptional.getString(context),
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: colorScheme.onPrimary,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
+                      // image attachments section
                       Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          ElevatedButton.icon(
-                            onPressed: _pickImages,
-                            icon: Icon(Icons.photo_library, 
-                              color: colorScheme.onPrimary,
-                            ),
-                            label: Text(AppLocale.gallery.getString(context), 
-                              style: TextStyle(
-                                color: colorScheme.onPrimary,
-                              ),
+                          Text(
+                            AppLocale.images.getString(context),
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
-                          const SizedBox(width: 8),
-                          ElevatedButton.icon(
-                            onPressed: _takePhoto,
-                            icon: Icon(Icons.camera_alt, 
-                              color: colorScheme.onPrimary,
-                            ),
-                            label: Text(AppLocale.camera.getString(context), 
-                              style: TextStyle(
-                                color: colorScheme.onPrimary,
+                          Row(
+                            children: [
+                              IconButton(
+                                onPressed: _pickImages,
+                                icon: const Icon(Icons.photo_library),
+                                tooltip: AppLocale.pickImages.getString(context),
                               ),
-                            ),
+                              IconButton(
+                                onPressed: _takePhoto,
+                                icon: const Icon(Icons.camera_alt),
+                                tooltip: AppLocale.takePhoto.getString(context),
+                              ),
+                            ],
                           ),
                         ],
                       ),
-                      const SizedBox(height: 16),
                       
-                      // selected images
                       if (_selectedImages.isNotEmpty) ...[
+                        const SizedBox(height: 8),
                         SizedBox(
                           height: 120,
                           child: ListView.builder(
@@ -377,7 +711,6 @@ class _SendNotificationPageState extends State<SendNotificationPage> with Single
                                   Container(
                                     margin: const EdgeInsets.only(right: 8),
                                     width: 120,
-                                    height: 120,
                                     decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(8),
                                       image: DecorationImage(
@@ -389,18 +722,18 @@ class _SendNotificationPageState extends State<SendNotificationPage> with Single
                                   Positioned(
                                     top: 4,
                                     right: 12,
-                                    child: InkWell(
+                                    child: GestureDetector(
                                       onTap: () => _removeImage(index),
                                       child: Container(
                                         padding: const EdgeInsets.all(4),
                                         decoration: BoxDecoration(
-                                          color: Colors.black54,
-                                          borderRadius: BorderRadius.circular(12),
+                                          color: Colors.black.withOpacity(0.5),
+                                          shape: BoxShape.circle,
                                         ),
                                         child: const Icon(
                                           Icons.close,
-                                          color: Colors.white,
                                           size: 16,
+                                          color: Colors.white,
                                         ),
                                       ),
                                     ),
@@ -410,38 +743,69 @@ class _SendNotificationPageState extends State<SendNotificationPage> with Single
                             },
                           ),
                         ),
-                        const SizedBox(height: 16),
                       ],
+                      
+                      const SizedBox(height: 32),
+                      
                       // send button
                       Center(
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 300),
-                          width: _isLoading ? 60 : 200,
-                          height: 50,
-                          child: CustomAnimatedButton(
-                            onPressed: _isLoading ? null : () async {
-                              await _sendNotification();
-                            },
-                            text: AppLocale.sendNotification.getString(context),
-                            width: double.infinity,
-                          ),
+                        child: CustomAnimatedButton(
+                          onPressed: _sendNotification,
+                          text: AppLocale.send.getString(context),
                         ),
                       ),
-                      const SizedBox(height: 30),
+                      
+                      const SizedBox(height: 16),
                     ],
                   ),
                 ),
               ),
             ),
-            tablet: Container(),
+        tablet: Container(),
           ),
-          if (_isLoading) 
-            ProgressCircular(
-              isLoading: _isLoading,
-              message: AppLocale.sendingNotification.getString(context),
-            ),
+          
+          if (_isLoading)
+            const ProgressCircular(isLoading: true),
         ],
       ),
+    );
+  }
+  
+  Widget _buildUserSelectionTile({
+    required String userId, 
+    required String name, 
+    required String email,
+    required UserRole role,
+  }) {
+    final bool isSelected = _selectedReceivers.contains(userId);
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    
+    return CheckboxListTile(
+      title: Text(
+        name,
+        style: TextStyle(
+          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+        ),
+      ),
+      subtitle: Text(email),
+      secondary: CircleAvatar(
+        backgroundColor: isSelected ? colorScheme.primary : colorScheme.onSurface.withOpacity(0.2),
+        child: Text(
+          name.isNotEmpty ? name[0].toUpperCase() : '?',
+          style: TextStyle(
+            color: isSelected ? colorScheme.onPrimary : colorScheme.onSurface,
+          ),
+        ),
+      ),
+      value: isSelected,
+      onChanged: (bool? value) {
+        if (value != null) {
+          _toggleUserSelection(userId);
+        }
+      },
+      activeColor: colorScheme.primary,
+      checkColor: colorScheme.onPrimary,
+      dense: true,
     );
   }
 }

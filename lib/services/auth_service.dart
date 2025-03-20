@@ -16,10 +16,7 @@ import 'package:blockchain_university_voting_system/provider/user_provider.dart'
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth_user;
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_localization/flutter_localization.dart';
-import 'package:mailer/mailer.dart';
-import 'package:mailer/smtp_server/gmail.dart';
 import 'package:provider/provider.dart';
 
 class AuthService {
@@ -142,11 +139,13 @@ class AuthService {
       print("User address: ${userRetrieved?.walletAddress}");
       if (userRetrieved != null) {
         setUserAndLoginAndNavigate(context, userRetrieved);
+        SnackbarUtil.showSnackBar(context, AppLocale.loginSuccess.getString(context));
         return;
       }
 
       // if user not found, navigate to register page
       NavigationHelper.navigateToRegisterPage(context, true);
+      SnackbarUtil.showSnackBar(context, AppLocale.pleaseRegister.getString(context));
     } catch (e) {
       print("Error during Metamask login: $e");
       SnackbarUtil.showSnackBar(context, 'Login failed: $e');

@@ -3,6 +3,7 @@ import 'package:blockchain_university_voting_system/models/candidate_model.dart'
 import 'package:blockchain_university_voting_system/models/user_model.dart';
 import 'package:blockchain_university_voting_system/models/voting_event_model.dart';
 import 'package:blockchain_university_voting_system/routes/navigation_helper.dart';
+import 'package:blockchain_university_voting_system/services/report_service.dart';
 import 'package:blockchain_university_voting_system/utils/snackbar_util.dart';
 import 'package:blockchain_university_voting_system/provider/voting_event_provider.dart';
 import 'package:blockchain_university_voting_system/widgets/candidate_box.dart';
@@ -42,6 +43,8 @@ class _VotingEventPageState extends State<VotingEventPage> {
   late Duration timeRemaining;
   late Candidate winner;
 
+  final ReportService _reportService = ReportService();
+
   @override
   void initState() {
     super.initState();
@@ -53,12 +56,30 @@ class _VotingEventPageState extends State<VotingEventPage> {
     DateTime now = DateTime.now();
     TimeOfDay nowTime = TimeOfDay.now();
 
-    bool isWithinDateRange = now.isAfter(_votingEvent.startDate!) && now.isBefore(_votingEvent.endDate!);
-    bool isWithinTimeRange = nowTime.isAfter(_votingEvent.startTime!) && nowTime.isBefore(_votingEvent.endTime!);
     bool isVotingCreator = _votingEvent.createdBy == widget._user.walletAddress;
     bool hasVoted = _votingEvent.voters.any((voter) => voter.userID == widget._user.userID);
 
-    ongoing = isWithinDateRange && isWithinTimeRange;
+    // check if today is within the voting date range
+    if (now.isAfter(_votingEvent.startDate!) && now.isBefore(_votingEvent.endDate!)) {
+      // if today is within date range, check if current time is after start time
+      ongoing = nowTime.hour > _votingEvent.startTime!.hour || 
+                (nowTime.hour == _votingEvent.startTime!.hour && 
+                 nowTime.minute >= _votingEvent.startTime!.minute);
+    } else if (now.isAtSameMomentAs(_votingEvent.startDate!)) {
+      // if today is the start date, check if current time is after or equal to start time
+      ongoing = nowTime.hour > _votingEvent.startTime!.hour || 
+                (nowTime.hour == _votingEvent.startTime!.hour && 
+                 nowTime.minute >= _votingEvent.startTime!.minute);
+    } else if (now.isAtSameMomentAs(_votingEvent.endDate!)) {
+      // if today is the end date, check if current time is before or equal to end time
+      ongoing = nowTime.hour < _votingEvent.endTime!.hour || 
+                (nowTime.hour == _votingEvent.endTime!.hour && 
+                 nowTime.minute <= _votingEvent.endTime!.minute);
+    } else {
+      // if today is outside the date range, voting is not ongoing
+      ongoing = false;
+    }
+
     canVote = ongoing && widget._user.role == UserRole.student && widget._isEligibleToVote && !hasVoted && !isVotingCreator;
     isEnded = now.isAfter(_votingEvent.endDate!) || (now == _votingEvent.endDate! && nowTime.isAfter(_votingEvent.endTime!));
 
@@ -71,6 +92,9 @@ class _VotingEventPageState extends State<VotingEventPage> {
     if (isEnded) {
       winner = _votingEvent.candidates.reduce((a, b) => a.votesReceived > b.votesReceived ? a : b);
     }
+    print("ongoing: $ongoing");
+    print("canVote: $canVote");
+    print("isEnded: $isEnded");
   }
 
   Future<void> _vote(Candidate candidate) async {
@@ -91,7 +115,23 @@ class _VotingEventPageState extends State<VotingEventPage> {
     }
   }
 
-  Future<void> _exportToReport() async {}
+  Future<void> _exportToReport() async {
+    await _reportService.exportVotingReport(
+      context: context, 
+      votingEvent: _votingEvent, 
+      votingEventDate: votingEventDate, 
+      votingEventTime: votingEventTime, 
+      isEnded: isEnded, 
+      winner: winner, 
+      generatedBy: widget._user.name, 
+      updateLoadingState: (isLoading, message) {
+        setState(() {
+          this.isLoading = isLoading;
+          loadingText = message;
+        });
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {

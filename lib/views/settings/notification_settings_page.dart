@@ -17,10 +17,13 @@ class NotificationSettingsPage extends StatefulWidget {
 
 class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
   bool _notificationsEnabled = true;
-  bool _voteReminderEnabled = true;
-  bool _newCandidateEnabled = true;
-  bool _newResultEnabled = true;
+  final Map<String, bool> _topicSettings = {};
   bool _isLoading = true;
+  
+  // get all available notification types from FirebaseService
+  final List<String> _availableTypes = FirebaseService.getAvailableNotificationTypes()
+      .where((type) => type != 'all_notifications') // exclude the main toggle
+      .toList();
 
   @override
   void initState() {
@@ -34,24 +37,23 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
     });
     
     try {
-      // load notifications enabled
+      // load main notification toggle
       bool? notificationsEnabled = await getNotificationsEnabled();
-      // load specific notification enabled
-      bool? voteReminderEnabled = await getSpecificNotificationEnabled('vote_reminder');
-      bool? newCandidateEnabled = await getSpecificNotificationEnabled('new_candidate');
-      bool? newResultEnabled = await getSpecificNotificationEnabled('new_result');
+      _notificationsEnabled = notificationsEnabled ?? true;
+      
+      // load settings for each notification type
+      for (String type in _availableTypes) {
+        bool? enabled = await getSpecificNotificationEnabled(type);
+        _topicSettings[type] = enabled ?? true;
+      }
       
       if (mounted) {
         setState(() {
-          _notificationsEnabled = notificationsEnabled ?? true;
-          _voteReminderEnabled = voteReminderEnabled ?? true;
-          _newCandidateEnabled = newCandidateEnabled ?? true;
-          _newResultEnabled = newResultEnabled ?? true;
           _isLoading = false;
         });
       }
     } catch (e) {
-      print("加载通知设置出错: $e");
+      debugPrint("Error loading notification settings: $e");
       if (mounted) {
         setState(() {
           _isLoading = false;
@@ -66,38 +68,27 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
     });
     
     try {
-      // save main notification settings
+      // save main notification toggle
       await saveNotificationsEnabled(_notificationsEnabled);
       
-      // save specific notification type settings
-      await saveSpecificNotificationEnabled('vote_reminder', _voteReminderEnabled);
-      await saveSpecificNotificationEnabled('new_candidate', _newCandidateEnabled);
-      await saveSpecificNotificationEnabled('new_result', _newResultEnabled);
-      
-      // apply notification settings to Firebase
+      // handle main notification topic
       if (_notificationsEnabled) {
         await FirebaseService.subscribeToTopic('all_notifications');
       } else {
         await FirebaseService.unsubscribeFromTopic('all_notifications');
       }
       
-      // subscribe to specific notification type
-      if (_voteReminderEnabled && _notificationsEnabled) {
-        await FirebaseService.subscribeToTopic('vote_reminder');
-      } else {
-        await FirebaseService.unsubscribeFromTopic('vote_reminder');
-      }
-      
-      if (_newCandidateEnabled && _notificationsEnabled) {
-        await FirebaseService.subscribeToTopic('new_candidate');
-      } else {
-        await FirebaseService.unsubscribeFromTopic('new_candidate');
-      }
-      
-      if (_newResultEnabled && _notificationsEnabled) {
-        await FirebaseService.subscribeToTopic('new_result');
-      } else {
-        await FirebaseService.unsubscribeFromTopic('new_result');
+      // save and apply each topic subscription
+      for (String type in _availableTypes) {
+        // save setting to preferences
+        await saveSpecificNotificationEnabled(type, _topicSettings[type] ?? false);
+        
+        // apply subscription or unsubscription
+        if (_topicSettings[type] == true && _notificationsEnabled) {
+          await FirebaseService.subscribeToTopic(type);
+        } else {
+          await FirebaseService.unsubscribeFromTopic(type);
+        }
       }
       
       // display success message
@@ -137,7 +128,10 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildSectionHeader(AppLocale.notifications.getString(context), AppLocale.controlWhetherToReceiveAllTypesOfNotifications.getString(context)),
+                  _buildSectionHeader(
+                    AppLocale.notifications.getString(context), 
+                    AppLocale.controlWhetherToReceiveAllTypesOfNotifications.getString(context)
+                  ),
                   _buildSwitchTile(
                     AppLocale.enableNotifications.getString(context),
                     AppLocale.enableOrDisableAllNotifications.getString(context), 
@@ -154,42 +148,76 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
                     AppLocale.notificationTypes.getString(context),
                     AppLocale.selectTheNotificationTypesYouWantToReceive.getString(context)
                   ),
-                  _buildSwitchTile(
-                    AppLocale.voteReminder.getString(context),
-                    AppLocale.remindYouToParticipateInVotingActivities.getString(context), 
-                    _voteReminderEnabled && _notificationsEnabled, 
-                    (value) {
-                      setState(() {
-                        _voteReminderEnabled = value;
-                      });
-                    },
-                    enabled: _notificationsEnabled,
-                    icon: FontAwesomeIcons.voteYea,
-                  ),
-                  _buildSwitchTile(
-                    AppLocale.newCandidate.getString(context),
-                    AppLocale.notifyYouWhenThereIsANewCandidate.getString(context), 
-                    _newCandidateEnabled && _notificationsEnabled, 
-                    (value) {
-                      setState(() {
-                        _newCandidateEnabled = value;
-                      });
-                    },
-                    enabled: _notificationsEnabled,
-                    icon: FontAwesomeIcons.userPlus,
-                  ),
-                  _buildSwitchTile(
-                    AppLocale.newResult.getString(context),
-                    AppLocale.notifyYouWhenTheVotingResultsAreAnnounced.getString(context), 
-                    _newResultEnabled && _notificationsEnabled, 
-                    (value) {
-                      setState(() {
-                        _newResultEnabled = value;
-                      });
-                    },
-                    enabled: _notificationsEnabled,
-                    icon: FontAwesomeIcons.chartBar,
-                  ),
+                  
+                  // dynamically generate all notification type toggles
+                  ..._availableTypes.map((type) {
+                    IconData icon;
+                    String title;
+                    String description;
+                    
+                    // determine icon and text based on type
+                    switch (type) {
+                      case 'vote_reminder':
+                        icon = FontAwesomeIcons.voteYea;
+                        title = AppLocale.voteReminder.getString(context);
+                        description = AppLocale.remindYouToParticipateInVotingActivities.getString(context);
+                        break;
+                      case 'new_candidate':
+                        icon = FontAwesomeIcons.userPlus;
+                        title = AppLocale.newCandidate.getString(context);
+                        description = AppLocale.notifyYouWhenThereIsANewCandidate.getString(context);
+                        break;
+                      case 'new_result':
+                        icon = FontAwesomeIcons.chartBar;
+                        title = AppLocale.newResult.getString(context);
+                        description = AppLocale.notifyYouWhenTheVotingResultsAreAnnounced.getString(context);
+                        break;
+                      case 'system':
+                        icon = FontAwesomeIcons.cog;
+                        title = 'System';
+                        description = 'System-related notifications';
+                        break;
+                      case 'general':
+                        icon = FontAwesomeIcons.bell;
+                        title = 'General';
+                        description = 'General notifications';
+                        break;
+                      case 'announcement':
+                        icon = FontAwesomeIcons.bullhorn;
+                        title = 'Announcements';
+                        description = 'Important announcements';
+                        break;
+                      case 'event':
+                        icon = FontAwesomeIcons.calendar;
+                        title = 'Events';
+                        description = 'Event notifications';
+                        break;
+                      case 'verification':
+                        icon = FontAwesomeIcons.check;
+                        title = 'Verification';
+                        description = 'Account verification updates';
+                        break;
+                      default:
+                        icon = FontAwesomeIcons.solidBell;
+                        title = type.replaceAll('_', ' ').capitalize();
+                        description = '$title notifications';
+                        break;
+                    }
+                    
+                    return _buildSwitchTile(
+                      title,
+                      description, 
+                      _topicSettings[type] ?? true && _notificationsEnabled, 
+                      (value) {
+                        setState(() {
+                          _topicSettings[type] = value;
+                        });
+                      },
+                      enabled: _notificationsEnabled,
+                      icon: icon,
+                    );
+                  }),
+                  
                   const SizedBox(height: 20),
                   Center(
                     child: CustomConfirmButton(
@@ -260,5 +288,12 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
         onTap: enabled ? () => onChanged(!value) : null,
       ),
     );
+  }
+}
+
+// extension method to capitalize the first letter of each word
+extension StringExtension on String {
+  String capitalize() {
+    return split(' ').map((word) => word.isNotEmpty ? '${word[0].toUpperCase()}${word.substring(1)}' : '').join(' ');
   }
 } 

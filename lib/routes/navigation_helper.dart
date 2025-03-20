@@ -5,7 +5,7 @@ import 'package:go_router/go_router.dart';
 
 class NavigationHelper {
 
-  // Authentication
+  // authentication
   static Future<void> navigateToLoginPage(BuildContext context) async {
     await navigateWithPreload(
       context, 
@@ -42,7 +42,7 @@ class NavigationHelper {
     );
   }
 
-  // Home (Dashboard, Profile, Settings)
+  // home (dashboard, profile, settings)
   static Future<void> navigateToHomePage(BuildContext context) async {
     await navigateWithPreload(
       context, 
@@ -54,7 +54,7 @@ class NavigationHelper {
     context.push('/${RouterPath.editprofilepage.path}');
   }
 
-  // Voting
+  // voting
   static Future<void> navigateToVotingListPage(BuildContext context) async {
     await navigateWithPreload(
       context, 
@@ -78,12 +78,12 @@ class NavigationHelper {
     context.push('/${RouterPath.addcandidatepage.path}');
   }
 
-  // Pending VE
+  // pending VE
   static void navigateToPendingVotingEventListPage(BuildContext context) {
     context.push('/${RouterPath.pendingvotingeventlistpage.path}');
   }
 
-  // User Management
+  // user management
   static void navigateToUserManagementPage(BuildContext context) {
     context.push('/${RouterPath.usermanagementpage.path}');
   }
@@ -98,12 +98,12 @@ class NavigationHelper {
   }
   
 
-  // Report
+  // report
   static void navigateToReportPage(BuildContext context) {
     context.push('/${RouterPath.reportpage.path}');
   }
 
-  // Audit
+  // audit
   static void navigateToAuditListPage(BuildContext context) {
     context.push('/${RouterPath.auditlistpage.path}');
   }
@@ -111,15 +111,18 @@ class NavigationHelper {
     context.push('/${RouterPath.votingeventauditlogspage.path}');
   }
 
-  // Notifications
+  // notifications
   static void navigateToNotificationsPage(BuildContext context) {
     context.push('/${RouterPath.notificationspage.path}');
   }
   static void navigateToSendNotificationPage(BuildContext context) {
     context.push('/${RouterPath.sendnotificationpage.path}');
   }
+  static void navigateToNotifionSettingsPage(BuildContext context) {
+    context.push('/${RouterPath.notificationsettingspage.path}');
+  }
 
-  // Back method
+  // back method
   static void navigateBack(BuildContext context) {
     context.pop();
   }

@@ -4,6 +4,7 @@ import 'package:blockchain_university_voting_system/models/user_model.dart';
 import 'package:blockchain_university_voting_system/provider/notification_provider.dart';
 import 'package:blockchain_university_voting_system/provider/user_provider.dart';
 import 'package:blockchain_university_voting_system/routes/navigation_helper.dart';
+import 'package:blockchain_university_voting_system/services/firebase_service.dart';
 import 'package:blockchain_university_voting_system/utils/date_format_util.dart';
 import 'package:blockchain_university_voting_system/utils/snackbar_util.dart';
 import 'package:blockchain_university_voting_system/widgets/empty_state_widget.dart';
@@ -31,6 +32,9 @@ class _NotificationsPageState extends State<NotificationsPage> with SingleTicker
   bool _isLoading = true;
   late TextEditingController _searchController;
   String _searchQuery = '';
+  String? _selectedType;
+  
+  final List<String> _allTypes = ['All', ...FirebaseService.getAvailableNotificationTypes()];
 
   @override
   void initState() {
@@ -115,11 +119,22 @@ class _NotificationsPageState extends State<NotificationsPage> with SingleTicker
   }
 
   List<NotificationModel> _filterNotifications(List<NotificationModel> notifications) {
-    if (_searchQuery.isEmpty) return notifications;
+    if (_searchQuery.isEmpty && _selectedType == null || _selectedType == 'All') {
+      return notifications;
+    }
     
     return notifications.where((notification) {
-      return notification.title.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-             notification.message.toLowerCase().contains(_searchQuery.toLowerCase());
+      // Filter by search query
+      bool matchesSearch = _searchQuery.isEmpty ||
+          notification.title.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+          notification.message.toLowerCase().contains(_searchQuery.toLowerCase());
+      
+      // Filter by type/topic
+      bool matchesType = _selectedType == null || 
+                         _selectedType == 'All' || 
+                         notification.type == _selectedType;
+      
+      return matchesSearch && matchesType;
     }).toList();
   }
 
@@ -146,38 +161,109 @@ class _NotificationsPageState extends State<NotificationsPage> with SingleTicker
               controller: _tabController,
               tabs: [
                 Tab(text: AppLocale.received.getString(context)),
-            Tab(text: AppLocale.sent.getString(context)),
-          ],
-          indicatorColor: colorScheme.onSecondary,
-          labelColor: colorScheme.onSecondary,
-        ) : null,
+                Tab(text: AppLocale.sent.getString(context)),
+              ],
+              indicatorColor: colorScheme.onSecondary,
+              labelColor: colorScheme.onSecondary,
+            ) 
+          : null,
       ),
       backgroundColor: colorScheme.tertiary,
       body: Column(
         children: [
-          // Search Box
+          // search and Filter Row
           Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                hintText: 'Search notifications...',
-                prefixIcon: const Icon(Icons.search),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10.0),
+            padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0),
+            child: Row(
+              children: [
+                // search Box
+                Expanded(
+                  flex: 3,
+                  child: TextField(
+                    controller: _searchController,
+                    decoration: InputDecoration(
+                      hintText: AppLocale.searchNotifications.getString(context),
+                      prefixIcon: const Icon(Icons.search),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10.0),
+                      ),
+                      filled: true,
+                      fillColor: colorScheme.surface,
+                      contentPadding: const EdgeInsets.symmetric(vertical: 0),
+                    ),
+                    onChanged: (value) {
+                      setState(() {
+                        _searchQuery = value;
+                      });
+                    },
+                  ),
                 ),
-                filled: true,
-                fillColor: colorScheme.surface,
-              ),
-              onChanged: (value) {
-                setState(() {
-                  _searchQuery = value;
-                });
-              },
+                const SizedBox(width: 8),
+                // topic Filter Dropdown
+                Expanded(
+                  flex: 2,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                    decoration: BoxDecoration(
+                      color: colorScheme.surface,
+                      borderRadius: BorderRadius.circular(10.0),
+                      border: Border.all(color: Colors.grey.shade400),
+                    ),
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton<String>(
+                        value: _selectedType ?? 'All',
+                        icon: const Icon(Icons.filter_list),
+                        isExpanded: true,
+                        hint: Text(AppLocale.filterByType.getString(context)),
+                        items: _allTypes.map((String value) {
+                          return DropdownMenuItem<String>(
+                            value: value,
+                            child: Text(
+                              value == 'All' 
+                                  ? AppLocale.allNotificationTypes.getString(context)
+                                  : AppLocale.formatTypeDisplay(value, context),
+                              style: const TextStyle(fontSize: 14),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          );
+                        }).toList(),
+                        onChanged: (newValue) {
+                          setState(() {
+                            _selectedType = newValue == 'All' ? null : newValue;
+                          });
+                        },
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
           
-          // Notification Content
+          // filter Chips
+          if (_selectedType != null && _selectedType != 'All')
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Wrap(
+                spacing: 8.0,
+                children: [
+                  Chip(
+                    label: Text(_selectedType != null 
+                      ? AppLocale.formatTypeDisplay(_selectedType!, context)
+                      : ''),
+                    deleteIcon: const Icon(Icons.close, size: 18),
+                    onDeleted: () {
+                      setState(() {
+                        _selectedType = null;
+                      });
+                    },
+                    backgroundColor: colorScheme.primary.withOpacity(0.2),
+                  ),
+                ],
+              ),
+            ),
+          
+          // notification Content
           Expanded(
             child: _isLoading
               ? const Center(child: CircularProgressIndicator())
@@ -190,14 +276,14 @@ class _NotificationsPageState extends State<NotificationsPage> with SingleTicker
                         ? TabBarView(
                           controller: _tabController,
                           children: [
-                            // Received notifications tab
+                            // received notifications tab
                             _buildNotificationsList(
                               _filterNotifications(provider.receivedNotifications),
                               _onTapReceivedNotification,
                               AppLocale.noNotificationsReceived.getString(context),
                             ),
                             
-                            // Sent notifications tab
+                            // sent notifications tab
                             _buildNotificationsList(
                               _filterNotifications(provider.sentNotifications),
                               _onTapSentNotification,
@@ -251,7 +337,7 @@ class _NotificationsPageState extends State<NotificationsPage> with SingleTicker
     Function(NotificationModel) onTap,
   ) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    // Add a small delay based on index for staggered effect
+    // add a small delay based on index for staggered effect
     return TweenAnimationBuilder(
       tween: Tween<double>(begin: 0, end: 1),
       duration: const Duration(milliseconds: 300),
@@ -387,13 +473,13 @@ class _NotificationsPageState extends State<NotificationsPage> with SingleTicker
   }
 
   void _onTapReceivedNotification(NotificationModel notification) {
-    // Show notification detail dialog
+    // show notification detail dialog
     _markAsRead(notification);
     _showNotificationDetailDialog(notification);
   }
 
   void _onTapSentNotification(NotificationModel notification) {
-    // Show notification detail dialog
+    // show notification detail dialog
     _showNotificationDetailDialog(notification);
   }
 

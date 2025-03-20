@@ -1,7 +1,8 @@
 {
   "projects": {
     "fyp_buvs": "blockchain-voting-system-f1dfe",
-    "buvs": "blockchain-voting-system-f1dfe"
+    "buvs": "blockchain-voting-system-f1dfe",
+    "default": "blockchain-voting-system-f1dfe"
   },
   "targets": {},
   "etags": {}

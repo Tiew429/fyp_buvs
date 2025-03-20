@@ -3,6 +3,7 @@ import 'package:blockchain_university_voting_system/models/voting_event_model.da
 import 'package:blockchain_university_voting_system/provider/notification_provider.dart';
 import 'package:blockchain_university_voting_system/provider/user_provider.dart';
 import 'package:blockchain_university_voting_system/routes/navigation_keys.dart';
+import 'package:blockchain_university_voting_system/services/fcm_functions.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -12,11 +13,14 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:blockchain_university_voting_system/database/shared_preferences.dart';
 import 'package:blockchain_university_voting_system/models/user_model.dart' as model_user;
 import 'package:provider/provider.dart';
+import 'package:flutter/material.dart';
 
 class FirebaseService {
 
   static final FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin = 
       FlutterLocalNotificationsPlugin();
+
+  static final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
 
   static Future<void> setupFirebase() async {
     try {
@@ -217,18 +221,60 @@ class FirebaseService {
 
   // subscribe to topic
   static Future<void> subscribeToTopic(String topic) async {
-    await FirebaseMessaging.instance.subscribeToTopic(topic);
-    print("Subscribed to topic: $topic");
+    try {
+      await _firebaseMessaging.subscribeToTopic(topic);
+      debugPrint('Subscribed to topic: $topic');
+    } catch (e) {
+      debugPrint('Error subscribing to topic $topic: $e');
+    }
   }
 
   // unsubscribe from topic
   static Future<void> unsubscribeFromTopic(String topic) async {
-    await FirebaseMessaging.instance.unsubscribeFromTopic(topic);
-    print("Unsubscribed from topic: $topic");
+    try {
+      await _firebaseMessaging.unsubscribeFromTopic(topic);
+      debugPrint('Unsubscribed from topic: $topic');
+    } catch (e) {
+      debugPrint('Error unsubscribing from topic $topic: $e');
+    }
+  }
+
+  // subscribe to multiple topics at once
+  static Future<void> subscribeToTopics(List<String> topics) async {
+    for (String topic in topics) {
+      await subscribeToTopic(topic);
+    }
+  }
+
+  // unsubscribe from multiple topics
+  static Future<void> unsubscribeFromTopics(List<String> topics) async {
+    for (String topic in topics) {
+      await unsubscribeFromTopic(topic);
+    }
+  }
+
+  // get all available notification types/topics
+  static List<String> getAvailableNotificationTypes() {
+    return [
+      'all_notifications',
+      'vote_reminder',
+      'new_candidate',
+      'new_result',
+      'system',
+      'general',
+      'announcement',
+      'event',
+      'verification',
+    ];
+  }
+
+  // get current FCM token
+  static Future<String?> getToken() async {
+    return await _firebaseMessaging.getToken();
   }
 
   // send notification to all users based on notification type
-  static Future<void> sendNotificationToAllUsers(VotingEvent votingEvent) async {
+  static Future<void> sendVotingEventCreatedNotification(String userID, VotingEvent votingEvent) async {
     try {
       NotificationProvider notificationProvider = Provider.of(rootNavigatorKey.currentContext!, listen: false);
       UserProvider userProvider = Provider.of(rootNavigatorKey.currentContext!, listen: false);
@@ -238,8 +284,15 @@ class FirebaseService {
         message: 'A new voting event "${votingEvent.title}" has been created',
         senderID: userProvider.user!.userID,
         receiverIDs: ['all_users'],
-        type: 'voting_event',
+        type: 'event',
       );
+
+      await FCMFunctions.sendTopicNotification(
+        'event', // topic
+        'A new voting event has been created !!',
+        'Voting Event: ${votingEvent.title}\n has been created by ${userProvider.user!.name}\n Will be started at ${votingEvent.startDate} ${votingEvent.startTime}'
+      );
+        
     } catch (e) {
       print('Error sending notifications to all users: $e');
     }

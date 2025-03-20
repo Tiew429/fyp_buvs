@@ -1,4 +1,7 @@
-mixin AppLocale {
+import 'package:flutter/material.dart';
+import 'package:flutter_localization/flutter_localization.dart';
+
+class AppLocale {
   // roles
   static const String admin = 'admin';
   static const String staff = 'staff';
@@ -7,6 +10,9 @@ mixin AppLocale {
   // voting event status
   static const String available = 'available';
   static const String deprecated = 'deprecated';
+  static const String waitingToStart = 'waiting to start';
+  static const String ongoing = 'ongoing';
+  static const String ended = 'ended';
 
   // authentication
   static const String login = 'login';
@@ -32,8 +38,12 @@ mixin AppLocale {
   static const String verificationCode = 'verification code';
   static const String verify = 'verify';
   static const String loggingIn = 'logging in...';
-  static const String registering = 'registering...'; 
-  static const String exportToReport = 'export to report';
+  static const String registering = 'registering...';
+  static const String registrationFailed = 'registration failed';
+  static const String registrationSuccess = 'registration success';
+  static const String loginFailed = 'login failed';
+  static const String loginSuccess = 'login success';
+  static const String pleaseRegister = 'please register';
 
   // home (dashboard, profile, settings)
   static const String home = 'home';
@@ -140,6 +150,9 @@ mixin AppLocale {
   static const String announcement = 'announcement';
   static const String event = 'event';
   static const String alert = 'alert';
+  static const String selectHowYouWantToSendThisNotification = 'select how you want to send this notification';
+  static const String thisNotificationWillBeSentToAllUsersWhoAreSubscribedTo = 'this notification will be sent to all users who are subscribed to';
+  static const String topic = 'topic';
 
   // votings
   static const String votingList = 'voting list';
@@ -184,6 +197,13 @@ mixin AppLocale {
   static const String timeRemaining = 'time remaining';
   static const String results = 'results';
   static const String winner = 'winner';
+  static const String votingEventHasAlreadyStarted = 'voting event has already started';
+  static const String votingEventHasEnded = 'voting event has ended';
+  static const String votingEventID = 'voting event id';
+  static const String areYouSureYouWantToDeprecate = 'are you sure you want to deprecate';
+  static const String votingEventDeprecatedSuccessfully = 'voting event deprecated successfully';
+  static const String failedToDeprecateVotingEvent = 'failed to deprecate voting event';
+  static const String deprecate = 'deprecate';
 
   // student
   static const String notEligibleForVoting = 'not eligible for voting';
@@ -215,6 +235,14 @@ mixin AppLocale {
 
   // report
   static const String report = 'report';
+  static const String generatingReport = 'generating report';
+  static const String reportExportedSuccessfully = 'report exported successfully';
+  static const String errorExportingReport = 'error exporting report';
+  static const String exportFormat = 'export format';
+  static const String selectExportFormat = 'select export format';
+  static const String exportToReport = 'export to report';
+  static const String exportToExcel = 'export to excel';
+  static const String exportToPdf = 'export to pdf';
 
   // audit
   static const String audit = 'audit';
@@ -279,7 +307,7 @@ mixin AppLocale {
   static const String errorUploadingDocuments = 'error uploading documents';
   static const String userVerifiedSuccessfully = 'user verified successfully';
   static const String failedToRejectVerification = 'failed to reject verification';
-  static const String errorVerifyingUser = 'error verifying user'; 
+  static const String errorVerifyingUser = 'error verifying user';
   static const String errorRejectingVerification = 'error rejecting verification';
   static const String rejectionReason = 'rejection reason';
   static const String pleaseProvideReasonForRejection = 'please provide a reason for rejection';
@@ -287,9 +315,81 @@ mixin AppLocale {
   static const String pleaseEnterAReason = 'please enter a reason';
   static const String submit = 'submit';
   static const String verificationRejected = 'verification rejected';
+  static const String userAlreadyVerified = 'user already verified';
+
+  // Additional strings for SendNotificationPage
+  static const String notificationType = 'notification type';
+  static const String receivers = 'receivers';
+  static const String allUsers = 'all users';
+  static const String images = 'images';
+  static const String pickImages = 'pick images';
+  static const String takePhoto = 'take photo';
+  static const String send = 'send';
+
+  // Additional notification strings
+  static const String sendToAllUsersInSystem = 'send to all users in the system';
+  static const String byTopic = 'by topic';
+  static const String specificUsers = 'specific users';
+  static const String sendingToTopic = 'sending to topic';
+  static const String selectedUsers = 'selected users';
+  static const String clearAll = 'clear all';
+  static const String staffSection = 'staff';
+  static const String studentsSection = 'students';
+  static const String searchNotifications = 'search notifications';
+  static const String filterByType = 'filter by type';
+
+  // notification page strings
+  static const String selectNotificationTopic = 'select notification topic';
+  static const String allNotificationTypes = 'all notification types';
+
+  // helper function to format type display
+  static String formatTypeDisplay(String type, BuildContext context) {
+    final String locale = FlutterLocalization.instance.currentLocale!.languageCode;
+    if (locale == 'ms') {
+      switch (type) {
+        case 'vote_reminder': return 'Peringatan Undian';
+        case 'new_candidate': return 'Calon Baharu';
+        case 'new_result': return 'Keputusan Baharu';
+        case 'system': return 'Sistem';
+        case 'general': return 'Umum';
+        case 'announcement': return 'Pengumuman';
+        case 'event': return 'Acara';
+        case 'verification': return 'Pengesahan';
+        default: return type.replaceAll('_', ' ').split(' ').map((word) => 
+          word.isNotEmpty ? '${word[0].toUpperCase()}${word.substring(1)}' : '').join(' ');
+      }
+    } else if (locale == 'zh') {
+      switch (type) {
+        case 'vote_reminder': return '投票提醒';
+        case 'new_candidate': return '新候选人';
+        case 'new_result': return '新结果';
+        case 'system': return '系统';
+        case 'general': return '一般';
+        case 'announcement': return '公告';
+        case 'event': return '活动';
+        case 'verification': return '验证';
+        default: return type.replaceAll('_', ' ').split(' ').map((word) => 
+          word.isNotEmpty ? '${word[0].toUpperCase()}${word.substring(1)}' : '').join(' ');
+      }
+    } else {
+      // default to English
+      switch (type) {
+        case 'vote_reminder': return 'Vote Reminder';
+        case 'new_candidate': return 'New Candidate';
+        case 'new_result': return 'New Result';
+        case 'system': return 'System';
+        case 'general': return 'General';
+        case 'announcement': return 'Announcement';
+        case 'event': return 'Event';
+        case 'verification': return 'Verification';
+        default: return type.replaceAll('_', ' ').split(' ').map((word) => 
+          word.isNotEmpty ? '${word[0].toUpperCase()}${word.substring(1)}' : '').join(' ');
+      }
+    }
+  }
 
   // english-en
-  static const Map<String, dynamic> en = {
+  static Map<String, dynamic> en = {
     // roles
     admin: 'Administrator',
     staff: 'Staff',
@@ -298,6 +398,9 @@ mixin AppLocale {
     // voting event status
     available: 'Available',
     deprecated: 'Deprecated',
+    waitingToStart: 'Waiting to Start',
+    ongoing: 'Ongoing',
+    ended: 'Ended',
 
     // authentication
     login: 'Login',
@@ -324,7 +427,11 @@ mixin AppLocale {
     verify: 'Verify',
     loggingIn: 'Logging in...', 
     registering: 'Registering...',
-    exportToReport: 'Export to Report',
+    registrationFailed: 'Registration failed',
+    registrationSuccess: 'Registration success',
+    loginFailed: 'Login failed',
+    loginSuccess: 'Login success',
+    pleaseRegister: 'Please register',
 
     // home
     home: 'Home',
@@ -379,6 +486,11 @@ mixin AppLocale {
     thisWillPreventTheUserFromLoggingIn: 'This will prevent the user from logging in.',
     holdToConfirmFreezing: 'Hold to confirm freezing',
     holdToFreeze: 'Hold to Freeze',
+    failedToLoadUsers: 'failed to load users',
+    noPermissionToAccessPage: 'no permission to access page',
+    noStaffMembersFound: 'no staff members found',
+    noPermissionToAccessUserManagement: 'no permission to access user management',
+    searchStaff: 'search staff',
 
     // notifications
     notifications: 'Notifications',
@@ -389,14 +501,14 @@ mixin AppLocale {
     receivedNotifications: 'Received Notifications',
     sent: 'Sent',
     sentNotifications: 'Sent Notifications',
-    notificationSentSuccessfully: 'Notification sent successfully',
-    failedToSendNotification: 'Failed to send notification',
+    notificationDeleted: 'Notification deleted',
+    failedToDeleteNotification: 'Failed to delete notification',
     markAsRead: 'Mark as read',
     markAsUnread: 'Mark as unread',
     markAllAsRead: 'Mark all as read',
     markAllAsUnread: 'Mark all as unread',
-    notificationDeleted: 'Notification deleted',
-    failedToDeleteNotification: 'Failed to delete notification',
+    notificationSentSuccessfully: 'Notification sent successfully',
+    failedToSendNotification: 'Failed to send notification',
     noNotificationsReceived: 'No notifications received',
     noNotificationsSent: 'No notifications sent',
     errorSendingNotification: 'Error sending notification',
@@ -426,6 +538,9 @@ mixin AppLocale {
     announcement: 'Announcement',
     event: 'Event',
     alert: 'Alert',
+    selectHowYouWantToSendThisNotification: 'Select how you want to send this notification',
+    thisNotificationWillBeSentToAllUsersWhoAreSubscribedTo: 'This notification will be sent to all users who are subscribed to',
+    topic: 'Topic',
 
     // voting
     votingList: 'Voting List',
@@ -470,6 +585,13 @@ mixin AppLocale {
     timeRemaining: 'Time Remaining',
     results: 'Results',
     winner: 'Winner',
+    votingEventHasAlreadyStarted: 'Voting event has already started',
+    votingEventHasEnded: 'Voting event has ended',
+    votingEventID: 'voting event id',
+    areYouSureYouWantToDeprecate: 'are you sure you want to deprecate',
+    votingEventDeprecatedSuccessfully: 'voting event deprecated successfully',
+    failedToDeprecateVotingEvent: 'failed to deprecate voting event',
+    deprecate: 'deprecate',
 
     // student
     notEligibleForVoting: 'Not eligible for voting',
@@ -501,6 +623,14 @@ mixin AppLocale {
 
     // report
     report: 'Report',
+    generatingReport: 'Generating report',
+    reportExportedSuccessfully: 'Report exported successfully',
+    errorExportingReport: 'Error exporting report',
+    exportFormat: 'Export Format',
+    selectExportFormat: 'Select Export Format',
+    exportToReport: 'Export to Report',
+    exportToExcel: 'Export to Excel',
+    exportToPdf: 'Export to PDF',
 
     // audit
     audit: 'Audit',
@@ -573,10 +703,33 @@ mixin AppLocale {
     pleaseEnterAReason: 'Please enter a reason',
     submit: 'Submit',
     verificationRejected: 'Verification rejected',
+    userAlreadyVerified: 'User Already Verified',
+
+    // Additional strings for SendNotificationPage
+    notificationType: 'Notification Type',
+    receivers: 'Receivers',
+    allUsers: 'All Users',
+    images: 'Images',
+    pickImages: 'Pick Images',
+    takePhoto: 'Take Photo',
+    send: 'Send',
+
+    // Additional notification strings
+    sendToAllUsersInSystem: 'Send to all users in the system',
+    byTopic: 'By Topic',
+    specificUsers: 'Pengguna Tertentu',
+    sendingToTopic: 'Menghantar ke topik',
+    selectedUsers: 'Pengguna Terpilih',
+    clearAll: 'Kosongkan Semua',
+    studentsSection: 'Pelajar',
+    searchNotifications: 'Cari notifikasi...',
+    filterByType: 'Tapis mengikut jenis',
+    selectNotificationTopic: 'Pilih topik yang notifikasi ini tergolong:',
+    allNotificationTypes: 'Semua',
   };
 
   // malay-ms
-  static const Map<String, dynamic> ms = {
+  static Map<String, dynamic> ms = {
     // roles
     admin: 'Pentadbir',
     staff: 'Kakitangan',
@@ -585,6 +738,9 @@ mixin AppLocale {
     // voting event status
     available: 'Tersedia',
     deprecated: 'Ditamatkan',
+    waitingToStart: 'Menunggu Dimulakan',
+    ongoing: 'Berjalan',
+    ended: 'Selesai',
 
     // authentication
     login: 'Log Masuk',
@@ -611,7 +767,11 @@ mixin AppLocale {
     verify: 'Sahkan',
     loggingIn: 'Log masuk...',
     registering: 'Mendaftar...',
-    exportToReport: 'Eksport ke Laporan',
+    registrationFailed: 'Pendaftaran gagal',
+    registrationSuccess: 'Pendaftaran berjaya',
+    loginFailed: 'Log masuk gagal',
+    loginSuccess: 'Log masuk berjaya',
+    pleaseRegister: 'Sila daftar',
 
     // home
     home: 'Home',
@@ -666,6 +826,11 @@ mixin AppLocale {
     thisWillPreventTheUserFromLoggingIn: 'Ini akan mencegah pengguna untuk log masuk.',
     holdToConfirmFreezing: 'Tahan untuk mengesahkan pembekuan',
     holdToFreeze: 'Tahan untuk membekukan',
+    failedToLoadUsers: 'gagal memuatkan pengguna',
+    noPermissionToAccessPage: 'tiada kebenaran untuk mengakses halaman',
+    noStaffMembersFound: 'tiada ahli kakitangan ditemui',
+    noPermissionToAccessUserManagement: 'tiada kebenaran untuk mengakses pengurusan pengguna',
+    searchStaff: 'cari kakitangan',
 
     // notifications
     notifications: 'Notifikasi',
@@ -713,6 +878,9 @@ mixin AppLocale {
     announcement: 'Pengumuman',
     event: 'Acara',
     alert: 'Peringatan',
+    selectHowYouWantToSendThisNotification: 'Pilih cara anda ingin mengirim notifikasi ini',
+    thisNotificationWillBeSentToAllUsersWhoAreSubscribedTo: 'Notifikasi ini akan dihantar kepada semua pengguna yang berlangganan',
+    topic: 'Topik',
 
     // voting
     votingList: 'Senarai Undian',
@@ -757,6 +925,13 @@ mixin AppLocale {
     timeRemaining: 'Masa Tinggal',
     results: 'Hasil',
     winner: 'Pemenang',
+    votingEventHasAlreadyStarted: 'Acara pengundian telah dimulakan',
+    votingEventHasEnded: 'Acara pengundian telah tamat',
+    votingEventID: 'voting event id',
+    areYouSureYouWantToDeprecate: 'Adakah anda yakin untuk membekukan acara undian ini?',
+    votingEventDeprecatedSuccessfully: 'Acara undian berjaya ditamatkan',
+    failedToDeprecateVotingEvent: 'Gagal menamatkan acara undian',
+    deprecate: 'Membekukan',
 
     // student
     notEligibleForVoting: 'Tidak layak untuk pengundian', 
@@ -788,6 +963,14 @@ mixin AppLocale {
 
     // report
     report: 'Laporan',
+    generatingReport: 'Membuat laporan...',
+    reportExportedSuccessfully: 'Laporan berjaya dieksport',
+    errorExportingReport: 'Kesalahan mengeksport laporan',
+    exportFormat: 'Format Eksport',
+    selectExportFormat: 'Pilih Format Eksport',
+    exportToReport: 'Eksport ke Laporan',
+    exportToExcel: 'Eksport ke Excel',
+    exportToPdf: 'Eksport ke PDF',
 
     // audit
     audit: 'Audit',
@@ -860,10 +1043,33 @@ mixin AppLocale {
     pleaseEnterAReason: 'Sila masukkan sebab',
     submit: 'Hantar',
     verificationRejected: 'Pengesahan ditolak',
+    userAlreadyVerified: 'Pengguna telah disahkan',
+
+    // Additional strings for SendNotificationPage
+    notificationType: 'Jenis Notifikasi',
+    receivers: 'Penerima',
+    allUsers: 'Semua Pengguna',
+    images: 'Gambar',
+    pickImages: 'Pilih Gambar',
+    takePhoto: 'Ambil Gambar',
+    send: 'Hantar',
+
+    // Additional notification strings
+    sendToAllUsersInSystem: 'Hantar kepada semua pengguna dalam sistem',
+    byTopic: 'Mengikut Topik',
+    specificUsers: 'Pengguna Tertentu',
+    sendingToTopic: 'Menghantar ke topik',
+    selectedUsers: 'Pengguna Terpilih',
+    clearAll: 'Kosongkan Semua',
+    studentsSection: 'Pelajar',
+    searchNotifications: 'Cari notifikasi...',
+    filterByType: 'Tapis mengikut jenis',
+    selectNotificationTopic: 'Pilih topik yang notifikasi ini tergolong:',
+    allNotificationTypes: 'Semua',
   };
 
   // chinese-zh
-  static const Map<String, dynamic> zh = {
+  static Map<String, dynamic> zh = {
     // roles
     admin: '管理员',
     staff: '职员',
@@ -872,6 +1078,9 @@ mixin AppLocale {
     // voting event status
     available: '可用',
     deprecated: '已弃用',
+    waitingToStart: '等待开始',
+    ongoing: '进行中',
+    ended: '已结束',
 
     // authentication
     login: '登录',
@@ -898,8 +1107,12 @@ mixin AppLocale {
     verify: '验证',
     loggingIn: '登录中...',
     registering: '注册中...',
-    exportToReport: '导出到报告',
-    
+    registrationFailed: '注册失败',
+    registrationSuccess: '注册成功',
+    loginFailed: '登录失败',
+    loginSuccess: '登录成功',
+    pleaseRegister: '请注册',
+
     // home
     home: '主页',
 
@@ -953,6 +1166,11 @@ mixin AppLocale {
     thisWillPreventTheUserFromLoggingIn: '这将阻止用户登录。',
     holdToConfirmFreezing: '按住确认冻结',
     holdToFreeze: '按住冻结',
+    failedToLoadUsers: '加载用户失败',
+    noPermissionToAccessPage: '没有权限访问页面',
+    noStaffMembersFound: '没有找到职员',
+    noPermissionToAccessUserManagement: '没有权限访问用户管理',
+    searchStaff: '搜索职员',
 
     // notifications
     notifications: '通知',
@@ -1000,6 +1218,9 @@ mixin AppLocale {
     announcement: '公告',
     event: '事件',
     alert: '警报',
+    selectHowYouWantToSendThisNotification: '选择您想要发送通知的方式',
+    thisNotificationWillBeSentToAllUsersWhoAreSubscribedTo: '此通知将发送给所有订阅者',
+    topic: '主题',
 
     // voting
     votingList: '投票列表',
@@ -1044,6 +1265,13 @@ mixin AppLocale {
     timeRemaining: '剩余时间',
     results: '结果',
     winner: '获胜者',
+    votingEventHasAlreadyStarted: '投票活动已开始',
+    votingEventHasEnded: '投票活动已结束',
+    votingEventID: '投票活动ID',
+    areYouSureYouWantToDeprecate: '您确定要弃用此投票活动吗？',
+    votingEventDeprecatedSuccessfully: '投票活动已弃用成功',
+    failedToDeprecateVotingEvent: '弃用投票活动失败',
+    deprecate: '弃用',
 
     // student
     notEligibleForVoting: '不符合投票资格',
@@ -1075,6 +1303,14 @@ mixin AppLocale {
 
     // report
     report: '报告',
+    generatingReport: '生成报告...',
+    reportExportedSuccessfully: '报告已导出成功',
+    errorExportingReport: '导出报告失败',
+    exportFormat: '导出格式',
+    selectExportFormat: '选择导出格式',
+    exportToReport: '导出到报告',
+    exportToExcel: '导出到Excel',
+    exportToPdf: '导出到PDF',
 
     // audit
     audit: '审计',
@@ -1147,5 +1383,28 @@ mixin AppLocale {
     pleaseEnterAReason: '请输入原因',
     submit: '提交',
     verificationRejected: '验证已拒绝',
+    userAlreadyVerified: '用户已验证',
+
+    // Additional strings for SendNotificationPage
+    notificationType: '通知类型',
+    receivers: '接收者',
+    allUsers: '所有用户',
+    images: '图片',
+    pickImages: '选择图片',
+    takePhoto: '拍照',
+    send: '发送',
+
+    // Additional notification strings
+    sendToAllUsersInSystem: '发送给系统中的所有用户',
+    byTopic: '按主题',
+    specificUsers: '特定用户',
+    sendingToTopic: '发送到主题',
+    selectedUsers: '已选择的用户',
+    clearAll: '清除全部',
+    studentsSection: '学生',
+    searchNotifications: '搜索通知...',
+    filterByType: '按类型筛选',
+    selectNotificationTopic: '选择此通知所属的主题：',
+    allNotificationTypes: '全部',
   };
 }

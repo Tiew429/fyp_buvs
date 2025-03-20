@@ -196,6 +196,20 @@ class _AddCandidatePageState extends State<AddCandidatePage> {
 
   // add candidates
   Future<void> _addCandidates(List<Student> students) async {
+    if (votingEvent.startDate!.isBefore(DateTime.now()) && votingEvent.startTime!.isBefore(TimeOfDay.fromDateTime(DateTime.now()))) {
+      SnackbarUtil.showSnackBar(
+        context, 
+        AppLocale.votingEventHasAlreadyStarted.getString(context)
+      );
+      return;
+    } else if (votingEvent.endDate!.isBefore(DateTime.now()) && votingEvent.endTime!.isBefore(TimeOfDay.fromDateTime(DateTime.now()))) {
+      SnackbarUtil.showSnackBar(
+        context, 
+        AppLocale.votingEventHasEnded.getString(context)
+      );
+      return;
+    }
+
     setState(() {
       _isLoadingTransaction = true;
     });

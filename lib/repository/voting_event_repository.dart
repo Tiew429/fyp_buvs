@@ -198,7 +198,7 @@ class VotingEventRepository {
     return [];
   }
 
-  Future<bool> insertNewVotingEvent(VotingEvent votingEvent) async {
+  Future<bool> insertNewVotingEvent(String userID, VotingEvent votingEvent) async {
     print("Voting_Event_Repository: Inserting voting event to blockchain and firebase.");
 
     try {
@@ -213,7 +213,7 @@ class VotingEventRepository {
       }
       
       // send notification to all users
-      await FirebaseService.sendNotificationToAllUsers(votingEvent);
+      await FirebaseService.sendVotingEventCreatedNotification(userID, votingEvent);
 
       return true;
     } catch (e) {

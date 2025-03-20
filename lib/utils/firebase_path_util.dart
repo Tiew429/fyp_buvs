@@ -7,4 +7,8 @@ class FirebasePathUtil {
     return FirebaseFirestore.instance.collection('users').doc(role.name).collection(role.name);
   }
 
+  static CollectionReference getUserCollectionWithoutRole() {
+    return FirebaseFirestore.instance.collection('users');
+  }
+
 }

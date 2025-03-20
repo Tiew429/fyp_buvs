@@ -1,4 +1,5 @@
 import 'package:blockchain_university_voting_system/localization/app_locale.dart';
+import 'package:blockchain_university_voting_system/provider/user_provider.dart';
 import 'package:blockchain_university_voting_system/provider/wallet_provider.dart';
 import 'package:blockchain_university_voting_system/routes/navigation_helper.dart';
 import 'package:blockchain_university_voting_system/utils/snackbar_util.dart';
@@ -14,14 +15,17 @@ import 'package:flutter_localization/flutter_localization.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class VotingEventCreatePage extends StatefulWidget {
+  final UserProvider _userProvider;
   final VotingEventProvider _votingEventViewModel;
   final WalletProvider _walletProvider;
 
   const VotingEventCreatePage({
     super.key,
+    required UserProvider userProvider,
     required VotingEventProvider votingEventViewModel,
     required WalletProvider walletProvider,
-  }) :_votingEventViewModel = votingEventViewModel,
+  }) : _userProvider = userProvider,
+      _votingEventViewModel = votingEventViewModel,
       _walletProvider = walletProvider;
 
   @override
@@ -81,7 +85,7 @@ class _VotingEventCreatePageState extends State<VotingEventCreatePage> {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: Theme.of(context).colorScheme.copyWith(
-              primary: colorScheme.tertiary,
+              primary: colorScheme.secondary,
             ),
           ),
           child: child!,
@@ -114,7 +118,7 @@ class _VotingEventCreatePageState extends State<VotingEventCreatePage> {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: Theme.of(context).colorScheme.copyWith(
-              primary: colorScheme.tertiary,
+              primary: colorScheme.secondary,
             ),
           ),
           child: child!,
@@ -170,6 +174,7 @@ class _VotingEventCreatePageState extends State<VotingEventCreatePage> {
         startTime, 
         endTime, 
         widget._walletProvider.walletAddress!,
+        widget._userProvider.user!.userID,
       );
 
       if (success) {

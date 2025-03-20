@@ -35,11 +35,16 @@ class _ProfilePageViewPageState extends State<ProfilePageViewPage> {
   @override
   void initState() {
     super.initState();
-    _user = widget.userManagementProvider.selectedUser;
+    
+    if (widget.userManagementProvider.selectedUser == null) {
+      _user = widget.userProvider.user!;
+    } else {
+      _user = widget.userManagementProvider.selectedUser!;
+    }
 
-    if (_user is Staff) {
+    if (_user.role == UserRole.staff) {
       _userRole = UserRole.staff;
-    } else if (_user is Student) {
+    } else if (_user.role == UserRole.student) {
       _userRole = UserRole.student;
     } else {
       _userRole = UserRole.admin;
@@ -399,7 +404,7 @@ class _ProfilePageViewPageState extends State<ProfilePageViewPage> {
           Expanded(
             child: Row(
               children: [
-                Text(displayValue),
+                Text(displayValue.isNotEmpty ? displayValue : 'N/A'),
                 const SizedBox(width: 8),
                 displayValue.isNotEmpty ? InkWell(
                   onTap: () {

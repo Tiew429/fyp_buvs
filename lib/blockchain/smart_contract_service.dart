@@ -452,11 +452,25 @@ class SmartContractService {
   }
 
   Future<bool> checkIfVotingEventExists(String votingEventID) async {
-    // check is the voting event id already exists in blockchain
-      final votingEventIDs = await readFunction('getVotingEventIDs');
-
-      bool eventExists = false;
-      if (votingEventIDs is List) {
+    // check if the voting event id already exists in blockchain
+    final votingEventIDs = await readFunction('getVotingEventIDs');
+    
+    bool eventExists = false;
+    
+    // handle different possible return structures
+    if (votingEventIDs is List) {
+      if (votingEventIDs.isNotEmpty && votingEventIDs[0] is List) {
+        // handle double-nested list case: [[VE-1, VE-2, ...]]
+        final innerList = votingEventIDs[0];
+        for (var id in innerList) {
+          String idStr = id.toString();
+          if (idStr == votingEventID) {
+            eventExists = true;
+            break;
+          }
+        }
+      } else {
+        // handle single-nested list case: [VE-1, VE-2, ...]
         for (var id in votingEventIDs) {
           String idStr = id is List ? id[0].toString() : id.toString();
           if (idStr == votingEventID) {
@@ -464,11 +478,12 @@ class SmartContractService {
             break;
           }
         }
-      } else if (votingEventIDs is String) {
-        eventExists = votingEventIDs == votingEventID;
       }
+    } else if (votingEventIDs is String) {
+      eventExists = votingEventIDs == votingEventID;
+    }
 
-      if (!eventExists) {
+    if (!eventExists) {
       throw Exception("Smart_Contract_Service (checkIfVotingEventExists): Voting event ID '$votingEventID' not found in blockchain. Available IDs: $votingEventIDs");
     }
 

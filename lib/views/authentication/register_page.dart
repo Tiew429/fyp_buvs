@@ -3,6 +3,7 @@ import 'package:blockchain_university_voting_system/provider/wallet_provider.dar
 import 'package:blockchain_university_voting_system/routes/navigation_helper.dart';
 import 'package:blockchain_university_voting_system/routes/navigation_keys.dart';
 import 'package:blockchain_university_voting_system/services/auth_service.dart';
+import 'package:blockchain_university_voting_system/utils/snackbar_util.dart';
 import 'package:blockchain_university_voting_system/utils/validator_util.dart';
 import 'package:blockchain_university_voting_system/widgets/centered_container.dart';
 import 'package:blockchain_university_voting_system/widgets/custom_confirm_button.dart';
@@ -49,7 +50,7 @@ class _RegisterPageState extends State<RegisterPage> {
     _confirmPasswordController.dispose();
   }
 
-  void _register() {
+  Future<void> _register() async {
     // set loading to true
     setState(() {
       _isLoading = true;
@@ -82,6 +83,7 @@ class _RegisterPageState extends State<RegisterPage> {
             setState(() {
               _isLoading = false;
             });
+            SnackbarUtil.showSnackBar(context, AppLocale.registrationSuccess.getString(context));
           }
         }).catchError((error) {
           // handle any errors and set loading to false
@@ -89,6 +91,7 @@ class _RegisterPageState extends State<RegisterPage> {
             setState(() {
               _isLoading = false;
             });
+            SnackbarUtil.showSnackBar(context, AppLocale.registrationFailed.getString(context));
           }
         });
       } else {
@@ -99,6 +102,7 @@ class _RegisterPageState extends State<RegisterPage> {
             setState(() {
               _isLoading = false;
             });
+            SnackbarUtil.showSnackBar(context, AppLocale.registrationSuccess.getString(context));
           }
         }).catchError((error) {
           // handle any errors and set loading to false
@@ -106,6 +110,7 @@ class _RegisterPageState extends State<RegisterPage> {
             setState(() {
               _isLoading = false;
             });
+            SnackbarUtil.showSnackBar(context, AppLocale.registrationFailed.getString(context));
           }
         });
       }
@@ -166,7 +171,9 @@ class _RegisterPageState extends State<RegisterPage> {
                   const SizedBox(height: 20,),
                   CustomConfirmButton(
                     text: AppLocale.register.getString(context),
-                    onPressed: () => _register(),
+                    onPressed: () async {
+                      await _register();
+                    },
                   ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,

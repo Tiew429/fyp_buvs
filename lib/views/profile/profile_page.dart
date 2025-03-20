@@ -45,7 +45,8 @@ class _ProfilePageState extends State<ProfilePage> {
     return Scaffold(
       backgroundColor: colorScheme.tertiary,
       appBar: AppBar(
-        backgroundColor: colorScheme.primary,
+        backgroundColor: colorScheme.secondary,
+        centerTitle: true,
         title: Text(
           AppLocale.profile.getString(context),
           style: TextStyle(color: colorScheme.onPrimary),
@@ -94,9 +95,49 @@ class _ProfilePageState extends State<ProfilePage> {
                           child: Image.asset('assets/images/fox.png'),
                         ),
                       ),
+                    ],
+                  ),
+                  Stack(
+                    children: [
+                      Column(
+                        children: [
+                          Text(
+                            widget._user.name,
+                            style: TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                              color: colorScheme.onPrimary,
+                            ),
+                          ),
+                          const SizedBox(height: 5),
+                          Text(
+                            widget._user.email,
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: colorScheme.onPrimary.withOpacity(0.9),
+                            ),
+                          ),
+                          const SizedBox(height: 5),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: colorScheme.onPrimary.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Text(
+                              role,
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                                color: colorScheme.onPrimary,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                       Positioned(
-                        bottom: 5,
-                        right: screenSize.width * 0.5 - screenSize.shortestSide * 0.12 - 10,
+                        top: 0,
+                        right: 0,
                         child: GestureDetector(
                           onTap: () {
                             NavigationHelper.navigateToEditProfilePage(context);
@@ -114,47 +155,15 @@ class _ProfilePageState extends State<ProfilePage> {
                                 ),
                               ],
                             ),
-                            child: const Icon(
+                            child: Icon(
                               Icons.edit,
                               size: 18,
-                              color: Colors.white,
+                              color: colorScheme.onPrimary,
                             ),
                           ),
                         ),
                       ),
                     ],
-                  ),
-                  Text(
-                    widget._user.name,
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      color: colorScheme.onPrimary,
-                    ),
-                  ),
-                  const SizedBox(height: 5),
-                  Text(
-                    widget._user.email,
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: colorScheme.onPrimary.withOpacity(0.9),
-                    ),
-                  ),
-                  const SizedBox(height: 5),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: colorScheme.onPrimary.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      role,
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: colorScheme.onPrimary,
-                      ),
-                    ),
                   ),
                 ],
               ),
@@ -170,7 +179,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
-                      color: colorScheme.onTertiary,
+                      color: colorScheme.onPrimary,
                     ),
                   ),
                   const SizedBox(height: 20),
@@ -197,7 +206,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
-                      color: colorScheme.onTertiary,
+                      color: colorScheme.onPrimary,
                     ),
                   ),
                   const SizedBox(height: 20),
@@ -262,7 +271,7 @@ class _ProfilePageState extends State<ProfilePage> {
               Icon(
                 icon,
                 size: 20,
-                color: colorScheme.primary,
+                color: colorScheme.secondary,
               ),
               const SizedBox(width: 8),
               Text(
@@ -270,7 +279,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
-                  color: colorScheme.onSurface,
+                  color: colorScheme.onPrimary,
                 ),
               ),
             ],
@@ -280,7 +289,7 @@ class _ProfilePageState extends State<ProfilePage> {
             content,
             style: TextStyle(
               fontSize: 14,
-              color: colorScheme.onSurface.withOpacity(0.8),
+              color: colorScheme.onPrimary.withOpacity(0.8),
             ),
           ),
         ],
@@ -330,14 +339,14 @@ class _ProfilePageState extends State<ProfilePage> {
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
-                  color: colorScheme.onSurface,
+                  color: colorScheme.onPrimary,
                 ),
               ),
             ),
             Icon(
               Icons.arrow_forward_ios,
               size: 16,
-              color: colorScheme.onSurface.withOpacity(0.5),
+              color: colorScheme.onPrimary.withOpacity(0.5),
             ),
           ],
         ),

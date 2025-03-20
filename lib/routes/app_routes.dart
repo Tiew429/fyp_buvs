@@ -143,7 +143,7 @@ List<RouteBase> router(String initialRoute, GlobalKey<NavigatorState> navigatorK
     return null;
   }
 
-  VotingEventProvider? getVotingEventViewModel() {
+  VotingEventProvider? getVotingEventProvider() {
     try {
       if (navigatorKey.currentContext != null) {
         return Provider.of<VotingEventProvider>(navigatorKey.currentContext!, listen: false);
@@ -454,7 +454,7 @@ List<RouteBase> router(String initialRoute, GlobalKey<NavigatorState> navigatorK
         return buildPageWithAnimation(
           VotingListPage(
             user: user,
-            votingEventViewModel: getVotingEventViewModel()!,
+            votingEventViewModel: getVotingEventProvider()!,
             walletProvider: getWalletProvider()!,
           ), 
           state,
@@ -475,7 +475,8 @@ List<RouteBase> router(String initialRoute, GlobalKey<NavigatorState> navigatorK
         }
         return buildPageWithAnimation(
           VotingEventCreatePage(
-            votingEventViewModel: getVotingEventViewModel()!,
+            userProvider: getUserProvider()!,
+            votingEventViewModel: getVotingEventProvider()!,
             walletProvider: getWalletProvider()!,
           ), 
           state,
@@ -499,7 +500,7 @@ List<RouteBase> router(String initialRoute, GlobalKey<NavigatorState> navigatorK
           VotingEventPage(
             user: user,
             isEligibleToVote: isEligibleToVote,
-            votingEventViewModel: getVotingEventViewModel()!,
+            votingEventViewModel: getVotingEventProvider()!,
           ), 
           state,
         );
@@ -511,7 +512,7 @@ List<RouteBase> router(String initialRoute, GlobalKey<NavigatorState> navigatorK
       pageBuilder: (context, state) {
         return buildPageWithAnimation(
           EditVotingEventPage(
-            votingEventViewModel: getVotingEventViewModel()!,
+            votingEventViewModel: getVotingEventProvider()!,
           ), 
           state,
         );
@@ -523,7 +524,7 @@ List<RouteBase> router(String initialRoute, GlobalKey<NavigatorState> navigatorK
       pageBuilder: (context, state) {
         return buildPageWithAnimation(
           ManageCandidatePage(
-            votingEventViewModel: getVotingEventViewModel()!,
+            votingEventViewModel: getVotingEventProvider()!,
           ), 
           state,
         );
@@ -535,7 +536,7 @@ List<RouteBase> router(String initialRoute, GlobalKey<NavigatorState> navigatorK
       pageBuilder: (context, state) {
         return buildPageWithAnimation(
           AddCandidatePage(
-            votingEventProvider: getVotingEventViewModel()!,
+            votingEventProvider: getVotingEventProvider()!,
             studentProvider: getStudentProvider()!,
           ), 
           state,
@@ -549,7 +550,7 @@ List<RouteBase> router(String initialRoute, GlobalKey<NavigatorState> navigatorK
       pageBuilder: (context, state) {
         return buildPageWithAnimation(
           PendingVotingEventListPage(
-            votingEventViewModel: getVotingEventViewModel()!,
+            votingEventProvider: getVotingEventProvider()!,
           ), 
           state,
         );

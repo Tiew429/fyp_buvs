@@ -100,17 +100,17 @@ class _MainAppState extends State<MainApp> {
     super.initState();
     _localization.init(
       mapLocales: [
-        const MapLocale('en', 
+        MapLocale('en', 
           AppLocale.en,
           countryCode: 'US',
           fontFamily: 'Font EN',
         ),
-        const MapLocale('ms', 
+        MapLocale('ms', 
           AppLocale.ms,
           countryCode: 'MS',
           fontFamily: 'Font MS',
         ),
-        const MapLocale('zh', 
+        MapLocale('zh', 
           AppLocale.zh,
           countryCode: 'ZH',
           fontFamily: 'Font ZH',

@@ -55,7 +55,7 @@ class _CustomCancelButtonState extends State<CustomCancelButton> {
                 Colors.red[900] // Dark red when pressed
               : widget.backgroundColor ??
                 Colors.red, // Regular red when not pressed
-          border: Border.all(color: Theme.of(context).colorScheme.onPrimary),
+          // border: Border.all(color: Theme.of(context).colorScheme.onPrimary),
           borderRadius: BorderRadius.circular(widget.borderRadius ?? 8.0),
         ),
         padding: widget.padding,
