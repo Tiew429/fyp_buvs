@@ -11,20 +11,20 @@ class ThemeProvider extends ChangeNotifier {
   bool get isDarkMode => _isDarkMode;
   ThemeMode get themeMode => _isDarkMode ? ThemeMode.dark : ThemeMode.light;
 
-  // Load saved theme mode when initializing
+  // load saved theme mode when initializing
   Future<void> _loadThemeMode() async {
     _isDarkMode = await ThemeSharedPreferences.loadThemeMode();
     notifyListeners();
   }
 
-  // Toggle theme and save preference
+  // toggle theme and save preference
   void toggleTheme(bool isDarkMode) async {
     _isDarkMode = isDarkMode;
     await ThemeSharedPreferences.saveThemeMode(isDarkMode);
     notifyListeners();
   }
 
-  // Method to directly set theme mode
+  // method to directly set theme mode
   void setDarkMode(bool value) async {
     if (_isDarkMode != value) {
       _isDarkMode = value;

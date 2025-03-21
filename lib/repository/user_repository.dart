@@ -29,8 +29,7 @@ class UserRepository {
         .doc(role.stringValue)
         .collection(role.stringValue);
 
-      // Common user data
-      Map<String, dynamic> userData = {
+      await roleCollection.doc(userId).set({
         'userID': userId,
         'username': newUser.name,
         'email': newUser.email,
@@ -38,16 +37,7 @@ class UserRepository {
         'walletAddress': newUser.walletAddress,
         'bio': '',
         'isVerified': false,
-      };
-      
-      // Add role-specific fields
-      if (role == model_user.UserRole.staff && newUser is Staff) {
-        userData['department'] = newUser.department;
-      } else if (role == model_user.UserRole.student && newUser is Student) {
-        userData['isEligibleForVoting'] = newUser.isEligibleForVoting;
-      }
-
-      await roleCollection.doc(userId).set(userData);
+      });
     } catch (e) {
       print(e);
     }

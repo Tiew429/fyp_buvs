@@ -44,6 +44,7 @@ class AppLocale {
   static const String loginFailed = 'login failed';
   static const String loginSuccess = 'login success';
   static const String pleaseRegister = 'please register';
+  static const String walletConnectionSuccessful = 'wallet connection successful';
 
   // home (dashboard, profile, settings)
   static const String home = 'home';
@@ -243,6 +244,8 @@ class AppLocale {
   static const String exportToReport = 'export to report';
   static const String exportToExcel = 'export to excel';
   static const String exportToPdf = 'export to pdf';
+  static const String doYouWantToGenerateReportFor = 'do you want to generate report for';
+  static const String noEndedVotingEvents = 'no ended voting events available';
 
   // audit
   static const String audit = 'audit';
@@ -319,15 +322,15 @@ class AppLocale {
   static const String userAlreadyVerified = 'user already verified';
   
   // staff registration
-  static const String staffRegistration = 'staff registration';
-  static const String staffType = 'staff type';
-  static const String academic = 'academic';
-  static const String administrative = 'administrative';
-  static const String academicDepartment = 'academic department';
-  static const String administrativeDepartment = 'administrative department';
-  static const String selectDepartment = 'select department';
-  static const String registerAsStaff = 'register as staff';
-  static const String areYouStaffMember = 'are you a staff member';
+  static const String staffRegistration = 'Staff Registration';
+  static const String staffType = 'Staff Type';
+  static const String academic = 'Academic';
+  static const String administrative = 'Administrative';
+  static const String academicDepartment = 'Academic Department';
+  static const String administrativeDepartment = 'Administrative Department';
+  static const String selectDepartment = 'Select Department';
+  static const String registerAsStaff = 'Register as Staff';
+  static const String areYouStaffMember = 'Are you a staff member';
 
   // Additional strings for SendNotificationPage
   static const String notificationType = 'notification type';
@@ -444,6 +447,7 @@ class AppLocale {
     loginFailed: 'Login failed',
     loginSuccess: 'Login success',
     pleaseRegister: 'Please register',
+    walletConnectionSuccessful: 'Wallet connection successful',
 
     // home
     home: 'Home',
@@ -643,93 +647,95 @@ class AppLocale {
     exportToReport: 'Export to Report',
     exportToExcel: 'Export to Excel',
     exportToPdf: 'Export to PDF',
+    doYouWantToGenerateReportFor: 'Do you want to generate report for',
+    noEndedVotingEvents: 'No ended voting events available',
 
     // audit
     audit: 'Audit',
 
     // validator_util
     dontLeaveBlank: 'Please don\'t leave this field blank',
-    emailCantBeBlank: 'Email cannot be blank',
-    enterValidEmail: 'Please enter valid email address',
-    passwordCantBeBlank: 'Password cannot be blank',
-    passwordMustAtLeast6Char: 'Password must be at least 6 characters long',
+    emailCantBeBlank: 'Emel tidak boleh kosong',
+    enterValidEmail: 'Sila masukkan emel yang sah',
+    passwordCantBeBlank: 'Kata laluan tidak boleh kosong',
+    passwordMustAtLeast6Char: 'Kata laluan mestilah sekurang-kurangnya 6 aksara',
 
     // auth_service
-    userNotFound: 'User not found',
+    userNotFound: 'Pengguna tidak ditemui',
 
     // dialog
     save: 'Save',
     cancel: 'Cancel',
-    confirm: 'Confirm',
-    confirmSave: 'Confirm Save',
-    noChanges: 'No Changes',
+    confirm: 'Konfirmasi',
+    confirmSave: 'Konfirmasi Simpan',
+    noChanges: 'Tidak Ada Perubahan',
 
     // others
-    pleaseConnectYourWallet: 'Please connect your wallet',
-    close: 'Close',
-    errorPickingImages: 'Error picking images',
-    errorTakingPhoto: 'Error taking photo',
-    userNotLoggedIn: 'User not logged in',
-    attachImagesOptional: 'Attach images (optional)',
-    gallery: 'Gallery',
-    camera: 'Camera',
+    pleaseConnectYourWallet: 'Sila hubungkan kripto wallet anda',
+    close: 'Tutup',
+    errorPickingImages: 'Kesalahan memilih gambar',
+    errorTakingPhoto: 'Kesalahan mengambil gambar',
+    userNotLoggedIn: 'Pengguna tidak log masuk',
+    attachImagesOptional: 'Lampirkan gambar (pilihan)',
+    gallery: 'Galeri',
+    camera: 'Kamera',
     of: '\'s',
-    as: 'as',
-    walletAddressCopiedToClipboard: 'Wallet address copied to clipboard',
-    accountHasBeenFrozen: 'Account has been frozen',
+    as: 'sebagai',
+    walletAddressCopiedToClipboard: 'Alamat wallet disalin ke papan klip',
+    accountHasBeenFrozen: 'Akaun telah dibekukan',
 
     // user verification
-    userHasNotUploadedDocumentsYet: 'User has not uploaded documents yet',
-    thisUserIsVerified: 'This user is verified',
-    userDocuments: 'User Documents',
-    tapOnAnImageToEnlarge: 'Tap on an image to enlarge',
-    identityCard: 'Identity Card',
-    studentCard: 'Student Card',
-    staffCard: 'Staff Card',
-    errorLoadingImage: 'Error loading image',
-    verifyUser: 'Verify User',
-    rejectVerification: 'Reject Verification',
-    yourAccountIsVerified: 'Your account is verified',
-    verificationInProgress: 'Verification in progress',
-    pleaseWaitForAdminToVerifyYourAccount: 'Please wait for admin to verify your account',
-    reuploadDocuments: 'Re-upload Documents',
-    uploadDocumentsForVerification: 'Upload Documents for Verification',
-    pleaseUploadClearImagesOfYourDocuments: 'Please upload clear images of your documents',
-    upload: 'Upload',
-    noImageSelected: 'No image selected',
-    submitForVerification: 'Submit for Verification',
-    verificationFailed: 'Verification Failed',
-    yourVerificationWasRejected: 'Your verification was rejected',
-    reason: 'Reason',
-    pleaseUploadCorrectDocuments: 'Please upload correct documents',
-    iUnderstand: 'I understand',
-    pleaseUploadBothDocuments: 'Please upload both documents',
-    documentsSubmittedSuccessfully: 'Documents submitted successfully',
-    errorUploadingDocuments: 'Error uploading documents',
-    userVerifiedSuccessfully: 'User verified successfully',
-    failedToRejectVerification: 'Failed to reject verification',
-    errorVerifyingUser: 'Error verifying user',
-    errorRejectingVerification: 'Error rejecting verification',
-    rejectionReason: 'Rejection Reason',
-    pleaseProvideReasonForRejection: 'Please provide a reason for rejection',
-    enterReason: 'Enter reason',
-    pleaseEnterAReason: 'Please enter a reason',
-    submit: 'Submit',
-    verificationRejected: 'Verification rejected',
-    userAlreadyVerified: 'User Already Verified',
+    userHasNotUploadedDocumentsYet: 'Pengguna belum memuat naik dokumen',
+    thisUserIsVerified: 'Pengguna ini telah disahkan',
+    userDocuments: 'Dokumen Pengguna',
+    tapOnAnImageToEnlarge: 'Ketik pada imej untuk membesarkan',
+    identityCard: 'Kad Pengenalan',
+    studentCard: 'Kad Pelajar',
+    staffCard: 'Kad Staf',
+    errorLoadingImage: 'Ralat memuat imej',
+    verifyUser: 'Sahkan Pengguna',
+    rejectVerification: 'Tolak Pengesahan',
+    yourAccountIsVerified: 'Akaun anda telah disahkan',
+    verificationInProgress: 'Pengesahan sedang diproses',
+    pleaseWaitForAdminToVerifyYourAccount: 'Sila tunggu admin untuk mengesahkan akaun anda',
+    reuploadDocuments: 'Muat Naik Semula Dokumen',
+    uploadDocumentsForVerification: 'Muat Naik Dokumen untuk Pengesahan',
+    pleaseUploadClearImagesOfYourDocuments: 'Sila muat naik imej dokumen yang jelas',
+    upload: 'Muat Naik',
+    noImageSelected: 'Tiada imej dipilih',
+    submitForVerification: 'Hantar untuk Pengesahan',
+    verificationFailed: 'Pengesahan Gagal',
+    yourVerificationWasRejected: 'Pengesahan anda telah ditolak',
+    reason: 'Sebab',
+    pleaseUploadCorrectDocuments: 'Sila muat naik dokumen yang betul',
+    iUnderstand: 'Saya faham',
+    pleaseUploadBothDocuments: 'Sila muat naik kedua-dua dokumen',
+    documentsSubmittedSuccessfully: 'Dokumen berjaya dihantar',
+    errorUploadingDocuments: 'Ralat memuat naik dokumen',
+    userVerifiedSuccessfully: 'Pengguna berjaya disahkan',
+    failedToRejectVerification: 'Gagal menolak pengesahan',
+    errorVerifyingUser: 'Ralat mengesahkan pengguna',
+    errorRejectingVerification: 'Ralat menolak pengesahan',
+    rejectionReason: 'Sebab Penolakan',
+    pleaseProvideReasonForRejection: 'Sila berikan sebab penolakan',
+    enterReason: 'Masukkan sebab',
+    pleaseEnterAReason: 'Sila masukkan sebab',
+    submit: 'Hantar',
+    verificationRejected: 'Pengesahan ditolak',
+    userAlreadyVerified: 'Pengguna telah disahkan',
 
     // Additional strings for SendNotificationPage
-    notificationType: 'Notification Type',
-    receivers: 'Receivers',
-    allUsers: 'All Users',
-    images: 'Images',
-    pickImages: 'Pick Images',
-    takePhoto: 'Take Photo',
-    send: 'Send',
+    notificationType: 'Jenis Notifikasi',
+    receivers: 'Penerima',
+    allUsers: 'Semua Pengguna',
+    images: 'Gambar',
+    pickImages: 'Pilih Gambar',
+    takePhoto: 'Ambil Gambar',
+    send: 'Hantar',
 
     // Additional notification strings
-    sendToAllUsersInSystem: 'Send to all users in the system',
-    byTopic: 'By Topic',
+    sendToAllUsersInSystem: 'Hantar kepada semua pengguna dalam sistem',
+    byTopic: 'Mengikut Topik',
     specificUsers: 'Pengguna Tertentu',
     sendingToTopic: 'Menghantar ke topik',
     selectedUsers: 'Pengguna Terpilih',
@@ -744,12 +750,12 @@ class AppLocale {
     staffRegistration: 'Staff Registration',
     staffType: 'Staff Type',
     academic: 'Academic',
-    administrative: 'Administratif',
-    academicDepartment: 'Departemen Akademik',
-    administrativeDepartment: 'Departemen Administratif',
-    selectDepartment: 'Pilih Departemen',
-    registerAsStaff: 'Daftar sebagai Kakitangan',
-    areYouStaffMember: 'Adakah anda seorang kakitangan',
+    administrative: 'Administrative',
+    academicDepartment: 'Academic Department',
+    administrativeDepartment: 'Administrative Department',
+    selectDepartment: 'Select Department',
+    registerAsStaff: 'Register as Staff',
+    areYouStaffMember: 'Are you a staff member',
   };
 
   // malay-ms
@@ -796,6 +802,7 @@ class AppLocale {
     loginFailed: 'Log masuk gagal',
     loginSuccess: 'Log masuk berjaya',
     pleaseRegister: 'Sila daftar',
+    walletConnectionSuccessful: 'Hubungan wallet berjaya',
 
     // home
     home: 'Home',
@@ -995,6 +1002,8 @@ class AppLocale {
     exportToReport: 'Eksport ke Laporan',
     exportToExcel: 'Eksport ke Excel',
     exportToPdf: 'Eksport ke PDF',
+    doYouWantToGenerateReportFor: 'Adakah anda mahu menjana laporan untuk',
+    noEndedVotingEvents: 'Tiada acara pengundian tamat tersedia',
 
     // audit
     audit: 'Audit',
@@ -1148,6 +1157,7 @@ class AppLocale {
     loginFailed: '登录失败',
     loginSuccess: '登录成功',
     pleaseRegister: '请注册',
+    walletConnectionSuccessful: '钱包连接成功',
 
     // home
     home: '主页',
@@ -1217,14 +1227,14 @@ class AppLocale {
     receivedNotifications: '已接收通知',
     sent: '已发送',
     sentNotifications: '已发送通知',
-    notificationSentSuccessfully: '通知已发送成功',
-    failedToSendNotification: '发送通知失败',
+    notificationDeleted: '通知已删除',
+    failedToDeleteNotification: '删除通知失败',
     markAsRead: '标记为已读',
     markAsUnread: '标记为未读',
     markAllAsRead: '标记所有为已读',
     markAllAsUnread: '标记所有为未读',
-    notificationDeleted: '通知已删除',
-    failedToDeleteNotification: '删除通知失败',
+    notificationSentSuccessfully: '通知已发送成功',
+    failedToSendNotification: '发送通知失败',
     noNotificationsReceived: '没有收到通知',
     noNotificationsSent: '没有发送通知',
     errorSendingNotification: '发送通知失败',
@@ -1347,6 +1357,8 @@ class AppLocale {
     exportToReport: '导出到报告',
     exportToExcel: '导出到Excel',
     exportToPdf: '导出到PDF',
+    doYouWantToGenerateReportFor: '您想为此生成报告吗',
+    noEndedVotingEvents: '没有已结束的投票活动',
 
     // audit
     audit: '审计',

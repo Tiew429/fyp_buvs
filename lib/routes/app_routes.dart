@@ -629,8 +629,16 @@ List<RouteBase> router(String initialRoute, GlobalKey<NavigatorState> navigatorK
       path: '/${RouterPath.reportpage.path}',
       name: RouterPath.reportpage.path,
       pageBuilder: (context, state) {
+        final userProvider = Provider.of<UserProvider>(context, listen: false);
+        final votingEventProvider = Provider.of<VotingEventProvider>(context, listen: false);
+        final walletProvider = Provider.of<WalletProvider>(context, listen: false);
+        
         return buildPageWithAnimation(
-          const ReportPage(), 
+          ReportPage(
+            userProvider: userProvider,
+            votingEventViewModel: votingEventProvider,
+            walletProvider: walletProvider,
+          ), 
           state,
         );
       },

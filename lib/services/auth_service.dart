@@ -261,12 +261,13 @@ class AuthService {
         );
       }
 
-      // If user does not have a wallet address, just navigate to login page
+      // if user does not have a wallet address, just navigate to login page
       if (walletAddress.isEmpty) {
         NavigationHelper.navigateToLoginPage(context);
       } else {
-        // If the user has a wallet address, you might directly log them in with Metamask
+        // if the user has a wallet address, you might directly log them in with Metamask
         await loginWithMetamask(context);
+        SnackbarUtil.showSnackBar(context, '${AppLocale.walletConnectionSuccessful.getString(context)}!');
       }
     } on auth_user.FirebaseAuthException catch (e) {
       SnackbarUtil.showSnackBar(context, 'Registration failed: ${e.message}');
