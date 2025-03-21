@@ -12,9 +12,17 @@ class NavigationHelper {
       RouterPath.loginpage.path,
       needsAppKitModal: true,
     );
+    clearNavigationStack(context, RouterPath.loginpage.path);
   }
   static void navigateToRegisterPage(BuildContext context, [bool registerWithMetamask = false]) {
     context.push('/${RouterPath.registerpage.path}',
+      extra: {
+        'registerWithMetamask': registerWithMetamask,
+      },
+    );
+  }
+  static void navigateToStaffRegisterPage(BuildContext context, [bool registerWithMetamask = false]) {
+    context.push('/${RouterPath.staffregisterpage.path}',
       extra: {
         'registerWithMetamask': registerWithMetamask,
       },
@@ -49,6 +57,7 @@ class NavigationHelper {
       RouterPath.homepage.path,
       needsAppKitModal: true,
     );
+    clearNavigationStack(context, RouterPath.homepage.path);
   }
   static void navigateToEditProfilePage(BuildContext context) {
     context.push('/${RouterPath.editprofilepage.path}');
@@ -125,5 +134,13 @@ class NavigationHelper {
   // back method
   static void navigateBack(BuildContext context) {
     context.pop();
+  }
+
+  // clear navigation stack
+  static void clearNavigationStack(BuildContext context, String path) {
+    while(context.canPop()) {
+      context.pop();
+    }
+    context.pushReplacement(path);
   }
 }

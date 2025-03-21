@@ -156,6 +156,21 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     ],
                   ),
+                  const SizedBox(height: 10),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text('${AppLocale.areYouStaffMember.getString(context)}? '),
+                      GestureDetector(
+                        onTap: () => NavigationHelper.navigateToStaffRegisterPage(context),
+                        child: Text(AppLocale.registerAsStaff.getString(context),
+                          style: const TextStyle(
+                            color: Colors.lightBlue,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                   const SizedBox(height: 20,),
                   Text('${AppLocale.otherLoginMethods.getString(context)}:'),
                   const SizedBox(height: 20,),

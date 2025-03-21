@@ -10,6 +10,7 @@ import 'package:blockchain_university_voting_system/views/audit/audit_list_page.
 import 'package:blockchain_university_voting_system/views/audit/voting_event_audit_logs_page.dart';
 import 'package:blockchain_university_voting_system/views/authentication/login_page.dart';
 import 'package:blockchain_university_voting_system/views/authentication/register_page.dart';
+import 'package:blockchain_university_voting_system/views/authentication/staff_register_page.dart';
 import 'package:blockchain_university_voting_system/views/authentication/reset_pass_page.dart';
 import 'package:blockchain_university_voting_system/views/authentication/set_new_pass_page.dart';
 import 'package:blockchain_university_voting_system/views/authentication/verfitication_code_page.dart';
@@ -341,6 +342,21 @@ List<RouteBase> router(String initialRoute, GlobalKey<NavigatorState> navigatorK
         final registerWithMetamask = extras['registerWithMetamask'] as bool;
         return buildPageWithAnimation(
           RegisterPage(registerWithMetamask: registerWithMetamask), 
+          state,
+        );
+      },
+    ),
+    GoRoute(
+      path: '/${RouterPath.staffregisterpage.path}',
+      name: RouterPath.staffregisterpage.path,
+      pageBuilder: (context, state) {
+        final Map<String, dynamic> extras = state.extra as Map<String, dynamic>? ?? {
+          'registerWithMetamask': false,
+        };
+
+        final registerWithMetamask = extras['registerWithMetamask'] as bool;
+        return buildPageWithAnimation(
+          StaffRegisterPage(registerWithMetamask: registerWithMetamask), 
           state,
         );
       },

@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:blockchain_university_voting_system/data/router_path.dart';
 import 'package:blockchain_university_voting_system/database/shared_preferences.dart';
 import 'package:blockchain_university_voting_system/localization/app_locale.dart';
+import 'package:blockchain_university_voting_system/models/staff_model.dart';
 import 'package:blockchain_university_voting_system/models/student_model.dart';
 import 'package:blockchain_university_voting_system/models/user_model.dart' as model_user;
 import 'package:blockchain_university_voting_system/provider/wallet_provider.dart';
@@ -218,6 +219,7 @@ class AuthService {
     String password, [
     String walletAddress = '',
     model_user.UserRole role = model_user.UserRole.student,
+    String department = 'General',
   ]) async {
     try {
       // check if username or email is already taken
@@ -234,18 +236,30 @@ class AuthService {
       }
 
       // create user in firestore + firebase authentication
-      await userRepo.createUser(
-        // basically, the user will be a student. Admin and staff will be added earlier while deploying the app (admin) and added while inviting (staff).
-        Student(
-          userID: '', // will be assigned internally in createUser method
-          name: username,
-          email: email,
-          role: role,
-          walletAddress: walletAddress,
-          isEligibleForVoting: false,
-        ),
-        password,
-      );
+      if (role == model_user.UserRole.staff) {
+        await userRepo.createUser(
+          Staff(
+            userID: '', // will be assigned internally in createUser method
+            name: username,
+            email: email,
+            walletAddress: walletAddress,
+            department: department,
+          ),
+          password,
+        );
+      } else {
+        await userRepo.createUser(
+          Student(
+            userID: '', // will be assigned internally in createUser method
+            name: username,
+            email: email,
+            role: role,
+            walletAddress: walletAddress,
+            isEligibleForVoting: false,
+          ),
+          password,
+        );
+      }
 
       // If user does not have a wallet address, just navigate to login page
       if (walletAddress.isEmpty) {

@@ -30,4 +30,13 @@ class ValidatorUtil {
     }
     return null;
   }
+  
+  static String? validateConfirmPassword(context, String password, String confirmPassword) {
+    if (confirmPassword.trim().isEmpty) {
+      return '${AppLocale.passwordCantBeBlank.getString(context)}!';
+    } else if (password != confirmPassword) {
+      return 'Passwords do not match!';
+    }
+    return null;
+  }
 }

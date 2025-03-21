@@ -1,6 +1,7 @@
 enum RouterPath {
   loginpage,
   registerpage,
+  staffregisterpage,
   forgotpasspage,
   resetpasspage,
   setnewpasspage,

@@ -274,6 +274,7 @@ class AppLocale {
   static const String gallery = 'gallery';
   static const String camera = 'camera';
   static const String of = '\'s';
+  static const String as = 'as';
   static const String walletAddressCopiedToClipboard = 'wallet address copied to clipboard';
   static const String accountHasBeenFrozen = 'account has been frozen';
 
@@ -316,6 +317,17 @@ class AppLocale {
   static const String submit = 'submit';
   static const String verificationRejected = 'verification rejected';
   static const String userAlreadyVerified = 'user already verified';
+  
+  // staff registration
+  static const String staffRegistration = 'staff registration';
+  static const String staffType = 'staff type';
+  static const String academic = 'academic';
+  static const String administrative = 'administrative';
+  static const String academicDepartment = 'academic department';
+  static const String administrativeDepartment = 'administrative department';
+  static const String selectDepartment = 'select department';
+  static const String registerAsStaff = 'register as staff';
+  static const String areYouStaffMember = 'are you a staff member';
 
   // Additional strings for SendNotificationPage
   static const String notificationType = 'notification type';
@@ -662,6 +674,7 @@ class AppLocale {
     gallery: 'Gallery',
     camera: 'Camera',
     of: '\'s',
+    as: 'as',
     walletAddressCopiedToClipboard: 'Wallet address copied to clipboard',
     accountHasBeenFrozen: 'Account has been frozen',
 
@@ -726,6 +739,17 @@ class AppLocale {
     filterByType: 'Tapis mengikut jenis',
     selectNotificationTopic: 'Pilih topik yang notifikasi ini tergolong:',
     allNotificationTypes: 'Semua',
+
+    // staff registration
+    staffRegistration: 'Staff Registration',
+    staffType: 'Staff Type',
+    academic: 'Academic',
+    administrative: 'Administratif',
+    academicDepartment: 'Departemen Akademik',
+    administrativeDepartment: 'Departemen Administratif',
+    selectDepartment: 'Pilih Departemen',
+    registerAsStaff: 'Daftar sebagai Kakitangan',
+    areYouStaffMember: 'Adakah anda seorang kakitangan',
   };
 
   // malay-ms
@@ -1002,6 +1026,7 @@ class AppLocale {
     gallery: 'Galeri',
     camera: 'Kamera',
     of: '\'s',
+    as: 'sebagai',
     walletAddressCopiedToClipboard: 'Alamat wallet disalin ke papan klip',
     accountHasBeenFrozen: 'Akaun telah dibekukan',
 
@@ -1066,6 +1091,17 @@ class AppLocale {
     filterByType: 'Tapis mengikut jenis',
     selectNotificationTopic: 'Pilih topik yang notifikasi ini tergolong:',
     allNotificationTypes: 'Semua',
+
+    // staff registration
+    staffRegistration: 'Pendaftaran Kakitangan',
+    staffType: 'Jenis Kakitangan',
+    academic: 'Akademik',
+    administrative: 'Administratif',
+    academicDepartment: 'Departemen Akademik',
+    administrativeDepartment: 'Departemen Administratif',
+    selectDepartment: 'Pilih Departemen',
+    registerAsStaff: 'Daftar sebagai Kakitangan',
+    areYouStaffMember: 'Adakah anda seorang kakitangan',
   };
 
   // chinese-zh
@@ -1342,6 +1378,7 @@ class AppLocale {
     gallery: '画廊',
     camera: '相机',
     of: '的',
+    as: '为',
     walletAddressCopiedToClipboard: '钱包地址已复制到剪贴板',
     accountHasBeenFrozen: '账户已被冻结',
 
@@ -1406,5 +1443,16 @@ class AppLocale {
     filterByType: '按类型筛选',
     selectNotificationTopic: '选择此通知所属的主题：',
     allNotificationTypes: '全部',
+
+    // staff registration
+    staffRegistration: '职员注册',
+    staffType: '职员类型',
+    academic: '学术',
+    administrative: '行政',
+    academicDepartment: '学术部门',
+    administrativeDepartment: '行政部门',
+    selectDepartment: '选择部门',
+    registerAsStaff: '注册为职员',
+    areYouStaffMember: '您是职员吗',
   };
 }
