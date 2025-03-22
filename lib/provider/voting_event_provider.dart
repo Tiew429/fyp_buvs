@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:blockchain_university_voting_system/data/voting_event_status.dart';
 import 'package:blockchain_university_voting_system/models/candidate_model.dart';
+import 'package:blockchain_university_voting_system/models/user_model.dart';
 import 'package:blockchain_university_voting_system/models/voting_event_model.dart';
 import 'package:blockchain_university_voting_system/repository/voting_event_repository.dart';
 import 'package:flutter/material.dart';
@@ -222,8 +223,8 @@ class VotingEventProvider extends ChangeNotifier{
     return success;
   }
 
-  Future<bool> vote(Candidate candidate) async {
-    return await _votingEventRepository.vote(candidate);
+  Future<bool> vote(Candidate candidate, User user) async {
+    return await _votingEventRepository.vote(candidate, user, _selectedVotingEvent);
   }
 
   @override

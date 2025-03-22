@@ -7,7 +7,6 @@ import 'package:blockchain_university_voting_system/services/report_service.dart
 import 'package:blockchain_university_voting_system/utils/snackbar_util.dart';
 import 'package:blockchain_university_voting_system/provider/voting_event_provider.dart';
 import 'package:blockchain_university_voting_system/widgets/candidate_box.dart';
-import 'package:blockchain_university_voting_system/widgets/centered_container.dart';
 import 'package:blockchain_university_voting_system/widgets/custom_animated_button.dart';
 import 'package:blockchain_university_voting_system/widgets/custom_bar_chart.dart';
 import 'package:blockchain_university_voting_system/widgets/progress_circular.dart';
@@ -99,7 +98,7 @@ class _VotingEventPageState extends State<VotingEventPage> {
 
   Future<void> _vote(Candidate candidate) async {
     try {
-      await widget._votingEventProvider.vote(candidate);
+      await widget._votingEventProvider.vote(candidate, widget._user);
     } catch (e) {
       print("Error voting: $e");
     }
@@ -155,262 +154,241 @@ class _VotingEventPageState extends State<VotingEventPage> {
       body: ScrollableResponsiveWidget(
         phone: Stack(
           children: [
-            Column(
-              children: [
-                const CenteredContainer(
-                  child: Text("Pic"),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 10.0),
-                  child: Text(AppLocale.votingEventInformation.getString(context), 
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                CenteredContainer(
-                  padding: const EdgeInsets.all(0),
-                  child: Container(
-                    alignment: Alignment.centerLeft,
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text.rich(
-                          TextSpan(
-                            children: [
-                              const TextSpan(
-                                text: "VE-ID: ",
-                                style: TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                              TextSpan(text: _votingEvent.votingEventID),
-                            ],
+            SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // event header with status badge
+                    Container(
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        color: colorScheme.surface,
+                        borderRadius: BorderRadius.circular(15),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.1),
+                            blurRadius: 10,
+                            offset: const Offset(0, 2),
                           ),
-                        ),
-                        Text.rich(
-                          TextSpan(
-                            children: [
-                              TextSpan(
-                                text: "${AppLocale.title.getString(context)}: ",
-                                style: const TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                              TextSpan(text: _votingEvent.title),
-                            ],
-                          ),
-                        ),
-                        Text.rich(
-                          TextSpan(
-                            children: [
-                              TextSpan(
-                                text: "${AppLocale.description.getString(context)}: ",
-                                style: const TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                              TextSpan(text: _votingEvent.description),
-                            ],
-                          ),
-                        ),
-                        Text.rich(
-                          TextSpan(
-                            children: [
-                              TextSpan(
-                                text: "${AppLocale.date.getString(context)}: ",
-                                style: const TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                              TextSpan(text: votingEventDate),
-                            ],
-                          ),
-                        ),
-                        Text.rich(
-                          TextSpan(
-                            children: [
-                              TextSpan(
-                                text: "${AppLocale.time.getString(context)}: ",
-                                style: const TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                              TextSpan(text: votingEventTime),
-                            ],
-                          ),
-                        ),
-                        Text.rich(
-                          TextSpan(
-                            children: [
-                              TextSpan(
-                                text: "${AppLocale.status.getString(context)}: ",
-                                style: const TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                              TextSpan(text: _votingEvent.status.name == 'available' ? AppLocale.available.getString(context) :
-                                            AppLocale.deprecated.getString(context)),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                if (isEnded) // should be isEnded, but true for test purpose
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 10.0),
-                    child: Text("${AppLocale.results.getString(context)}:", 
-                      style: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
+                        ],
                       ),
-                    ),
-                  ),
-                if (isEnded)
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 20.0),
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      color: colorScheme.primary,
-                      border: Border.all(
-                        color: colorScheme.onPrimary,
-                        width: Theme.of(context).brightness == Brightness.dark ? 3.0 : 1.0,
-                      ),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Row(
-                      children: [
-                        const Icon(FontAwesomeIcons.crown),
-                        const SizedBox(width: 10),
-                        Text("${AppLocale.winner.getString(context)}: ${winner.name}", 
-                          style: const TextStyle(
-                            fontSize: 20,
+                      padding: const EdgeInsets.all(16.0),
+                      margin: const EdgeInsets.only(bottom: 16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                _votingEvent.title,
+                                style: const TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              _buildStatusBadge(context),
+                            ],
                           ),
-                        ),
-                        const Spacer(),
-                        Text("${AppLocale.votesReceived.getString(context)}: ${winner.votesReceived}", 
-                          style: const TextStyle(
-                            fontSize: 20,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 10.0),
-                  child: Text("${AppLocale.candidateParticipated.getString(context)}:", 
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                _votingEvent.candidates.isEmpty 
-                  ? Center(
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Text(
-                          AppLocale.noCandidateFound.getString(context),
-                          style: TextStyle(
-                            color: colorScheme.onTertiary,
-                            fontSize: 18,
-                          ),
-                        ),
-                      ),
-                    )
-                  : Column(
-                      children: _votingEvent.candidates.map(
-                        (candidate) => Padding(
-                          padding: const EdgeInsets.only(bottom: 8.0),
-                          child: CandidateBox(
-                            candidate: candidate,
-                            onTap: () => _showCandidateDetails(candidate),
-                            backgroundColor: colorScheme.primary,
-                            textColor: colorScheme.onPrimary,
-                            canVote: canVote, // canVote should be, but now using true for test purpose
-                            onVote: () => _vote(candidate),
-                          ),
-                        )).toList(),
-                    ),
-                if (ongoing) // should be ongoing, but true for test purpose
-                  Padding(
-                    padding: const EdgeInsets.only(top: 2.0, bottom: 10.0),
-                    child: Text("${AppLocale.statistics.getString(context)}:", 
-                      style: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  // statistics container
-                if (ongoing || isEnded)
-                  Container(
-                    padding: const EdgeInsets.all(10.0),
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      color: colorScheme.primary,
-                      border: Border.all(
-                        color: colorScheme.onPrimary,
-                        width: Theme.of(context).brightness == Brightness.dark ? 3.0 : 1.0,
-                      ),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text("${AppLocale.totalVotesCast.getString(context)}: xx/xx"),
-                        Text("${AppLocale.percentageOfVotesCast.getString(context)}: xx%"),
-                        Text("${AppLocale.remainingVoters.getString(context)}: xx"),
-                        // bar chart
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 24.0),
-                          child: AspectRatio(
-                            aspectRatio: 16/9,
-                            child: CustomBarChart(
-                              xAxisList: _votingEvent.candidates.map((candidate) => candidate.name).toList(), 
-                              yAxisList: _votingEvent.candidates.map((candidate) => candidate.votesReceived.toDouble()).toList(), 
-                              xAxisName: AppLocale.candidate.getString(context), 
-                              yAxisName: AppLocale.votesReceived.getString(context), 
-                              interval: 0,
+                          const SizedBox(height: 8),
+                          Text(
+                            _votingEvent.description,
+                            style: TextStyle(
+                              color: colorScheme.onSurface.withOpacity(0.8),
+                              fontSize: 16,
                             ),
                           ),
-                        ),
-                        //--------------------------------
-                        Text("${AppLocale.timeRemaining.getString(context)}: ${timeRemaining.inDays} d ${timeRemaining.inHours % 24} h ${timeRemaining.inMinutes % 60} m"),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                if (!ongoing && !isEnded) // cannot edit or remove candidate when and after voting is ongoing and ended
-                  Column(
-                    children: [
-                      const SizedBox(height: 10.0),
-                      Row(
+                    
+                    // event information card
+                    _buildSectionCard(
+                      context,
+                      AppLocale.votingEventInformation.getString(context),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Spacer(),
-                          CustomAnimatedButton(
-                            onPressed: () => NavigationHelper.navigateToManageCandidatePage(context), 
-                            text: AppLocale.manageCandidate.getString(context),
+                          _buildInfoRow("VE-ID", _votingEvent.votingEventID),
+                          _buildInfoRow(AppLocale.date.getString(context), votingEventDate),
+                          _buildInfoRow(AppLocale.time.getString(context), votingEventTime),
+                          _buildInfoRow(
+                            AppLocale.status.getString(context), 
+                            _votingEvent.status.name == 'available' 
+                                ? AppLocale.available.getString(context) 
+                                : AppLocale.deprecated.getString(context)
                           ),
+                          if (ongoing)
+                            _buildTimeRemaining(),
                         ],
                       ),
-                      const SizedBox(height: 10.0),
-                      Row(
-                        children: [
-                          const Spacer(),
-                          CustomAnimatedButton(
-                            onPressed: () => _delete(), 
-                            backgroundColor: Colors.red,
-                            text: AppLocale.delete.getString(context),
+                    ),
+                    
+                    // results section for ended events
+                    if (isEnded)
+                      _buildSectionCard(
+                        context,
+                        AppLocale.results.getString(context),
+                        Column(
+                          children: [
+                            Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(12),
+                                  decoration: BoxDecoration(
+                                    color: Colors.amber.withOpacity(0.2),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(
+                                    FontAwesomeIcons.crown,
+                                    color: Colors.amber,
+                                    size: 30,
+                                  ),
+                                ),
+                                const SizedBox(width: 16),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        winner.name,
+                                        style: const TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      Text(
+                                        "${AppLocale.votesReceived.getString(context)}: ${winner.votesReceived}",
+                                        style: TextStyle(
+                                          color: colorScheme.onSurface.withOpacity(0.7),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    
+                    // candidates section
+                    _buildSectionCard(
+                      context,
+                      AppLocale.candidateParticipated.getString(context),
+                      _votingEvent.candidates.isEmpty 
+                        ? Center(
+                            child: Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: Text(
+                                AppLocale.noCandidateFound.getString(context),
+                                style: TextStyle(
+                                  color: colorScheme.onSurface.withOpacity(0.7),
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ),
+                          )
+                        : Column(
+                            children: _votingEvent.candidates.map(
+                              (candidate) => Padding(
+                                padding: const EdgeInsets.only(bottom: 8.0),
+                                child: CandidateBox(
+                                  candidate: candidate,
+                                  onTap: () => _showCandidateDetails(candidate),
+                                  backgroundColor: colorScheme.primary,
+                                  textColor: colorScheme.onPrimary,
+                                  canVote: canVote,
+                                  onVote: () => _vote(candidate),
+                                ),
+                              )).toList(),
                           ),
-                        ],
+                    ),
+                    
+                    // statistics section
+                    if (ongoing || isEnded)
+                      _buildSectionCard(
+                        context,
+                        AppLocale.statistics.getString(context),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // statistics rows
+                            _buildStatRow(
+                              AppLocale.totalVotesCast.getString(context),
+                              "xx/xx",
+                              const Icon(Icons.ballot_outlined, size: 20),
+                            ),
+                            _buildStatRow(
+                              AppLocale.percentageOfVotesCast.getString(context),
+                              "xx%",
+                              const Icon(Icons.percent, size: 20),
+                            ),
+                            _buildStatRow(
+                              AppLocale.remainingVoters.getString(context),
+                              "xx",
+                              const Icon(Icons.people_outline, size: 20),
+                            ),
+                            
+                            const SizedBox(height: 16),
+                            // bar chart
+                            AspectRatio(
+                              aspectRatio: 16/9,
+                              child: CustomBarChart(
+                                xAxisList: _votingEvent.candidates.map((candidate) => candidate.name).toList(), 
+                                yAxisList: _votingEvent.candidates.map((candidate) => candidate.votesReceived.toDouble()).toList(), 
+                                xAxisName: AppLocale.candidate.getString(context), 
+                                yAxisName: AppLocale.votesReceived.getString(context), 
+                                interval: 0,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                    ],
-                  ),
-                const SizedBox(height: 10.0),
-                if (isEnded) // should be isEnded, but true for test purpose
-                  Row(
-                    children: [
-                      const Spacer(),
-                      CustomAnimatedButton(
-                        onPressed: () => _exportToReport(), 
-                        backgroundColor: Colors.red,
-                        text: AppLocale.exportToReport.getString(context),
+                    
+                    // action buttons for admin/staff before event starts
+                    if (!ongoing && !isEnded)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 16.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            CustomAnimatedButton(
+                              onPressed: () => NavigationHelper.navigateToManageCandidatePage(context), 
+                              text: AppLocale.manageCandidate.getString(context),
+                            ),
+                            const SizedBox(width: 12),
+                            CustomAnimatedButton(
+                              onPressed: () => _delete(), 
+                              backgroundColor: Colors.red,
+                              text: AppLocale.delete.getString(context),
+                            ),
+                          ],
+                        ),
                       ),
-                    ],
-                  ),
-              ],
+                    
+                    // export report button for ended events
+                    if (isEnded)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 16.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            CustomAnimatedButton(
+                              onPressed: () => _exportToReport(), 
+                              backgroundColor: Colors.indigo,
+                              text: AppLocale.exportToReport.getString(context),
+                            ),
+                          ],
+                        ),
+                      ),
+                      
+                    const SizedBox(height: 24),
+                  ],
+                ),
+              ),
             ),
             if (isLoading)
               ProgressCircular(
@@ -420,6 +398,259 @@ class _VotingEventPageState extends State<VotingEventPage> {
           ],
         ),
         tablet: Container(),
+      ),
+    );
+  }
+  
+  // helper method to build status badge
+  Widget _buildStatusBadge(BuildContext context) {
+    Color badgeColor;
+    String statusText;
+    IconData statusIcon;
+    
+    if (_votingEvent.status.name == 'deprecated') {
+      badgeColor = Colors.grey;
+      statusText = AppLocale.deprecated.getString(context);
+      statusIcon = Icons.not_interested;
+    } else {
+      DateTime now = DateTime.now();
+      TimeOfDay nowTime = TimeOfDay.now();
+      
+      // event hasn't started yet
+      if (now.isBefore(_votingEvent.startDate!) || 
+          (now.isAtSameMomentAs(_votingEvent.startDate!) && 
+           (nowTime.hour < _votingEvent.startTime!.hour || 
+            (nowTime.hour == _votingEvent.startTime!.hour && 
+             nowTime.minute < _votingEvent.startTime!.minute)))) {
+        badgeColor = Colors.blue;
+        statusText = AppLocale.waitingToStart.getString(context);
+        statusIcon = Icons.schedule;
+      } 
+      // event has ended
+      else if (now.isAfter(_votingEvent.endDate!) || 
+          (now.isAtSameMomentAs(_votingEvent.endDate!) && 
+           (nowTime.hour > _votingEvent.endTime!.hour || 
+            (nowTime.hour == _votingEvent.endTime!.hour && 
+             nowTime.minute > _votingEvent.endTime!.minute)))) {
+        badgeColor = Colors.orange;
+        statusText = AppLocale.ended.getString(context);
+        statusIcon = Icons.done_all;
+      } 
+      // event is ongoing
+      else {
+        badgeColor = Colors.green;
+        statusText = AppLocale.ongoing.getString(context);
+        statusIcon = Icons.how_to_vote;
+      }
+    }
+    
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: badgeColor.withOpacity(0.2),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: badgeColor, width: 1),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(statusIcon, size: 14, color: badgeColor),
+          const SizedBox(width: 4),
+          Text(
+            statusText,
+            style: TextStyle(
+              color: badgeColor,
+              fontWeight: FontWeight.bold,
+              fontSize: 12,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+  
+  // helper method to build section cards
+  Widget _buildSectionCard(BuildContext context, String title, Widget content) {
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: colorScheme.surface,
+        borderRadius: BorderRadius.circular(15),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.all(16.0),
+      margin: const EdgeInsets.only(bottom: 16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(bottom: 12.0),
+            child: Row(
+              children: [
+                Container(
+                  width: 4,
+                  height: 18,
+                  decoration: BoxDecoration(
+                    color: colorScheme.primary,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: colorScheme.onSurface,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          content,
+        ],
+      ),
+    );
+  }
+  
+  // helper method to build info rows
+  Widget _buildInfoRow(String label, String value) {
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 120,
+            child: Text(
+              "$label:",
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: colorScheme.primary,
+              ),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              style: TextStyle(
+                color: colorScheme.onSurface,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+  
+  // helper method to build time remaining indicator
+  Widget _buildTimeRemaining() {
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    final int totalMinutes = timeRemaining.inMinutes;
+    final int totalDurationMinutes = 
+        (_votingEvent.endDate!.difference(_votingEvent.startDate!).inDays * 24 * 60) +
+        (_votingEvent.endTime!.hour * 60 + _votingEvent.endTime!.minute) -
+        (_votingEvent.startTime!.hour * 60 + _votingEvent.startTime!.minute);
+    
+    // calculate percentage of time elapsed
+    final double progress = 1 - (totalMinutes / totalDurationMinutes);
+    
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 16),
+        Text(
+          "${AppLocale.timeRemaining.getString(context)}:",
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: colorScheme.primary,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            Icon(
+              Icons.timer,
+              color: colorScheme.primary,
+              size: 18,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              "${timeRemaining.inDays}d ${timeRemaining.inHours % 24}h ${timeRemaining.inMinutes % 60}m",
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: colorScheme.onSurface,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(8),
+          child: LinearProgressIndicator(
+            value: progress,
+            backgroundColor: colorScheme.primary.withOpacity(0.2),
+            valueColor: AlwaysStoppedAnimation<Color>(
+              progress < 0.25 
+                  ? Colors.red 
+                  : progress < 0.75 
+                      ? Colors.orange 
+                      : Colors.green
+            ),
+            minHeight: 8,
+          ),
+        ),
+      ],
+    );
+  }
+  
+  // helper method to build statistics rows
+  Widget _buildStatRow(String label, String value, Icon icon) {
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12.0),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(6),
+            decoration: BoxDecoration(
+              color: colorScheme.primary.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: IconTheme(
+              data: IconThemeData(
+                color: colorScheme.primary,
+              ),
+              child: icon,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Text(
+            label,
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const Spacer(),
+          Text(
+            value,
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: colorScheme.primary,
+            ),
+          ),
+        ],
       ),
     );
   }

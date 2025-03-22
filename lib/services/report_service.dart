@@ -13,7 +13,7 @@ import 'package:blockchain_university_voting_system/models/voting_event_model.da
 import 'package:blockchain_university_voting_system/utils/snackbar_util.dart';
 
 class ReportService {
-  // Show format selection dialog
+  // show format selection dialog
   Future<String?> showExportFormatDialog(BuildContext context) async {
     return showDialog<String>(
       context: context,
@@ -46,7 +46,7 @@ class ReportService {
     );
   }
 
-  // Main export function - can be called from any page
+  // main export function - can be called from any page
   Future<void> exportVotingReport({
     required BuildContext context,
     required VotingEvent votingEvent,
@@ -60,7 +60,7 @@ class ReportService {
     updateLoadingState(true, AppLocale.generatingReport.getString(context));
     
     try {
-      // Show format selection dialog
+      // show format selection dialog
       final exportFormat = await showExportFormatDialog(context);
       if (exportFormat == null) {
         updateLoadingState(false, '');
@@ -104,7 +104,7 @@ class ReportService {
     }
   }
 
-  // Export to Excel
+  // export to Excel
   Future<void> exportToExcel({
     required BuildContext context,
     required VotingEvent votingEvent,
@@ -114,16 +114,16 @@ class ReportService {
     required Candidate? winner,
     required String generatedBy,
   }) async {
-    // Create a new Excel document
+    // create a new Excel document
     final excel = Excel.createExcel();
     
-    // Remove the default sheet
+    // remove the default sheet
     excel.delete('Sheet1');
     
-    // Create a sheet for the voting event details
+    // create a sheet for the voting event details
     final detailSheet = excel['Voting Event Details'];
     
-    // Add title row with styling
+    // add title row with styling
     final titleStyle = CellStyle(
       bold: true,
       fontColorHex: ExcelColor.fromHexString('#FFFFFF'),
@@ -131,26 +131,26 @@ class ReportService {
       horizontalAlign: HorizontalAlign.Center,
     );
     
-    // Add header for voting event details
+    // add header for voting event details
     detailSheet.cell(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: 0))
       ..value = TextCellValue('Voting Event Report')
       ..cellStyle = titleStyle;
     
-    // Merge cells for the title
+    // merge cells for the title
     detailSheet.merge(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: 0),
                       CellIndex.indexByColumnRow(columnIndex: 3, rowIndex: 0));
     
-    // Define a header style
+    // define a header style
     final headerStyle = CellStyle(
       bold: true,
       fontColorHex: ExcelColor.fromHexString('#000000'),
       backgroundColorHex: ExcelColor.fromHexString('#D9E1F2'),
     );
     
-    // Add event information rows
+    // add event information rows
     int rowIndex = 2;
     
-    // Add voting event details
+    // add voting event details
     _addExcelRow(detailSheet, rowIndex++, 'Voting Event ID:', votingEvent.votingEventID, headerStyle);
     _addExcelRow(detailSheet, rowIndex++, 'Title:', votingEvent.title, headerStyle);
     _addExcelRow(detailSheet, rowIndex++, 'Description:', votingEvent.description, headerStyle);
@@ -159,10 +159,10 @@ class ReportService {
     _addExcelRow(detailSheet, rowIndex++, 'Status:', votingEvent.status.name, headerStyle);
     _addExcelRow(detailSheet, rowIndex++, 'Total Votes Cast:', '${votingEvent.voters.length}', headerStyle);
     
-    // Add a space between sections
+    // add a space between sections
     rowIndex += 2;
     
-    // Add candidate information section header
+    // add candidate information section header
     detailSheet.cell(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: rowIndex))
       ..value = TextCellValue('Candidate Information')
       ..cellStyle = titleStyle;
@@ -171,14 +171,14 @@ class ReportService {
                       CellIndex.indexByColumnRow(columnIndex: 3, rowIndex: rowIndex));
     rowIndex += 2;
     
-    // Add candidate table headers
+    // add candidate table headers
     _addExcelTableHeader(detailSheet, rowIndex++, ['Name', 'User ID', 'Bio', 'Votes Received'], headerStyle);
     
-    // Sort candidates by votes (descending)
+    // sort candidates by votes (descending)
     final sortedCandidates = List<Candidate>.from(votingEvent.candidates)
       ..sort((a, b) => b.votesReceived.compareTo(a.votesReceived));
     
-    // Add candidate information
+    // add candidate information
     for (var candidate in sortedCandidates) {
       detailSheet.cell(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: rowIndex))
         .value = TextCellValue(candidate.name);
@@ -191,11 +191,11 @@ class ReportService {
       rowIndex++;
     }
     
-    // Add a space and winner information if voting has ended
+    // add a space and winner information if voting has ended
     if (isEnded && winner != null) {
       rowIndex += 2;
       
-      // Add winner section header
+      // add winner section header
       detailSheet.cell(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: rowIndex))
         ..value = TextCellValue('Winner Information')
         ..cellStyle = titleStyle;
@@ -204,11 +204,11 @@ class ReportService {
                         CellIndex.indexByColumnRow(columnIndex: 3, rowIndex: rowIndex));
       rowIndex += 2;
       
-      // Add winner information
+      // add winner information
       _addExcelRow(detailSheet, rowIndex++, 'Winner:', winner.name, headerStyle);
       _addExcelRow(detailSheet, rowIndex++, 'Votes Received:', '${winner.votesReceived}', headerStyle);
       
-      // Calculate winning percentage safely
+      // calculate winning percentage safely
       final double winningPercentage = votingEvent.voters.isNotEmpty 
           ? (winner.votesReceived / votingEvent.voters.length * 100) 
           : 0.0;
@@ -217,29 +217,29 @@ class ReportService {
           '${winningPercentage.toStringAsFixed(2)}%', headerStyle);
     }
     
-    // Auto-fit columns
+    // auto-fit columns
     for (var i = 0; i < 4; i++) {
       detailSheet.setColumnAutoFit(i);
     }
     
-    // Save the file
+    // save the file
     final bytes = excel.encode();
     
-    // Get the app directory
+    // get the app directory
     final directory = await getApplicationDocumentsDirectory();
     final dateFormat = DateFormat('yyyyMMdd_HHmmss');
     final fileName = 'voting_report_${dateFormat.format(DateTime.now())}.xlsx';
     final path = '${directory.path}/$fileName';
     
-    // Write to file
+    // write to file
     final file = File(path);
     await file.writeAsBytes(bytes!);
     
-    // Share the file
+    // share the file
     await Share.shareXFiles([XFile(path)], text: 'Voting Event Report');
   }
 
-  // Helper methods for Excel
+  // helper methods for Excel
   void _addExcelRow(Sheet sheet, int rowIndex, String label, String value, CellStyle headerStyle) {
     sheet.cell(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: rowIndex))
       ..value = TextCellValue(label)
@@ -256,7 +256,7 @@ class ReportService {
     }
   }
 
-  // Export to PDF
+  // export to PDF
   Future<void> exportToPdf({
     required BuildContext context,
     required VotingEvent votingEvent,
@@ -266,20 +266,20 @@ class ReportService {
     required Candidate? winner,
     required String generatedBy,
   }) async {
-    // Create a PDF document
+    // create a PDF document
     final pdf = pw.Document();
     
-    // Create a PDF theme with default fonts (removing Google Fonts dependency for simplification)
-    // If you want to use Google Fonts, you'll need to add the printing package and PdfGoogleFonts
+    // create a PDF theme with default fonts (removing Google Fonts dependency for simplification)
+    // if you want to use Google Fonts, you'll need to add the printing package and PdfGoogleFonts
     
-    // Add pages to the PDF
+    // add pages to the PDF
     pdf.addPage(
       pw.MultiPage(
         pageFormat: PdfPageFormat.a4,
         margin: const pw.EdgeInsets.all(32),
         build: (pw.Context context) {
           return [
-            // Title
+            // title
             pw.Header(
               level: 0,
               child: pw.Text('Voting Event Report', 
@@ -292,7 +292,7 @@ class ReportService {
             ),
             pw.SizedBox(height: 20),
             
-            // Voting Event Details
+            // voting event details
             pw.Header(level: 1, text: 'Voting Event Details'),
             _buildPdfInfoRow('Voting Event ID:', votingEvent.votingEventID),
             _buildPdfInfoRow('Title:', votingEvent.title),
@@ -304,25 +304,25 @@ class ReportService {
             _buildPdfInfoRow('Total Votes Cast:', '${votingEvent.voters.length}'),
             pw.SizedBox(height: 20),
             
-            // Candidate Information
+            // candidate information
             pw.Header(level: 1, text: 'Candidate Information'),
             _buildCandidatesTable(votingEvent.candidates),
             pw.SizedBox(height: 20),
             
-            // Winner Information (if voting has ended)
+            // winner information (if voting has ended)
             if (isEnded && winner != null) ...[
               pw.Header(level: 1, text: 'Winner Information'),
               _buildPdfInfoRow('Winner:', winner.name),
               _buildPdfInfoRow('Votes Received:', '${winner.votesReceived}'),
               
-              // Calculate winning percentage safely
+              // calculate winning percentage safely
               _buildPdfInfoRow(
                 'Winning Percentage:', 
                 '${(votingEvent.voters.isNotEmpty ? (winner.votesReceived / votingEvent.voters.length * 100) : 0).toStringAsFixed(2)}%'
               ),
             ],
             
-            // Signature and timestamp
+            // signature and timestamp
             pw.SizedBox(height: 40),
             pw.Divider(),
             pw.Row(
@@ -337,21 +337,21 @@ class ReportService {
       ),
     );
     
-    // Get the directory
+    // get the directory
     final directory = await getApplicationDocumentsDirectory();
     final dateFormat = DateFormat('yyyyMMdd_HHmmss');
     final fileName = 'voting_report_${dateFormat.format(DateTime.now())}.pdf';
     final path = '${directory.path}/$fileName';
     
-    // Save the PDF
+    // save the PDF
     final file = File(path);
     await file.writeAsBytes(await pdf.save());
     
-    // Share the PDF
+    // share the PDF
     await Share.shareXFiles([XFile(path)], text: 'Voting Event Report');
   }
 
-  // Helper methods for PDF
+  // helper methods for PDF
   pw.Widget _buildPdfInfoRow(String label, String value) {
     return pw.Padding(
       padding: const pw.EdgeInsets.symmetric(vertical: 4),
@@ -374,7 +374,7 @@ class ReportService {
   }
 
   pw.Widget _buildCandidatesTable(List<Candidate> candidates) {
-    // Sort candidates by votes (descending)
+    // sort candidates by votes (descending)
     final sortedCandidates = List<Candidate>.from(candidates)
       ..sort((a, b) => b.votesReceived.compareTo(a.votesReceived));
     

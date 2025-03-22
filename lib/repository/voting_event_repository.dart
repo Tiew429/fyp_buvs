@@ -1,6 +1,7 @@
 import 'package:blockchain_university_voting_system/blockchain/smart_contract_service.dart';
 import 'package:blockchain_university_voting_system/models/candidate_model.dart';
 import 'package:blockchain_university_voting_system/models/student_model.dart';
+import 'package:blockchain_university_voting_system/models/user_model.dart';
 import 'package:blockchain_university_voting_system/models/voting_event_model.dart';
 import 'package:blockchain_university_voting_system/routes/navigation_keys.dart';
 import 'package:blockchain_university_voting_system/services/firebase_service.dart';
@@ -167,6 +168,34 @@ class VotingEventRepository {
 
           // get voter details
           final List<Student> voters = [];
+          
+          if (event[7] != null) {
+            // check if 'voters' field exists in the Firestore document
+            if (firestoreData.exists && firestoreData.get('voters') != null) {
+              final List<Student> votersInFirestore = 
+                (firestoreData['voters'] as List<dynamic>)
+                  .map((voter) => Student.fromMap(voter)).toList();
+
+              for (String addressStr in voterAddressStrings) {
+                try {
+                  // compare between voters in blockchain and voters (array) in firestore
+                  // if the voter is not found in firestore, ignore it
+                  // if the voter is found in firestore, add the voter to the voters list
+                  for (Student voter in votersInFirestore) {
+                    if (voter.walletAddress.toLowerCase() == addressStr.toLowerCase()) {
+                      voters.add(voter);
+                      votersInFirestore.remove(voter); // to improve performance
+                      break;
+                    }
+                  }
+                } catch (e) {
+                  print("Error fetching voter data for address $addressStr: $e");
+                }
+              }
+            } else {
+              print("Voting_Event_Repository (getVotingEventList): 'voters' field does not exist in Firestore document for event ID: $votingEventID");
+            }
+          }
 
           // create the voting event object with all details from blockchain and firestore
           final VotingEvent votingEvent = VotingEvent(
@@ -273,8 +302,26 @@ class VotingEventRepository {
     return true;
   }
 
-  Future<bool> vote(Candidate candidate) async {
-    return await _smartContractService.voteInBlockchain(candidate);
+  Future<bool> vote(Candidate candidate, User user, VotingEvent votingEvent) async {
+    bool success1 = await _smartContractService.voteInBlockchain(candidate);
+    bool success2 = false;
+
+    if (success1) {
+      votingEvent.voters.add(
+        Student(
+          userID: user.userID,
+          name: user.name,
+          email: user.email,
+          walletAddress: user.walletAddress,
+          role: user.role,
+          isVerified: user.isVerified,
+          isEligibleForVoting: true, // no need second verification
+        ),
+      );
+      success2 = await updateVotingEventInFirebase(votingEvent);
+    }
+
+    return success1 && success2;
   }
 
   Future<bool> insertVotingEventToFirebase(VotingEvent votingEvent) async {
@@ -286,6 +333,7 @@ class VotingEventRepository {
       final endTimeBigInt = ConverterUtil.timeOfDayToBigInt(votingEvent.endTime!);
 
       List<Map<String, dynamic>> candidateMaps = [];
+      List<Map<String, dynamic>> voterMaps = [];
 
       // firebase insertion
       await _firestore.collection('votingevents').doc(votingEvent.votingEventID).set({
@@ -294,6 +342,7 @@ class VotingEventRepository {
         'startTime': startTimeBigInt.toString(),
         'endTime': endTimeBigInt.toString(),
         'candidates': candidateMaps,
+        'voters': voterMaps,
       });
 
       return true;
@@ -316,6 +365,8 @@ class VotingEventRepository {
         'description': votingEvent.description,
         'startTime': startTimeBigInt.toString(),
         'endTime': endTimeBigInt.toString(),
+        'candidates': votingEvent.candidates.map((candidate) => candidate.toMap()).toList(),
+        'voters': votingEvent.voters.map((voter) => voter.toMap()).toList(),
       });
 
       return true;
