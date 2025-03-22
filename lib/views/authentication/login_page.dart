@@ -43,7 +43,7 @@ class _LoginPageState extends State<LoginPage> {
     _passwordController.dispose();
   }
 
-  void _loginWithCredentials() {
+  Future<void> _loginWithCredentials() async {
     // Set loading state to true immediately when button is clicked
     setState(() {
       _isLoading = true;
@@ -61,8 +61,8 @@ class _LoginPageState extends State<LoginPage> {
     final password = _passwordController.text.trim();
     
     // Use Future.delayed to ensure the loading indicator has time to appear
-    Future.delayed(Duration.zero, () {
-      _authService.loginWithCredentials(
+    Future.delayed(Duration.zero, () async {
+      await _authService.loginWithCredentials(
         context,
         emailOrUsername,
         password,
@@ -72,7 +72,6 @@ class _LoginPageState extends State<LoginPage> {
           setState(() {
             _isLoading = false;
           });
-          SnackbarUtil.showSnackBar(context, AppLocale.loginSuccess.getString(context));
         }
       }).catchError((error) {
         // Handle any errors and set loading to false

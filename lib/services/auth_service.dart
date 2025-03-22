@@ -170,7 +170,7 @@ class AuthService {
       } catch (e) {
         print("FCM token saving failed, but continuing login: $e");
       }
-      
+      SnackbarUtil.showSnackBar(context, AppLocale.loginSuccess.getString(context));
       NavigationHelper.navigateToHomePage(context);
     } catch (e) {
       print("Error during login and navigation: $e");
