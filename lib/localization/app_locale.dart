@@ -246,6 +246,7 @@ class AppLocale {
   static const String exportToPdf = 'export to pdf';
   static const String doYouWantToGenerateReportFor = 'do you want to generate report for';
   static const String noEndedVotingEvents = 'no ended voting events available';
+  static const String reportGenerationFailed = 'report generation failed';
 
   // audit
   static const String audit = 'audit';
@@ -649,6 +650,7 @@ class AppLocale {
     exportToPdf: 'Export to PDF',
     doYouWantToGenerateReportFor: 'Do you want to generate report for',
     noEndedVotingEvents: 'No ended voting events available',
+    reportGenerationFailed: 'Report generation failed',
 
     // audit
     audit: 'Audit',
@@ -1004,6 +1006,7 @@ class AppLocale {
     exportToPdf: 'Eksport ke PDF',
     doYouWantToGenerateReportFor: 'Adakah anda mahu menjana laporan untuk',
     noEndedVotingEvents: 'Tiada acara pengundian tamat tersedia',
+    reportGenerationFailed: 'Gagal menjana laporan',
 
     // audit
     audit: 'Audit',
@@ -1359,6 +1362,7 @@ class AppLocale {
     exportToPdf: '导出到PDF',
     doYouWantToGenerateReportFor: '您想为此生成报告吗',
     noEndedVotingEvents: '没有已结束的投票活动',
+    reportGenerationFailed: '报告生成失败',
 
     // audit
     audit: '审计',

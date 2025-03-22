@@ -8,8 +8,9 @@ class Student extends User {
     required super.name,
     required super.email,
     required super.walletAddress,
+    required UserRole role,
     super.isVerified,
-    bool isEligibleForVoting = false, required UserRole role,
+    bool isEligibleForVoting = false,
   }) : _isEligibleForVoting = isEligibleForVoting, 
        super(role: UserRole.student);
 

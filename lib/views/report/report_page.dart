@@ -1,8 +1,11 @@
 import 'package:blockchain_university_voting_system/localization/app_locale.dart';
+import 'package:blockchain_university_voting_system/models/candidate_model.dart';
 import 'package:blockchain_university_voting_system/models/voting_event_model.dart';
 import 'package:blockchain_university_voting_system/provider/user_provider.dart';
 import 'package:blockchain_university_voting_system/provider/wallet_provider.dart';
 import 'package:blockchain_university_voting_system/provider/voting_event_provider.dart';
+import 'package:blockchain_university_voting_system/services/report_service.dart';
+import 'package:blockchain_university_voting_system/utils/snackbar_util.dart';
 import 'package:blockchain_university_voting_system/widgets/custom_search_box.dart';
 import 'package:blockchain_university_voting_system/widgets/empty_state_widget.dart';
 import 'package:blockchain_university_voting_system/widgets/response_widget.dart';
@@ -33,6 +36,7 @@ class _ReportPageState extends State<ReportPage> {
   late List<VotingEvent> _votingEventList;
   late TextEditingController _searchController;
   List<VotingEvent> _filteredVotingEventList = [];
+  final ReportService _reportService = ReportService();
 
   @override
   void initState() {
@@ -145,11 +149,42 @@ class _ReportPageState extends State<ReportPage> {
   }
 
   // generate report (placeholder for actual implementation)
-  void _generateReport(VotingEvent event, String format) {
-    // placeholder for actual report generation
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(AppLocale.reportExportedSuccessfully.getString(context))),
-    );
+  Future<void> _generateReport(VotingEvent event, String format) async {
+    try {
+      // get the highest vote candidate
+      Candidate? winner = event.candidates.reduce((a, b) => a.votesReceived > b.votesReceived ? a : b);
+      String votingEventDate = '${event.startDate!.day} ${event.startDate!.month} ${event.startDate!.year}';
+      String votingEventTime = '${event.startTime!.hour}:${event.startTime!.minute}';
+
+      if (format == 'excel') {
+        await _reportService.exportToExcel(
+          context: context,
+          votingEvent: event,
+          votingEventDate: votingEventDate,
+          votingEventTime: votingEventTime,
+          isEnded: true,
+          winner: winner,
+          generatedBy: widget._userProvider.user!.email,
+        );
+      } else if (format == 'pdf') {
+        await _reportService.exportToPdf(
+          context: context,
+          votingEvent: event,
+          votingEventDate: votingEventDate,
+          votingEventTime: votingEventTime,
+          isEnded: true,
+          winner: winner,
+          generatedBy: widget._userProvider.user!.email,
+        );
+      } else {
+        throw Exception('Invalid format');
+      }
+
+      SnackbarUtil.showSnackBar(context, AppLocale.reportExportedSuccessfully.getString(context));
+    } catch (e) {
+      print("ReportPage: _generateReport: $e");
+      SnackbarUtil.showSnackBar(context, AppLocale.reportGenerationFailed.getString(context));
+    }
   }
 
   @override

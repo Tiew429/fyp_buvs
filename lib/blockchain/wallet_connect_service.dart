@@ -104,17 +104,18 @@ class WalletConnectService {
     
     _appkitModal!.onModalConnect.subscribe((ModalConnect? event) async {
       final userProvider = Provider.of<UserProvider>(context, listen: false);
+      final user = userProvider.user;
 
       // userviewmodel got user, means user is logged in
-      if (userProvider.user != null) {
+      if (user != null) {
         // if user's wallet address is not the same as the event's address
-        if (userProvider.user!.walletAddress.isEmpty) {
+        if (user.walletAddress == "" || user.walletAddress.isEmpty) {
           // update wallet address in provider and firestore
           print("WalletConnectService: User's wallet address is empty, updating wallet address");
           await userProvider.updateUser(userProvider.user!.copyWith(walletAddress: getWalletAddress(context)));
           updateWalletAddress(context);
           return;
-        } else if (userProvider.user!.walletAddress != getWalletAddress(context)) {
+        } else if (user.walletAddress != "" && user.walletAddress.isNotEmpty && user.walletAddress != getWalletAddress(context)) {
           // prompt error and disconnect wallet
           print("WalletConnectService: User's wallet address is not the same as the event's address");
           handleDisconnect(context, false);
