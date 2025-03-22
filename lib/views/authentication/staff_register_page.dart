@@ -79,6 +79,9 @@ class _StaffRegisterPageState extends State<StaffRegisterPage> {
   }
 
   Future<void> _register() async {
+    // close keyboard
+    FocusScope.of(context).unfocus();
+
     // set loading to true
     setState(() {
       _isLoading = true;

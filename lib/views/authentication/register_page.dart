@@ -51,6 +51,9 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   Future<void> _register() async {
+    // close keyboard
+    FocusScope.of(context).unfocus();
+
     // set loading to true
     setState(() {
       _isLoading = true;

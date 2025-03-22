@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:blockchain_university_voting_system/localization/app_locale.dart';
 import 'package:blockchain_university_voting_system/provider/user_provider.dart';
 import 'package:blockchain_university_voting_system/provider/wallet_provider.dart';
@@ -13,19 +15,20 @@ import 'package:blockchain_university_voting_system/widgets/response_widget.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_localization/flutter_localization.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:image_picker/image_picker.dart';
 
 class VotingEventCreatePage extends StatefulWidget {
   final UserProvider _userProvider;
-  final VotingEventProvider _votingEventViewModel;
+  final VotingEventProvider _votingEventProvider;
   final WalletProvider _walletProvider;
 
   const VotingEventCreatePage({
     super.key,
     required UserProvider userProvider,
-    required VotingEventProvider votingEventViewModel,
+    required VotingEventProvider votingEventProvider,
     required WalletProvider walletProvider,
   }) : _userProvider = userProvider,
-      _votingEventViewModel = votingEventViewModel,
+      _votingEventProvider = votingEventProvider,
       _walletProvider = walletProvider;
 
   @override
@@ -37,6 +40,8 @@ class _VotingEventCreatePageState extends State<VotingEventCreatePage> {
   _endDateController, _startTimeController, _endTimeController;
   bool _showStartDateWarning = false, _loading = false;
   final _formKey = GlobalKey<FormState>();
+  File? _imageFile;
+  final _imagePicker = ImagePicker();
 
   @override
   void initState() {
@@ -132,6 +137,86 @@ class _VotingEventCreatePageState extends State<VotingEventCreatePage> {
     }
   }
 
+  Future<void> _pickImage() async {
+    try {
+      final pickedFile = await _imagePicker.pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 80,
+      );
+
+      if (pickedFile != null) {
+        setState(() {
+          _imageFile = File(pickedFile.path);
+        });
+      }
+    } catch (e) {
+      print("Error picking image: $e");
+      if (mounted) {
+        SnackbarUtil.showSnackBar(context, "Error picking image: ${e.toString()}");
+      }
+    }
+  }
+
+  Widget _buildImagePreview() {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 20),
+      width: double.infinity,
+      height: 200,
+      decoration: BoxDecoration(
+        color: Colors.grey[200],
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey),
+      ),
+      child: _imageFile != null
+          ? Stack(
+              fit: StackFit.expand,
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Image.file(
+                    _imageFile!,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+                Positioned(
+                  top: 8,
+                  right: 8,
+                  child: CircleAvatar(
+                    backgroundColor: Colors.black.withOpacity(0.5),
+                    radius: 18,
+                    child: IconButton(
+                      icon: const Icon(Icons.close, color: Colors.white, size: 18),
+                      onPressed: () {
+                        setState(() {
+                          _imageFile = null;
+                        });
+                      },
+                    ),
+                  ),
+                ),
+              ],
+            )
+          : InkWell(
+              onTap: _pickImage,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(
+                    FontAwesomeIcons.image,
+                    size: 48,
+                    color: Colors.grey,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    AppLocale.tapToAddImage.getString(context),
+                    style: TextStyle(color: Colors.grey[600]),
+                  ),
+                ],
+              ),
+            ),
+    );
+  }
+
   Future<void> _create() async {
     if (!_formKey.currentState!.validate()) {
       return;
@@ -166,7 +251,7 @@ class _VotingEventCreatePageState extends State<VotingEventCreatePage> {
         minute: int.parse(endTimeParts[1])
       );
 
-      final success = await widget._votingEventViewModel.createVotingEvent(
+      final success = await widget._votingEventProvider.createVotingEvent(
         _titleController.text, 
         _descriptionController.text, 
         startDate, 
@@ -175,11 +260,12 @@ class _VotingEventCreatePageState extends State<VotingEventCreatePage> {
         endTime, 
         widget._walletProvider.walletAddress!,
         widget._userProvider.user!.userID,
+        imageFile: _imageFile,
       );
 
       if (success) {
-        // refresh voting event list
-        await widget._votingEventViewModel.loadVotingEvents();
+        // no need to reload from blockchain, the provider already has the new event
+        // await widget._votingEventProvider.loadVotingEvents();
         
         if (mounted) {
           // navigate back to voting list page
@@ -224,6 +310,7 @@ class _VotingEventCreatePageState extends State<VotingEventCreatePage> {
               key: _formKey,
               child: Column(
                 children: [
+                  _buildImagePreview(),
                   CustomTextFormField(
                     controller: _titleController,
                     labelText: AppLocale.title.getString(context),
@@ -234,6 +321,7 @@ class _VotingEventCreatePageState extends State<VotingEventCreatePage> {
                     controller: _descriptionController,
                     labelText: AppLocale.description.getString(context),
                     validator: (value) => ValidatorUtil.validateEmpty(context, _descriptionController.text),
+                    maxLines: 5,
                   ),
                   const SizedBox(height: 20,),
                   CustomTextFormField(

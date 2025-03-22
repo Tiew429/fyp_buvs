@@ -73,9 +73,8 @@ class UserManagementProvider extends ChangeNotifier {
 
   Future<bool> verifyUser(String userID) async {
     try {
-      final isVerified = await _userManagementRepository.verifyUser(userID);
+      final isVerified = await _userManagementRepository.verifyUser(userID, _selectedUser.role);
       if (isVerified) {
-        _selectedUser.isVerified = true;
         await SendEmailUtil.sendEmail(
           _selectedUser.email,
           'Account Verified',

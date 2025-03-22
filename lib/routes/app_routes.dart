@@ -20,7 +20,6 @@ import 'package:blockchain_university_voting_system/views/notifications/send_not
 import 'package:blockchain_university_voting_system/views/pending_ve/pending_voting_event_list_page.dart';
 import 'package:blockchain_university_voting_system/views/profile/edit_profile_page.dart';
 import 'package:blockchain_university_voting_system/views/report/report_page.dart';
-import 'package:blockchain_university_voting_system/views/user_management/invite_new_user_page.dart';
 import 'package:blockchain_university_voting_system/views/user_management/profile_page_view_page.dart';
 import 'package:blockchain_university_voting_system/views/user_management/user_management_page.dart';
 import 'package:blockchain_university_voting_system/views/user_management/user_verification_page.dart';
@@ -492,7 +491,7 @@ List<RouteBase> router(String initialRoute, GlobalKey<NavigatorState> navigatorK
         return buildPageWithAnimation(
           VotingEventCreatePage(
             userProvider: getUserProvider()!,
-            votingEventViewModel: getVotingEventProvider()!,
+            votingEventProvider: getVotingEventProvider()!,
             walletProvider: getWalletProvider()!,
           ), 
           state,
@@ -583,16 +582,6 @@ List<RouteBase> router(String initialRoute, GlobalKey<NavigatorState> navigatorK
             userProvider: getUserProvider()!,
             userManagementProvider: getUserManagementProvider()!,
           ), 
-          state,
-        );
-      },
-    ),
-    GoRoute(
-      path: '/${RouterPath.invitenewuserpage.path}',
-      name: RouterPath.invitenewuserpage.path,
-      pageBuilder: (context, state) {
-        return buildPageWithAnimation(
-          const InviteNewUserPage(), 
           state,
         );
       },

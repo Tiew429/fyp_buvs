@@ -7,6 +7,7 @@ class Candidate {
   final String _votingEventID;
   int _votesReceived;
   bool _isConfirmed;
+  String _avatarUrl;
 
   Candidate({
     required String candidateID,
@@ -17,6 +18,7 @@ class Candidate {
     required String walletAddress,
     int votesReceived = 0,
     bool isConfirmed = false,
+    String avatarUrl = '',
   }) : _candidateID = candidateID,
        _userID = userID,
        _name = name,
@@ -24,7 +26,8 @@ class Candidate {
        _votingEventID = votingEventID,
        _walletAddress = walletAddress,
        _votesReceived = votesReceived,
-       _isConfirmed = isConfirmed;
+       _isConfirmed = isConfirmed,
+       _avatarUrl = avatarUrl;
 
   // getter
   String get candidateID => _candidateID;
@@ -35,11 +38,14 @@ class Candidate {
   String get walletAddress => _walletAddress;
   int get votesReceived => _votesReceived;
   bool get isConfirmed => _isConfirmed;
+  String get avatarUrl => _avatarUrl;
+
   // setter
   void setName(String name) => _name = name;
   void setBio(String bio) => _bio = bio;
   void setVotesReceived(int votesReceived) => _votesReceived = votesReceived;
   void setIsConfirmed(bool isConfirmed) => _isConfirmed = isConfirmed;
+  void setAvatarUrl(String avatarUrl) => _avatarUrl = avatarUrl;
 
   factory Candidate.fromMap(Map<String, dynamic> map, [int votesReceived = 0]) {
     return Candidate(
@@ -51,6 +57,7 @@ class Candidate {
       walletAddress: map['walletAddress'],
       votesReceived: votesReceived, // only after the voting event is over, it will be retrieved from the blockchain
       isConfirmed: map['isConfirmed'],
+      avatarUrl: map['avatarUrl'],
     );
   }
 
@@ -63,6 +70,7 @@ class Candidate {
       'walletAddress': walletAddress,
       'votingEventID': votingEventID,
       'isConfirmed': isConfirmed,
+      'avatarUrl': avatarUrl,
     };
   }
 
@@ -80,6 +88,7 @@ class Candidate {
           'walletAddress': candidate['walletAddress'],
           'votingEventID': candidate['votingEventID'],
           'isConfirmed': candidate['isConfirmed'],
+          'avatarUrl': candidate['avatarUrl'],
         });
         candidateList.add(candidateData);
       }

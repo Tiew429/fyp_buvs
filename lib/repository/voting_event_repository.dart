@@ -7,7 +7,9 @@ import 'package:blockchain_university_voting_system/routes/navigation_keys.dart'
 import 'package:blockchain_university_voting_system/services/firebase_service.dart';
 import 'package:blockchain_university_voting_system/utils/converter_util.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'dart:io';
 import 'package:provider/provider.dart';
 import 'package:reown_appkit/reown_appkit.dart';
 
@@ -16,7 +18,7 @@ class VotingEventRepository {
   final _smartContractService = Provider.of<SmartContractService>(rootNavigatorKey.currentContext!, listen: false);
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  Future<List<VotingEvent>> getVotingEventList() async {
+  Future<List<VotingEvent>> getVotingEventList({bool manualRefresh = false}) async {
     print("Voting_Event_Repository: Obtaining voting event list from firebase and blockchain.");
 
     // create an empty array list for voting event object to store the voting event later
@@ -25,7 +27,9 @@ class VotingEventRepository {
 
     try {
       // retrieve the important details of voting events from blockchain
-      List<dynamic> votingEvents = await _smartContractService.getVotingEventsFromBlockchain();
+      List<dynamic> votingEvents = await _smartContractService.getVotingEventsFromBlockchain(
+        manualRefresh: manualRefresh,
+      );
       
       if (votingEvents.isEmpty) {
         print("Voting_Event_Repository (getVotingEventList): No voting events found from blockchain.");
@@ -210,6 +214,7 @@ class VotingEventRepository {
             endTime: endTime,
             candidates: candidates,
             voters: voters,
+            imageUrl: firestoreData.exists && firestoreData.get('imageUrl') != null ? firestoreData['imageUrl'] : '', // get image url from firestore
           );
 
           // add the voting event into votingEventList
@@ -343,6 +348,7 @@ class VotingEventRepository {
         'endTime': endTimeBigInt.toString(),
         'candidates': candidateMaps,
         'voters': voterMaps,
+        'imageUrl': votingEvent.imageUrl,
       });
 
       return true;
@@ -367,11 +373,62 @@ class VotingEventRepository {
         'endTime': endTimeBigInt.toString(),
         'candidates': votingEvent.candidates.map((candidate) => candidate.toMap()).toList(),
         'voters': votingEvent.voters.map((voter) => voter.toMap()).toList(),
+        'imageUrl': votingEvent.imageUrl,
       });
 
       return true;
     } catch (e) {
       print("Voting_Event_Repository (updateVotingEventInFirebase): $e");
+      return false;
+    }
+  }
+
+  // upload image to Firebase Storage and return the download URL
+  Future<String> uploadVotingEventImage(File image, String votingEventId) async {
+    try {
+      print('VotingEventRepository: Uploading image for voting event: $votingEventId');
+      
+      // create a unique filename using timestamp + event ID
+      final String fileName = '${DateTime.now().millisecondsSinceEpoch}_$votingEventId.jpg';
+      final String path = 'voting_events/$votingEventId/$fileName';
+      
+      // get the storage reference
+      final Reference storageRef = FirebaseStorage.instance.ref().child(path);
+      
+      // upload the image
+      final UploadTask uploadTask = storageRef.putFile(image);
+      
+      // await the completion of the upload and get the download URL
+      final TaskSnapshot taskSnapshot = await uploadTask;
+      final String downloadUrl = await taskSnapshot.ref.getDownloadURL();
+      
+      print('VotingEventRepository: Image uploaded. URL: $downloadUrl');
+      return downloadUrl;
+    } catch (e) {
+      print('VotingEventRepository (uploadVotingEventImage): Error uploading image: $e');
+      return '';
+    }
+  }
+
+  // delete image from Firebase Storage
+  Future<bool> deleteVotingEventImage(String imageUrl) async {
+    try {
+      if (imageUrl.isEmpty) {
+        return true; // nothing to delete
+      }
+      
+      print('VotingEventRepository: Deleting image at URL: $imageUrl');
+      
+      // extract the reference from the URL
+      final Reference storageRef = FirebaseStorage.instance.refFromURL(imageUrl);
+      
+      // delete the file
+      await storageRef.delete();
+      
+      print('VotingEventRepository: Image deleted successfully');
+      return true;
+    } catch (e) {
+      print('VotingEventRepository (deleteVotingEventImage): Error deleting image: $e');
       return false;
     }
   }

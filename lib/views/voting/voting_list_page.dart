@@ -40,6 +40,9 @@ class _VotingListPageState extends State<VotingListPage> {
     super.initState();
     _searchController = TextEditingController();
     
+    // set up a listener to update when the provider changes
+    widget._votingEventProvider.addListener(_updateEventList);
+    
     // delay loading data until build is complete
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
@@ -47,9 +50,18 @@ class _VotingListPageState extends State<VotingListPage> {
       }
     });
   }
-
-  Future<void> _loadVotingEvents() async {
-    await widget._votingEventProvider.loadVotingEvents();
+  
+  @override
+  void dispose() {
+    widget._votingEventProvider.removeListener(_updateEventList);
+    _searchController.dispose();
+    super.dispose();
+  }
+  
+  // update the local event list when the provider's data changes
+  void _updateEventList() {
+    if (!mounted) return;
+    
     setState(() {
       // get all non-deprecated events
       _votingEventList = widget._votingEventProvider.votingEventList
@@ -59,6 +71,11 @@ class _VotingListPageState extends State<VotingListPage> {
       _filteredVotingEventList = _votingEventList;
       _isLoading = false;
     });
+  }
+
+  Future<void> _loadVotingEvents() async {
+    await widget._votingEventProvider.loadVotingEvents();
+    _updateEventList();
   }
 
   // sort events by status: 1. ongoing, 2. waiting to start, 3. ended

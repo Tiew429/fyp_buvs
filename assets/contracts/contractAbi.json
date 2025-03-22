@@ -23,22 +23,9 @@
 		"type": "function"
 	},
 	{
-		"inputs": [
-			{
-				"internalType": "string",
-				"name": "_eventIDStr",
-				"type": "string"
-			},
-			{
-				"internalType": "address",
-				"name": "_student",
-				"type": "address"
-			}
-		],
-		"name": "addVoter",
-		"outputs": [],
+		"inputs": [],
 		"stateMutability": "nonpayable",
-		"type": "function"
+		"type": "constructor"
 	},
 	{
 		"anonymous": false,
@@ -138,24 +125,6 @@
 			}
 		],
 		"name": "removeCandidate",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "string",
-				"name": "_eventIDStr",
-				"type": "string"
-			},
-			{
-				"internalType": "address",
-				"name": "_student",
-				"type": "address"
-			}
-		],
-		"name": "removeVoter",
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
@@ -307,6 +276,19 @@
 		],
 		"name": "VotingEventUpdate",
 		"type": "event"
+	},
+	{
+		"inputs": [],
+		"name": "admin",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
 	},
 	{
 		"inputs": [

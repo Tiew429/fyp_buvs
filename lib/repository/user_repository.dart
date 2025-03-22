@@ -105,6 +105,7 @@ class UserRepository {
         'walletAddress': updatedUser.walletAddress,
         'bio': updatedUser.bio,
         'isVerified': updatedUser.isVerified,
+        'avatarUrl': updatedUser.avatarUrl,
       });
     } catch (e) {
       print(e);

@@ -43,9 +43,9 @@ class UserManagementRepository {
     }
   }
 
-  Future<bool> verifyUser(String userID) async {
+  Future<bool> verifyUser(String userID, UserRole role) async {
     try {
-      final userCollection = FirebasePathUtil.getUserCollection(UserRole.student);
+      final userCollection = FirebasePathUtil.getUserCollection(role);
       await userCollection.doc(userID).update({'isVerified': true});
       return true;
     } catch (e) {

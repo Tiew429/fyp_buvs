@@ -94,121 +94,151 @@ class VotingEventBox extends StatelessWidget {
             ),
           ),
           padding: const EdgeInsets.all(16),
-          child: Column(
+          child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      votingEvent.title,
+              if (votingEvent.imageUrl.isNotEmpty)
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: SizedBox(
+                    width: 80,
+                    height: 80,
+                    child: Image.network(
+                      votingEvent.imageUrl,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Container(
+                          color: Colors.grey[300],
+                          child: Icon(
+                            Icons.image_not_supported,
+                            color: Colors.grey[700],
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              if (votingEvent.imageUrl.isNotEmpty)
+                const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            votingEvent.title,
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: colorScheme.onPrimary,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        if (showStatusIndicator)
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: statusColor,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Text(
+                              eventStatus,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      votingEvent.description,
                       style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: colorScheme.onPrimary,
+                        fontSize: 14,
+                        color: colorScheme.onPrimary.withOpacity(0.8),
                       ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
-                  ),
-                  if (showStatusIndicator)
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: statusColor,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        eventStatus,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
+                    const SizedBox(height: 12),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.calendar_today,
+                                size: 16,
+                                color: colorScheme.onPrimary,
+                              ),
+                              const SizedBox(width: 4),
+                              Expanded(
+                                child: Text(
+                                  "${votingEvent.startDate!.day}/${votingEvent.startDate!.month}/${votingEvent.startDate!.year} - ${votingEvent.endDate!.day}/${votingEvent.endDate!.month}/${votingEvent.endDate!.year}",
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: colorScheme.onPrimary.withOpacity(0.7),
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.access_time,
+                                size: 16,
+                                color: colorScheme.onPrimary,
+                              ),
+                              const SizedBox(width: 4),
+                              Expanded(
+                                child: Text(
+                                  "${votingEvent.startTime!.format(context)} - ${votingEvent.endTime!.format(context)}",
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: colorScheme.onPrimary.withOpacity(0.7),
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Text(
-                votingEvent.description,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: colorScheme.onPrimary.withOpacity(0.8),
+                    const SizedBox(height: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          "${AppLocale.candidateParticipated.getString(context)}: ${votingEvent.candidates.length}",
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: colorScheme.onPrimary.withOpacity(0.7),
+                          ),
+                        ),
+                        Text(
+                          "ID: ${votingEvent.votingEventID}",
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: colorScheme.onPrimary.withOpacity(0.7),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-              const SizedBox(height: 12),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.calendar_today,
-                          size: 16,
-                          color: colorScheme.onPrimary,
-                        ),
-                        const SizedBox(width: 4),
-                        Expanded(
-                          child: Text(
-                            "${votingEvent.startDate!.day}/${votingEvent.startDate!.month}/${votingEvent.startDate!.year} - ${votingEvent.endDate!.day}/${votingEvent.endDate!.month}/${votingEvent.endDate!.year}",
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: colorScheme.onPrimary.withOpacity(0.7),
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.access_time,
-                          size: 16,
-                          color: colorScheme.onPrimary,
-                        ),
-                        const SizedBox(width: 4),
-                        Expanded(
-                          child: Text(
-                            "${votingEvent.startTime!.format(context)} - ${votingEvent.endTime!.format(context)}",
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: colorScheme.onPrimary.withOpacity(0.7),
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    "${AppLocale.candidateParticipated.getString(context)}: ${votingEvent.candidates.length}",
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: colorScheme.onPrimary.withOpacity(0.7),
-                    ),
-                  ),
-                  Text(
-                    "ID: ${votingEvent.votingEventID}",
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: colorScheme.onPrimary.withOpacity(0.7),
-                    ),
-                  ),
-                ],
               ),
             ],
           ),

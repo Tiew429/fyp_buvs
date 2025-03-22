@@ -10,6 +10,7 @@ class Student extends User {
     required super.walletAddress,
     required UserRole role,
     super.isVerified,
+    super.avatarUrl,
     bool isEligibleForVoting = false,
   }) : _isEligibleForVoting = isEligibleForVoting, 
        super(role: UserRole.student);
@@ -35,6 +36,7 @@ class Student extends User {
       role: UserRole.student,
       walletAddress: json['walletAddress'] ?? '',
       isVerified: json['isVerified'] ?? false,
+      avatarUrl: json['avatarUrl'] ?? '',
       isEligibleForVoting: json['isEligibleForVoting'] ?? false,
     );
   }
@@ -46,6 +48,7 @@ class Student extends User {
       'email': email,
       'walletAddress': walletAddress,
       'isVerified': isVerified,
+      'avatarUrl': avatarUrl,
       'isEligibleForVoting': true,
     };
   }
@@ -58,6 +61,7 @@ class Student extends User {
       role: UserRole.student,
       walletAddress: map['walletAddress'] ?? '',
       isVerified: map['isVerified'] ?? false,
+      avatarUrl: map['avatarUrl'] ?? '',
       isEligibleForVoting: map['isEligibleForVoting'] ?? false,
     );
   }

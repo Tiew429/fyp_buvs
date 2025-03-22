@@ -12,7 +12,7 @@ contract Voting {
         uint256 startDate; // unix timestamp for event start date
         uint256 endDate; // unix timestamp for event end date
         address createdBy; // blockchain address of the event creator
-        uint8 status; // enum index (0: pending, 1: approved, 2: ongoing, 3: completed, 4: deprecated)
+        uint8 status; // enum index (0: available, 1: deprecated)
         address[] candidates; // list of candidates' addresses
         address[] voters; // list of voters' addresses (voters)
     }
@@ -25,7 +25,7 @@ contract Voting {
 
     struct Vote {
         address votes; // voter's blockchain address
-        bytes32 candidateID; // vote receiver's id / candidate's id
+        bytes32 candidateID; // vote receiver's id / candidate's idt
         uint256 timestamp; // timestamp when the vote was cast
     }
 
@@ -135,15 +135,13 @@ contract Voting {
     }
 
     // get all candidates for an event
-    function getCandidatesForEvent(string memory _eventIDStr) 
-        public view returns (bytes32[] memory) {
+    function getCandidatesForEvent(string memory _eventIDStr) public view returns (bytes32[] memory) {
         bytes32 _eventID = stringToBytes32(_eventIDStr);
         return candidateIDsByEvent[_eventID];
     }
 
     // get vote results for an event
-    function getVoteResults(string memory _eventIDStr) 
-        public view returns (bytes32[] memory candidateIDs, uint256[] memory voteCounts) {
+    function getVoteResults(string memory _eventIDStr) public view returns (bytes32[] memory candidateIDs, uint256[] memory voteCounts) {
         bytes32 _eventID = stringToBytes32(_eventIDStr);
         bytes32[] memory _candidates = candidateIDsByEvent[_eventID];
         uint256[] memory votes = new uint256[](_candidates.length);
@@ -177,7 +175,7 @@ contract Voting {
             startDate: _startDate,
             endDate: _endDate,
             createdBy: msg.sender,
-            status: 0, // pending by default
+            status: 0, // available by default
             candidates: new address[](0),
             voters: new address[](0)
         });
@@ -225,8 +223,8 @@ contract Voting {
         require(msg.sender == votingEvent.createdBy, "Only event creator can remove");
         require(block.timestamp < votingEvent.startDate, "Event already started, cannot remove");
 
-        // change voting event status to deprecated (4)
-        votingEvents[_eventID].status = 4;
+        // change voting event status to deprecated (1)
+        votingEvents[_eventID].status = 1;
 
         // emit removal event
         emit VotingEventRemove(_eventID);
@@ -244,6 +242,16 @@ contract Voting {
         require(votingEvent.eventID != bytes32(0), "Voting event does not exist");
         require(!hasVoted[_eventID][msg.sender], "Already voted in this event");
         require(block.timestamp >= votingEvent.startDate && block.timestamp <= votingEvent.endDate, "Voting not active");
+
+        // Ensure msg.sender is in the voters list
+        bool isRegisteredVoter = false;
+        for (uint256 i = 0; i < votingEvent.voters.length; i++) {
+            if (votingEvent.voters[i] == msg.sender) {
+                isRegisteredVoter = true;
+                break;
+            }
+        }
+        require(isRegisteredVoter, "You are not registered to vote in this event");
 
         // Check if candidate exists
         require(candidatesByEvent[_eventID][_candidateID].walletAddress != address(0), "Candidate does not exist");
@@ -274,55 +282,34 @@ contract Voting {
         bytes32 _eventID = stringToBytes32(_eventIDStr);
         VotingEvent storage votingEvent = votingEvents[_eventID];
 
-        // 基本验证
         require(votingEvent.eventID != bytes32(0), "Voting event does not exist");
         require(msg.sender == votingEvent.createdBy, "Only event creator can add candidate");
         require(block.timestamp < votingEvent.startDate, "Event already started, cannot add candidate");
         require(_candidateIDStrs.length == _walletAddresses.length, "Candidate IDs and wallet addresses count mismatch");
         require(_candidateIDStrs.length > 0, "No candidates provided");
 
-        // 记录添加的候选人数量，用于调试
-        uint256 addedCount = 0;
-
         for (uint256 i = 0; i < _candidateIDStrs.length; i++) {
             bytes32 _candidateID = stringToBytes32(_candidateIDStrs[i]);
             address walletAddress = _walletAddresses[i];
 
-            // 增加地址验证
             require(walletAddress != address(0), "Invalid wallet address");
-            
-            // 确保候选人 ID 不为空
             require(_candidateID != bytes32(0), "Invalid candidate ID");
-
-            // 确保候选人未在此活动中注册
             require(candidatesByEvent[_eventID][_candidateID].walletAddress == address(0), "Candidate already exists");
 
-            // 创建新的候选人结构
             Candidate memory newCandidate = Candidate({
                 candidateID: _candidateID,
                 walletAddress: walletAddress,
                 votesReceived: 0
             });
 
-            // 保存候选人详细信息到此活动的映射中
             candidatesByEvent[_eventID][_candidateID] = newCandidate;
             candidateIDsByEvent[_eventID].push(_candidateID);
-            
-            // 同时更新全局候选人映射
             candidates[walletAddress] = newCandidate;
-            
-            // 将候选人的钱包地址添加到活动的候选人列表中
             votingEvent.candidates.push(walletAddress);
 
-            // 增加计数器
-            addedCount++;
-
-            // 为每个添加的候选人触发事件，包含更多信息
+            // emit candidate assign event
             emit CandidateAssign(_eventID, walletAddress);
         }
-        
-        // 可以添加一个额外的事件来确认添加了多少候选人
-        // emit CandidatesAdded(_eventID, addedCount);
     }
 
     // remove candidate from a voting event

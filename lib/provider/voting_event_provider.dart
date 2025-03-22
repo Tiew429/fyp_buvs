@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:blockchain_university_voting_system/data/voting_event_status.dart';
 import 'package:blockchain_university_voting_system/models/candidate_model.dart';
@@ -88,7 +89,7 @@ class VotingEventProvider extends ChangeNotifier{
       notifyListeners();
       
       // 总是从数据源获取最新数据
-      _votingEventList = await _votingEventRepository.getVotingEventList();
+      _votingEventList = await _votingEventRepository.getVotingEventList(manualRefresh: true);
       print("Voting_Event_Provider: Loaded ${_votingEventList.length} events.");
       
       _isLoading = false;
@@ -123,8 +124,11 @@ class VotingEventProvider extends ChangeNotifier{
     TimeOfDay? endTime,
     String walletAddress,
     String userID,
+    {File? imageFile}
   ) async {
     print("Voting_Event_Provider: Creating VotingEvent object.");
+    String imageUrl = '';
+    
     VotingEvent newVotingEvent = VotingEvent(
       votingEventID: "VE-${_votingEventList.length + 1}",
       title: title,
@@ -134,11 +138,28 @@ class VotingEventProvider extends ChangeNotifier{
       startTime: startTime,
       endTime: endTime,
       createdBy: walletAddress,
+      imageUrl: imageUrl,
     );
+
+    // if we have an image, upload it first
+    if (imageFile != null) {
+      imageUrl = await _votingEventRepository.uploadVotingEventImage(imageFile, newVotingEvent.votingEventID);
+      if (imageUrl.isNotEmpty) {
+        // update the voting event with the image URL
+        newVotingEvent = newVotingEvent.copyWith(imageUrl: imageUrl);
+      }
+    }
 
     bool success = await _votingEventRepository.insertNewVotingEvent(userID, newVotingEvent);
     if (success) {
       _votingEventList.add(newVotingEvent);
+      // notify listeners that the list has been updated
+      notifyListeners();
+    } else {
+      // if insert failed but we uploaded an image, delete it
+      if (imageUrl.isNotEmpty) {
+        await _votingEventRepository.deleteVotingEventImage(imageUrl);
+      }
     }
     
     return success;
@@ -218,6 +239,7 @@ class VotingEventProvider extends ChangeNotifier{
 
     if (success) {
       _selectedVotingEvent = cloneEvent; // put after the repository call to avoid race condition
+      notifyListeners();
     }
 
     return success;
@@ -225,6 +247,92 @@ class VotingEventProvider extends ChangeNotifier{
 
   Future<bool> vote(Candidate candidate, User user) async {
     return await _votingEventRepository.vote(candidate, user, _selectedVotingEvent);
+  }
+
+  // add or update an image for an existing voting event
+  Future<bool> updateVotingEventImage(File imageFile) async {
+    print("Voting_Event_Provider: Updating voting event image.");
+    try {
+      // first delete the existing image if there is one
+      if (_selectedVotingEvent.imageUrl.isNotEmpty) {
+        await _votingEventRepository.deleteVotingEventImage(_selectedVotingEvent.imageUrl);
+      }
+      
+      // upload the new image
+      String imageUrl = await _votingEventRepository.uploadVotingEventImage(
+        imageFile, 
+        _selectedVotingEvent.votingEventID
+      );
+      
+      if (imageUrl.isEmpty) {
+        return false;
+      }
+      
+      // update the voting event with the new image URL
+      VotingEvent updatedEvent = _selectedVotingEvent.copyWith(imageUrl: imageUrl);
+      
+      // update in firebase only, no need to update blockchain
+      bool success = await _votingEventRepository.updateVotingEventInFirebase(updatedEvent);
+      
+      if (success) {
+        // update the selected voting event
+        _selectedVotingEvent = updatedEvent;
+        
+        // update in the list
+        int index = _votingEventList.indexWhere(
+          (event) => event.votingEventID == _selectedVotingEvent.votingEventID
+        );
+        if (index != -1) {
+          _votingEventList[index] = updatedEvent;
+        }
+        
+        notifyListeners();
+      }
+      
+      return success;
+    } catch (e) {
+      print("Voting_Event_Provider (updateVotingEventImage): Error updating image: $e");
+      return false;
+    }
+  }
+  
+  // remove the image from a voting event
+  Future<bool> removeVotingEventImage() async {
+    print("Voting_Event_Provider: Removing voting event image.");
+    try {
+      if (_selectedVotingEvent.imageUrl.isEmpty) {
+        return true; // nothing to remove
+      }
+      
+      // delete the image from storage
+      await _votingEventRepository.deleteVotingEventImage(_selectedVotingEvent.imageUrl);
+      
+      // update the voting event with empty image URL
+      VotingEvent updatedEvent = _selectedVotingEvent.copyWith(imageUrl: '');
+      
+      // update in firebase only
+      bool success = await _votingEventRepository.updateVotingEventInFirebase(updatedEvent);
+      
+      if (success) {
+        // update the selected voting event
+        _selectedVotingEvent = updatedEvent;
+        
+        // update in the list
+        int index = _votingEventList.indexWhere(
+          (event) => event.votingEventID == _selectedVotingEvent.votingEventID
+        );
+        if (index != -1) {
+          _votingEventList[index] = updatedEvent;
+        }
+        
+        notifyListeners();
+      }
+      
+      return success;
+    } catch (e) {
+      print("Voting_Event_Provider (removeVotingEventImage): Error removing image: $e");
+      return false;
+    }
   }
 
   @override

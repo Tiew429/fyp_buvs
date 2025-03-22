@@ -1,9 +1,11 @@
+import 'package:blockchain_university_voting_system/localization/app_locale.dart';
 import 'package:blockchain_university_voting_system/provider/wallet_provider.dart';
 import 'package:blockchain_university_voting_system/routes/navigation_keys.dart';
 import 'package:blockchain_university_voting_system/services/auth_service.dart';
 import 'package:blockchain_university_voting_system/provider/user_provider.dart';
 import 'package:blockchain_university_voting_system/utils/snackbar_util.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localization/flutter_localization.dart';
 import 'package:provider/provider.dart';
 import 'package:reown_appkit/reown_appkit.dart';
 import 'dart:async';
@@ -114,6 +116,7 @@ class WalletConnectService {
           print("WalletConnectService: User's wallet address is empty, updating wallet address");
           await userProvider.updateUser(userProvider.user!.copyWith(walletAddress: getWalletAddress(context)));
           updateWalletAddress(context);
+          SnackbarUtil.showSnackBar(context, AppLocale.walletConnected.getString(context));
           return;
         } else if (user.walletAddress != "" && user.walletAddress.isNotEmpty && user.walletAddress != getWalletAddress(context)) {
           // prompt error and disconnect wallet

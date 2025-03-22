@@ -77,6 +77,7 @@ class AppLocale {
   static const String bio = 'bio';
   static const String verified = 'verified';
   static const String notVerified = 'not verified';
+  static const String pendingVerification = 'pending verification';
   static const String bioDescription = 'description of your profile';
   static const String haveNotConnectedWithCryptoWallet = 'haven\'t connect with cryptocurrency wallet';
   static const String connectWithCryptoWallet = 'connect with cryptocurrency wallet';
@@ -89,6 +90,7 @@ class AppLocale {
   static const String staffDetails = 'staff details';
   static const String studentDetails = 'student details';
   static const String verificationStatus = 'verification status';
+  static const String profileUpdated = 'profile updated';
 
   // user management
   static const String userManagement = 'user management';
@@ -154,6 +156,7 @@ class AppLocale {
   static const String selectHowYouWantToSendThisNotification = 'select how you want to send this notification';
   static const String thisNotificationWillBeSentToAllUsersWhoAreSubscribedTo = 'this notification will be sent to all users who are subscribed to';
   static const String topic = 'topic';
+  static const String tapToAddImage = 'tap to add image';
 
   // votings
   static const String votingList = 'voting list';
@@ -205,6 +208,8 @@ class AppLocale {
   static const String votingEventDeprecatedSuccessfully = 'voting event deprecated successfully';
   static const String failedToDeprecateVotingEvent = 'failed to deprecate voting event';
   static const String deprecate = 'deprecate';
+  static const String failedToUpdateVotingEventImage = 'failed to update voting event image';
+  static const String failedToRemoveVotingEventImage = 'failed to remove voting event image';
 
   // student
   static const String notEligibleForVoting = 'not eligible for voting';
@@ -281,6 +286,7 @@ class AppLocale {
   static const String as = 'as';
   static const String walletAddressCopiedToClipboard = 'wallet address copied to clipboard';
   static const String accountHasBeenFrozen = 'account has been frozen';
+  static const String walletConnected = 'wallet connected';
 
   // user verification
   static const String userHasNotUploadedDocumentsYet = 'user has not uploaded documents yet';
@@ -333,7 +339,7 @@ class AppLocale {
   static const String registerAsStaff = 'Register as Staff';
   static const String areYouStaffMember = 'Are you a staff member';
 
-  // Additional strings for SendNotificationPage
+  // additional strings for SendNotificationPage
   static const String notificationType = 'notification type';
   static const String receivers = 'receivers';
   static const String allUsers = 'all users';
@@ -342,7 +348,7 @@ class AppLocale {
   static const String takePhoto = 'take photo';
   static const String send = 'send';
 
-  // Additional notification strings
+  // additional notification strings
   static const String sendToAllUsersInSystem = 'send to all users in the system';
   static const String byTopic = 'by topic';
   static const String specificUsers = 'specific users';
@@ -481,6 +487,7 @@ class AppLocale {
     bio: 'Bio',
     verified: 'Verified',
     notVerified: 'Not Verified',
+    pendingVerification: 'Pending Verification',
     bioDescription: 'Description of your profile',
     haveNotConnectedWithCryptoWallet: 'Haven\'t connect with cryptocurrency wallet',
     connectWithCryptoWallet: 'Connect with cryptocurrency wallet',
@@ -493,6 +500,7 @@ class AppLocale {
     staffDetails: 'Staff Details',
     studentDetails: 'Student Details',
     verificationStatus: 'Verification Status',
+    profileUpdated: 'Profile updated',
 
     // user management
     userManagement: 'User Management',
@@ -577,7 +585,7 @@ class AppLocale {
     status: 'Status',
     candidateParticipated: 'Candidate Participated',
     manageCandidate: 'Manage Candidate',
-    name: 'Name',
+    name: 'Nama',
     editVotingEvent: 'Edit Voting Event',
     update: 'Update',
     votingEvent: 'Voting Event',
@@ -609,6 +617,8 @@ class AppLocale {
     votingEventDeprecatedSuccessfully: 'voting event deprecated successfully',
     failedToDeprecateVotingEvent: 'failed to deprecate voting event',
     deprecate: 'deprecate',
+    failedToUpdateVotingEventImage: 'failed to update voting event image',
+    failedToRemoveVotingEventImage: 'failed to remove voting event image',
 
     // student
     notEligibleForVoting: 'Not eligible for voting',
@@ -685,6 +695,7 @@ class AppLocale {
     as: 'sebagai',
     walletAddressCopiedToClipboard: 'Alamat wallet disalin ke papan klip',
     accountHasBeenFrozen: 'Akaun telah dibekukan',
+    walletConnected: 'Wallet connected',
 
     // user verification
     userHasNotUploadedDocumentsYet: 'Pengguna belum memuat naik dokumen',
@@ -752,12 +763,12 @@ class AppLocale {
     staffRegistration: 'Staff Registration',
     staffType: 'Staff Type',
     academic: 'Academic',
-    administrative: 'Administrative',
-    academicDepartment: 'Academic Department',
-    administrativeDepartment: 'Administrative Department',
-    selectDepartment: 'Select Department',
-    registerAsStaff: 'Register as Staff',
-    areYouStaffMember: 'Are you a staff member',
+    administrative: 'Administratif',
+    academicDepartment: 'Departemen Akademik',
+    administrativeDepartment: 'Departemen Administratif',
+    selectDepartment: 'Pilih Departemen',
+    registerAsStaff: 'Daftar sebagai Kakitangan',
+    areYouStaffMember: 'Adakah anda seorang kakitangan',
   };
 
   // malay-ms
@@ -835,8 +846,9 @@ class AppLocale {
     role: 'Peranan',
     walletAddress: 'Alamat Wallet',
     bio: 'Bio',
-    verified: 'Diluluskan',
-    notVerified: 'Belum Diluluskan',
+    verified: 'Disahkan',
+    notVerified: 'Tidak Disahkan',
+    pendingVerification: 'Pengesahan Tertunda',
     bioDescription: 'Deskripsi profil anda',
     haveNotConnectedWithCryptoWallet: 'Belum terhubung dengan kripto wallet',
     connectWithCryptoWallet: 'Hubungkan dengan kripto wallet',
@@ -849,6 +861,7 @@ class AppLocale {
     staffDetails: 'Maklumat Kakitangan',
     studentDetails: 'Maklumat Pelajar',
     verificationStatus: 'Status Pengesahan',
+    profileUpdated: 'Profil berjaya dikemas kini',
 
     // user management
     userManagement: 'Pengurusan Pengguna',
@@ -965,6 +978,8 @@ class AppLocale {
     votingEventDeprecatedSuccessfully: 'Acara undian berjaya ditamatkan',
     failedToDeprecateVotingEvent: 'Gagal menamatkan acara undian',
     deprecate: 'Membekukan',
+    failedToUpdateVotingEventImage: 'gagal mengemas kini imej acara pemungutan suara',
+    failedToRemoveVotingEventImage: 'gagal menghapus imej acara pemungutan suara',
 
     // student
     notEligibleForVoting: 'Tidak layak untuk pengundian', 
@@ -1193,7 +1208,8 @@ class AppLocale {
     bio: '个人简介',
     verified: '已验证',
     notVerified: '未验证',
-    bioDescription: '个人简介',
+    pendingVerification: '待验证',
+    bioDescription: '您的个人简介',
     haveNotConnectedWithCryptoWallet: '尚未连接到加密货币钱包',
     connectWithCryptoWallet: '连接到加密货币钱包',
     cryptocurrencyWalletAccountConnected: '加密货币钱包账户已连接',
@@ -1205,6 +1221,7 @@ class AppLocale {
     staffDetails: '职员详情',
     studentDetails: '学生详情',
     verificationStatus: '验证状态',
+    profileUpdated: '个人资料已更新',
 
     // user management
     userManagement: '用户管理',
@@ -1270,6 +1287,7 @@ class AppLocale {
     selectHowYouWantToSendThisNotification: '选择您想要发送通知的方式',
     thisNotificationWillBeSentToAllUsersWhoAreSubscribedTo: '此通知将发送给所有订阅者',
     topic: '主题',
+    tapToAddImage: '点击添加图片',
 
     // voting
     votingList: '投票列表',
@@ -1299,9 +1317,9 @@ class AppLocale {
     approve: '批准',
     reject: '拒绝',
     votingEventCreatedSuccessfully: '投票活动已创建成功',
-    failedToCreateVotingEvent: '创建投票活动失败',
-    votingEventUpdatedSuccessfully: '投票活动已更新成功',
-    failedToUpdateVotingEvent: '更新投票活动失败',
+    failedToCreateVotingEvent: '无法创建投票活动',
+    votingEventUpdatedSuccessfully: '投票活动已成功更新',
+    failedToUpdateVotingEvent: '无法更新投票活动',
     delete: '删除',
     votingEventDeletedSuccessfully: '投票活动已删除成功',
     creatingVotingEvent: '正在创建投票活动...',
@@ -1319,8 +1337,10 @@ class AppLocale {
     votingEventID: '投票活动ID',
     areYouSureYouWantToDeprecate: '您确定要弃用此投票活动吗？',
     votingEventDeprecatedSuccessfully: '投票活动已弃用成功',
-    failedToDeprecateVotingEvent: '弃用投票活动失败',
+    failedToDeprecateVotingEvent: '无法弃用投票活动',
     deprecate: '弃用',
+    failedToUpdateVotingEventImage: '无法更新投票活动图片',
+    failedToRemoveVotingEventImage: '无法删除投票活动图片',
 
     // student
     notEligibleForVoting: '不符合投票资格',
@@ -1397,6 +1417,7 @@ class AppLocale {
     as: '为',
     walletAddressCopiedToClipboard: '钱包地址已复制到剪贴板',
     accountHasBeenFrozen: '账户已被冻结',
+    walletConnected: '钱包已连接',
 
     // user verification
     userHasNotUploadedDocumentsYet: '用户尚未上传文件',

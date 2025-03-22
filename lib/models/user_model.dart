@@ -6,6 +6,7 @@ class User {
   String _walletAddress;
   String _bio;
   bool _isVerified;
+  String _avatarUrl;
 
   User({
     required String userID,
@@ -15,13 +16,15 @@ class User {
     String walletAddress = '',
     String bio = '',
     bool isVerified = false,
+    String avatarUrl = '',
   }) : _userID = userID,
        _name = name,
        _email = email,
        _role = role,
        _walletAddress = walletAddress,
        _bio = bio,
-       _isVerified = isVerified;
+       _isVerified = isVerified,
+       _avatarUrl = avatarUrl;
   
   // getter
   String get userID => _userID;
@@ -31,13 +34,15 @@ class User {
   String get walletAddress => _walletAddress;
   String get bio => _bio;
   bool get isVerified => _isVerified;
+  String get avatarUrl => _avatarUrl;
 
   // setter
   void setWalletAddress(String walletAddress) => _walletAddress = walletAddress;
   void setBio(String bio) => _bio = bio;
   void setIsVerified(bool value) => _isVerified = value;
+  void setAvatarUrl(String avatarUrl) => _avatarUrl = avatarUrl;
 
-  // Convert a User object to JSON
+  // convert a User object to JSON
   Map<String, dynamic> toJson() {
     return {
       'userID': _userID,
@@ -47,10 +52,11 @@ class User {
       'walletAddress': _walletAddress,
       'bio': _bio,
       'isVerified': _isVerified,
+      'avatarUrl': _avatarUrl,
     };
   }
 
-  // Create a User object from JSON
+  // create a User object from JSON
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
       userID: json['userID'],
@@ -60,6 +66,7 @@ class User {
       walletAddress: json['walletAddress'],
       bio: json['bio'],
       isVerified: json['isVerified'],
+      avatarUrl: json['avatarUrl'] ?? '',
     );
   }
 
@@ -70,6 +77,7 @@ class User {
     String? walletAddress,
     UserRole? role,
     bool? isVerified,
+    String? avatarUrl,
   }) {
     return User(
       userID: _userID,
@@ -79,6 +87,7 @@ class User {
       role: role ?? _role,
       bio: _bio,
       isVerified: isVerified ?? _isVerified,
+      avatarUrl: avatarUrl ?? _avatarUrl,
     );
   }
 }

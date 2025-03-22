@@ -199,6 +199,7 @@ class AuthService {
           walletAddress: userData['walletAddress'],
           bio: userData['bio'],
           isVerified: userData['isVerified'],
+          avatarUrl: userData['avatarUrl'],
         );
         setUserAndLoginAndNavigate(context, user);
         userFound = true;

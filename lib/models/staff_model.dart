@@ -10,6 +10,7 @@ class Staff extends User {
     required super.walletAddress,
     required UserRole role,
     super.isVerified,
+    super.avatarUrl,
     String department = 'General',
   }) : _department = department,
        super(role: UserRole.staff);
@@ -29,6 +30,7 @@ class Staff extends User {
       walletAddress: json['walletAddress'] ?? '',
       isVerified: json['isVerified'] ?? false,
       department: json['department'] ?? 'General',
+      avatarUrl: json['avatarUrl'] ?? '',
     );
   }
 }

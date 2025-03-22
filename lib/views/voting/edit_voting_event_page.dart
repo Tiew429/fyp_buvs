@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:blockchain_university_voting_system/localization/app_locale.dart';
 import 'package:blockchain_university_voting_system/models/voting_event_model.dart';
 import 'package:blockchain_university_voting_system/routes/navigation_helper.dart';
@@ -11,6 +13,7 @@ import 'package:blockchain_university_voting_system/widgets/response_widget.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_localization/flutter_localization.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:image_picker/image_picker.dart';
 
 class EditVotingEventPage extends StatefulWidget {
   final VotingEventProvider _votingEventViewModel;
@@ -29,6 +32,9 @@ class _EditVotingEventPageState extends State<EditVotingEventPage> {
   late final TextEditingController _titleController, _descriptionController, _startDateController, 
   _endDateController, _startTimeController, _endTimeController;
   bool _showStartDateWarning = false, _isLoading = false;
+  File? _imageFile;
+  final _imagePicker = ImagePicker();
+  bool _imageChanged = false;
 
   @override
   void initState() {
@@ -103,6 +109,130 @@ class _EditVotingEventPageState extends State<EditVotingEventPage> {
     }
   }
 
+  Future<void> _pickImage() async {
+    try {
+      final pickedFile = await _imagePicker.pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 80,
+      );
+
+      if (pickedFile != null) {
+        setState(() {
+          _imageFile = File(pickedFile.path);
+          _imageChanged = true;
+        });
+      }
+    } catch (e) {
+      print("Error picking image: $e");
+      if (mounted) {
+        SnackbarUtil.showSnackBar(context, "Error picking image: ${e.toString()}");
+      }
+    }
+  }
+
+  Widget _buildImagePreview() {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 20),
+      width: double.infinity,
+      height: 200,
+      decoration: BoxDecoration(
+        color: Colors.grey[200],
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey),
+      ),
+      child: _imageFile != null
+          ? Stack(
+              fit: StackFit.expand,
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Image.file(
+                    _imageFile!,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+                Positioned(
+                  top: 8,
+                  right: 8,
+                  child: CircleAvatar(
+                    backgroundColor: Colors.black.withOpacity(0.5),
+                    radius: 18,
+                    child: IconButton(
+                      icon: const Icon(Icons.close, color: Colors.white, size: 18),
+                      onPressed: () {
+                        setState(() {
+                          _imageFile = null;
+                          _imageChanged = true;
+                        });
+                      },
+                    ),
+                  ),
+                ),
+              ],
+            )
+          : _votingEvent.imageUrl.isNotEmpty && !_imageChanged
+              ? Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Image.network(
+                        _votingEvent.imageUrl,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Container(
+                            color: Colors.grey[300],
+                            child: Center(
+                              child: Icon(
+                                Icons.error_outline,
+                                color: Colors.grey[700],
+                                size: 48,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    Positioned(
+                      top: 8,
+                      right: 8,
+                      child: CircleAvatar(
+                        backgroundColor: Colors.black.withOpacity(0.5),
+                        radius: 18,
+                        child: IconButton(
+                          icon: const Icon(Icons.close, color: Colors.white, size: 18),
+                          onPressed: () {
+                            setState(() {
+                              _imageChanged = true;
+                              _imageFile = null;
+                            });
+                          },
+                        ),
+                      ),
+                    ),
+                  ],
+                )
+              : InkWell(
+                  onTap: _pickImage,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(
+                        FontAwesomeIcons.image,
+                        size: 48,
+                        color: Colors.grey,
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        AppLocale.tapToAddImage.getString(context),
+                        style: TextStyle(color: Colors.grey[600]),
+                      ),
+                    ],
+                  ),
+                ),
+    );
+  }
+
   Future<void> _edit() async {
     setState(() {
       _isLoading = true;
@@ -123,7 +253,26 @@ class _EditVotingEventPageState extends State<EditVotingEventPage> {
           minute: int.parse(_endTimeController.text.split(':')[1]),
         ),
       );
+      
       bool success = await widget._votingEventViewModel.updateVotingEvent(updatedEvent, _votingEvent);
+      
+      // Handle image update if the image was changed
+      if (success && _imageChanged) {
+        if (_imageFile != null) {
+          // Upload new image
+          success = await widget._votingEventViewModel.updateVotingEventImage(_imageFile!);
+          if (!success) {
+            SnackbarUtil.showSnackBar(context, AppLocale.failedToUpdateVotingEventImage.getString(context));
+          }
+        } else if (_votingEvent.imageUrl.isNotEmpty) {
+          // Remove existing image
+          success = await widget._votingEventViewModel.removeVotingEventImage();
+          if (!success) {
+            SnackbarUtil.showSnackBar(context, AppLocale.failedToRemoveVotingEventImage.getString(context));
+          }
+        }
+      }
+      
       if (success) {
         NavigationHelper.navigateBack(context);
         SnackbarUtil.showSnackBar(context, AppLocale.votingEventUpdatedSuccessfully.getString(context));
@@ -139,6 +288,7 @@ class _EditVotingEventPageState extends State<EditVotingEventPage> {
       });
     }
   }
+
   @override
   Widget build(BuildContext context) {
     ColorScheme colorScheme = Theme.of(context).colorScheme;
@@ -155,6 +305,7 @@ class _EditVotingEventPageState extends State<EditVotingEventPage> {
           ScrollableResponsiveWidget(
             phone: Column(
               children: [
+                _buildImagePreview(),
                 CustomTextFormField(
                   controller: _titleController,
                   labelText: AppLocale.title.getString(context),

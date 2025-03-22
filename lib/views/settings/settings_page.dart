@@ -48,15 +48,6 @@ class _SettingsPageState extends State<SettingsPage> {
 
     return Scaffold(
       backgroundColor: colorScheme.tertiary,
-      appBar: AppBar(
-        backgroundColor: colorScheme.secondary,
-        centerTitle: true,
-        title: Text(
-          AppLocale.settings.getString(context),
-          style: TextStyle(color: colorScheme.onPrimary),
-        ),
-        elevation: 0,
-      ),
       body: ScrollableWidget(
         hasBottomNavigationBar: true,
         child: Column(

@@ -229,6 +229,7 @@ class _AddCandidatePageState extends State<AddCandidatePage> {
             walletAddress: student.walletAddress,
             votingEventID: votingEvent.votingEventID,
             isConfirmed: true, // since it is added by admin or event creator
+            avatarUrl: student.avatarUrl,
           )
         );
       }

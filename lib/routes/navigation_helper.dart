@@ -96,9 +96,6 @@ class NavigationHelper {
   static void navigateToUserManagementPage(BuildContext context) {
     context.push('/${RouterPath.usermanagementpage.path}');
   }
-  static void navigateToInviteNewUserPage(BuildContext context) {
-    context.push('/${RouterPath.invitenewuserpage.path}');
-  }
   static void navigateToProfilePageViewPage(BuildContext context) {
     context.push('/${RouterPath.profilepageviewpage.path}');
   }

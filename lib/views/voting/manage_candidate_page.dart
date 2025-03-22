@@ -4,7 +4,6 @@ import 'package:blockchain_university_voting_system/models/voting_event_model.da
 import 'package:blockchain_university_voting_system/routes/navigation_helper.dart';
 import 'package:blockchain_university_voting_system/utils/snackbar_util.dart';
 import 'package:blockchain_university_voting_system/provider/voting_event_provider.dart';
-import 'package:blockchain_university_voting_system/widgets/candidate_box.dart';
 import 'package:blockchain_university_voting_system/widgets/custom_animated_button.dart';
 import 'package:blockchain_university_voting_system/widgets/empty_state_widget.dart';
 import 'package:blockchain_university_voting_system/widgets/response_widget.dart';
@@ -60,6 +59,7 @@ class _ManageCandidatePageState extends State<ManageCandidatePage> with SingleTi
           IconButton(
             icon: const Icon(Icons.add),
             onPressed: () => NavigationHelper.navigateToAddCandidatePage(context),
+            tooltip: AppLocale.addCandidate.getString(context),
           ),
         ],
         bottom: TabBar(
@@ -83,57 +83,97 @@ class _ManageCandidatePageState extends State<ManageCandidatePage> with SingleTi
           _buildPendingCandidatesTab(),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: FloatingActionButton.extended(
         onPressed: () => NavigationHelper.navigateToAddCandidatePage(context),
         backgroundColor: colorScheme.primary,
-        child: const Icon(Icons.add),
+        icon: const Icon(Icons.add),
+        label: Text(AppLocale.addCandidate.getString(context)),
       ),
     );
   }
 
-  // Build the confirmed candidates tab
+  // build the confirmed candidates tab
   Widget _buildConfirmedCandidatesTab() {
     final colorScheme = Theme.of(context).colorScheme;
 
     return ScrollableResponsiveWidget(
       hasBottomNavigationBar: true,
       phone: _confirmedCandidates.isEmpty
-        ? Center(
-            child: Text(
-              AppLocale.noConfirmedCandidateAvailable.getString(context),
-              style: TextStyle(
-                color: colorScheme.onTertiary,
-                fontSize: 18,
-              ),
-            ),
+        ? EmptyStateWidget(
+            message: AppLocale.noConfirmedCandidateAvailable.getString(context),
+            icon: Icons.person_off_outlined,
           )
         : _isLoading
             ? const Center(child: CircularProgressIndicator())
-            : Column(
-                children: _confirmedCandidates.isEmpty ?
-                  [
-                    EmptyStateWidget(
-                      message: AppLocale.noConfirmedCandidateAvailable.getString(context),
-                      icon: Icons.person,
-                    )
-                  ]
-                : _confirmedCandidates.map((candidate) => Padding(
-                    padding: const EdgeInsets.only(bottom: 12.0),
-                    child: CandidateBox(
-                      candidate: candidate,
-                      status: CandidateStatus.confirmed,
-                      onTap: () => _showCandidateDetails(candidate),
-                      backgroundColor: colorScheme.primary,
-                      textColor: colorScheme.onPrimary,
-                      canVote: false,
-                    ),
-                ),).toList(),
-            ),
+            : Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                child: Column(
+                  children: _confirmedCandidates.isEmpty ?
+                    [
+                      EmptyStateWidget(
+                        message: AppLocale.noConfirmedCandidateAvailable.getString(context),
+                        icon: Icons.person_off_outlined,
+                      )
+                    ]
+                  : _confirmedCandidates.map((candidate) => Padding(
+                      padding: const EdgeInsets.only(bottom: 16.0),
+                      child: Card(
+                        elevation: 2,
+                        child: InkWell(
+                          onTap: () => _showCandidateDetails(candidate),
+                          child: Stack(
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.all(12.0),
+                                child: Row(
+                                  children: [
+                                    CircleAvatar(
+                                      backgroundColor: colorScheme.primary,
+                                      child: Text(
+                                        candidate.name.isNotEmpty ? candidate.name[0].toUpperCase() : '?',
+                                        style: TextStyle(color: colorScheme.onPrimary),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 16),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            candidate.name,
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 16,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 4),
+                                          if (candidate.bio.isNotEmpty) 
+                                            Text(
+                                              candidate.bio,
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: TextStyle(
+                                                color: colorScheme.onSurface.withOpacity(0.7),
+                                              ),
+                                            ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                  ),).toList(),
+                ),
+              ),
       tablet: Container(),
     );
   }
 
-  // Build the pending candidates tab
+  // build the pending candidates tab
   Widget _buildPendingCandidatesTab() {
     final colorScheme = Theme.of(context).colorScheme;
 
@@ -141,50 +181,85 @@ class _ManageCandidatePageState extends State<ManageCandidatePage> with SingleTi
       ? const Center(child: CircularProgressIndicator())
       : ScrollableResponsiveWidget(
           phone: _pendingCandidates.isEmpty
-            ? Center(
-                child: Text(
-                  AppLocale.noPendingCandidateAvailable.getString(context),
-                  style: TextStyle(
-                    color: colorScheme.onTertiary,
-                    fontSize: 18,
-                  ),
-                ),
+            ? EmptyStateWidget(
+                message: AppLocale.noPendingCandidateAvailable.getString(context),
+                icon: Icons.pending_actions_outlined,
               )
-            : Column(
-                children: _pendingCandidates.map((candidate) => Stack(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 12.0),
-                      child: CandidateBox(
-                        candidate: candidate,
-                        status: CandidateStatus.pending,
+            : Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                child: Column(
+                  children: _pendingCandidates.map((candidate) => Padding(
+                    padding: const EdgeInsets.only(bottom: 16.0),
+                    child: Card(
+                      elevation: 2,
+                      child: InkWell(
                         onTap: () => _showCandidateDetails(candidate),
-                        backgroundColor: colorScheme.primary,
-                        textColor: colorScheme.onPrimary,
-                        canVote: false,
+                        child: Stack(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.all(12.0),
+                              child: Row(
+                                children: [
+                                  CircleAvatar(
+                                    backgroundColor: colorScheme.primaryContainer,
+                                    child: Text(
+                                      candidate.name.isNotEmpty ? candidate.name[0].toUpperCase() : '?',
+                                      style: TextStyle(color: colorScheme.onPrimaryContainer),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 16),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          candidate.name,
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 16,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        if (candidate.bio.isNotEmpty) 
+                                          Text(
+                                            candidate.bio,
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: TextStyle(
+                                              color: colorScheme.onSurface.withOpacity(0.7),
+                                            ),
+                                          ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Positioned(
+                              bottom: 8,
+                              right: 8,
+                              child: Row(
+                                children: [
+                                  CustomAnimatedButton(
+                                    onPressed: () => _confirmCandidate(candidate),
+                                    text: AppLocale.confirm.getString(context),
+                                    backgroundColor: Colors.green,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  CustomAnimatedButton(
+                                    onPressed: () => _rejectCandidate(candidate),
+                                    text: AppLocale.reject.getString(context),
+                                    backgroundColor: Colors.red,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                    Positioned(
-                      bottom: 8,
-                      right: 8,
-                      child: Row(
-                        children: [
-                          CustomAnimatedButton(
-                            onPressed: () => _confirmCandidate(candidate),
-                            text: AppLocale.confirm.getString(context),
-                            backgroundColor: Colors.green,
-                          ),
-                          const SizedBox(width: 8),
-                          CustomAnimatedButton(
-                            onPressed: () => _rejectCandidate(candidate),
-                            text: AppLocale.reject.getString(context),
-                            backgroundColor: Colors.red,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                )).toList(),
+                  )).toList(),
+                ),
               ),
           tablet: Container(),
         );
@@ -196,30 +271,52 @@ class _ManageCandidatePageState extends State<ManageCandidatePage> with SingleTi
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(candidate.name),
+        title: Row(
+          children: [
+            Expanded(child: Text(candidate.name)),
+          ],
+        ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             if (candidate.bio.isNotEmpty) ...[
-              Text("${AppLocale.bio.getString(context)}:"),
+              Text(
+                "${AppLocale.bio.getString(context)}:",
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
               const SizedBox(height: 4),
-              Text(candidate.bio),
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: colorScheme.surface,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(candidate.bio),
+              ),
               const SizedBox(height: 12),
             ],
-            Text("${AppLocale.username.getString(context)}:"),
+            Text(
+              "${AppLocale.username.getString(context)}:",
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: 4),
             SelectableText(candidate.name),
-            // For confirmed candidates, show votes received
-            if (candidate.isConfirmed) ...[
-              const SizedBox(height: 8),
-              Text("${AppLocale.votesReceived.getString(context)}: ${candidate.votesReceived}"),
-            ],
+            const SizedBox(height: 8),
+            const Text(
+              "User ID:",
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 4),
+            SelectableText(candidate.userID),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
+            style: TextButton.styleFrom(
+              backgroundColor: colorScheme.primary,
+            ),
             child: Text(
               AppLocale.close.getString(context),
               style: TextStyle(

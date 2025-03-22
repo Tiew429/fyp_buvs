@@ -44,13 +44,16 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Future<void> _loginWithCredentials() async {
-    // Set loading state to true immediately when button is clicked
+    // close keyboard
+    FocusScope.of(context).unfocus();
+
+    // set loading state to true immediately when button is clicked
     setState(() {
       _isLoading = true;
     });
     
     if (!(_formKey.currentState?.validate() ?? false)) {
-      // If form is invalid, set loading back to false and return early
+      // if form is invalid, set loading back to false and return early
       setState(() {
         _isLoading = false;
       });
@@ -60,21 +63,21 @@ class _LoginPageState extends State<LoginPage> {
     final emailOrUsername = _usernameOrEmailController.text.trim().toLowerCase();
     final password = _passwordController.text.trim();
     
-    // Use Future.delayed to ensure the loading indicator has time to appear
+    // use future.delayed to ensure the loading indicator has time to appear
     Future.delayed(Duration.zero, () async {
       await _authService.loginWithCredentials(
         context,
         emailOrUsername,
         password,
       ).then((_) {
-        // Only set loading to false after the login completes
+        // only set loading to false after the login completes
         if (mounted) {
           setState(() {
             _isLoading = false;
           });
         }
       }).catchError((error) {
-        // Handle any errors and set loading to false
+        // handle any errors and set loading to false
         if (mounted) {
           setState(() {
             _isLoading = false;

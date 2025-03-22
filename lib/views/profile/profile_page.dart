@@ -27,6 +27,7 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   void initState() {
     super.initState();
+    print("avatar url: ${widget._user.avatarUrl}");
   }
 
   @override
@@ -44,15 +45,6 @@ class _ProfilePageState extends State<ProfilePage> {
 
     return Scaffold(
       backgroundColor: colorScheme.tertiary,
-      appBar: AppBar(
-        backgroundColor: colorScheme.secondary,
-        centerTitle: true,
-        title: Text(
-          AppLocale.profile.getString(context),
-          style: TextStyle(color: colorScheme.onPrimary),
-        ),
-        elevation: 0,
-      ),
       body: ScrollableWidget(
         hasBottomNavigationBar: true,
         child: Column(
@@ -92,7 +84,37 @@ class _ProfilePageState extends State<ProfilePage> {
                         child: CircleAvatar(
                           radius: screenSize.shortestSide * 0.12,
                           backgroundColor: colorScheme.onPrimary.withOpacity(0.2),
-                          child: Image.asset('assets/images/fox.png'),
+                          child: widget._user.avatarUrl.isNotEmpty
+                            ? ClipOval(
+                                child: Image.network(
+                                  widget._user.avatarUrl,
+                                  width: screenSize.shortestSide * 0.24,
+                                  height: screenSize.shortestSide * 0.24,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return Icon(
+                                      Icons.person,
+                                      size: screenSize.shortestSide * 0.15,
+                                      color: colorScheme.onPrimary,
+                                    );
+                                  },
+                                  loadingBuilder: (context, child, loadingProgress) {
+                                    if (loadingProgress == null) return child;
+                                    return CircularProgressIndicator(
+                                      color: colorScheme.onPrimary,
+                                      value: loadingProgress.expectedTotalBytes != null
+                                          ? loadingProgress.cumulativeBytesLoaded /
+                                              loadingProgress.expectedTotalBytes!
+                                          : null,
+                                    );
+                                  },
+                                ),
+                              )
+                            : Icon(
+                                Icons.person,
+                                size: screenSize.shortestSide * 0.15,
+                                color: colorScheme.onPrimary,
+                              ),
                         ),
                       ),
                     ],

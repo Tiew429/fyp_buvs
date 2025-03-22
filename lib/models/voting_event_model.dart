@@ -17,6 +17,7 @@ class VotingEvent {
   final List<Student> _voters;
   final List<Candidate> _candidates;
   final List<Candidate> _pendingCandidates;
+  String _imageUrl;
 
   VotingEvent({
     required String votingEventID,
@@ -31,6 +32,7 @@ class VotingEvent {
     List<Student> voters = const [],
     List<Candidate> candidates = const [],
     List<Candidate> pendingCandidates = const [],
+    String imageUrl = '',
   }) : _votingEventID = votingEventID,
        _title = title,
        _description = description,
@@ -42,7 +44,8 @@ class VotingEvent {
        _status = status,
        _voters = voters,
        _candidates = candidates,
-       _pendingCandidates = pendingCandidates;
+       _pendingCandidates = pendingCandidates,
+       _imageUrl = imageUrl;
 
   // getter
   String get votingEventID => _votingEventID;
@@ -57,6 +60,7 @@ class VotingEvent {
   List<Student> get voters => _voters;
   List<Candidate> get candidates => _candidates;
   List<Candidate> get pendingCandidates => _pendingCandidates;
+  String get imageUrl => _imageUrl;
 
   // setter
   void setTitle(String title) => _title = title;
@@ -70,6 +74,7 @@ class VotingEvent {
   void removeStudentFromVoterList(dynamic student) => _voters.remove(student);
   void addCandidateToList(dynamic candidate) => _candidates.add(candidate);
   void removeCandidateFromList(dynamic candidate) => _candidates.remove(candidate);
+  void setImageUrl(String imageUrl) => _imageUrl = imageUrl;
 
   VotingEvent copyWith({
     String? votingEventID,
@@ -84,6 +89,7 @@ class VotingEvent {
     List<Student>? voters,
     List<Candidate>? candidates,
     List<Candidate>? pendingCandidates,
+    String? imageUrl,
   }) {
     return VotingEvent(
       votingEventID: votingEventID ?? _votingEventID,
@@ -98,6 +104,7 @@ class VotingEvent {
       voters: voters ?? _voters,
       candidates: candidates ?? _candidates,
       pendingCandidates: pendingCandidates ?? _pendingCandidates,
+      imageUrl: imageUrl ?? _imageUrl,
     );
   }
 
@@ -115,6 +122,7 @@ class VotingEvent {
       voters: map['voters'] ?? [],
       candidates: map['candidates'] ?? [],
       pendingCandidates: map['pendingCandidates'] ?? [],
+      imageUrl: map['imageUrl'] ?? '',
     );
   }
 }

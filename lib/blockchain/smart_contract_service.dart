@@ -23,7 +23,7 @@ class SmartContractService {
   
   final Map<String, dynamic> _eventCache = {};
   DateTime _lastCacheRefresh = DateTime.now();
-  final Duration _cacheDuration = const Duration(minutes: 5);
+  final Duration _cacheDuration = const Duration(minutes: 2);
   
   Future<void> initialize() async {
     if (rootNavigatorKey.currentContext == null) {
@@ -63,7 +63,8 @@ class SmartContractService {
   // retrieve the critical details of voting events from blockchain
   Future<List<dynamic>> getVotingEventsFromBlockchain({
     bool forceRefresh = false,
-    Function(double progress)? progressCallback
+    Function(double progress)? progressCallback,
+    bool manualRefresh = false,
   }) async {
     print("Smart_Contract_Service: Retrieving voting events from blockchain.");
     
@@ -72,7 +73,8 @@ class SmartContractService {
       final now = DateTime.now();
       if (!forceRefresh && 
           _eventCache.isNotEmpty && 
-          now.difference(_lastCacheRefresh) < _cacheDuration) {
+          now.difference(_lastCacheRefresh) < _cacheDuration && 
+          !manualRefresh) {
         print("Using cached voting events. Count: ${_eventCache.length}");
         return _eventCache.values.toList();
       }
@@ -424,6 +426,7 @@ class SmartContractService {
         parameters: parameters,
       );
       print("Smart_Contract_Service (writeFunction): Writing contract processed successfully.");
+      
       return true;
     } catch (e) {
       // check if the error is related to user rejecting the transaction

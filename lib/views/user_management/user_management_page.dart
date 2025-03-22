@@ -12,6 +12,9 @@ import 'package:blockchain_university_voting_system/widgets/response_widget.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_localization/flutter_localization.dart';
 
+// Enum for verification status
+enum VerificationStatus { verified, pending, notVerified }
+
 class UserManagementPage extends StatefulWidget {
   final UserProvider userProvider;
   final UserManagementProvider userManagementProvider;
@@ -39,7 +42,7 @@ class _UserManagementPageState extends State<UserManagementPage> with SingleTick
   late TextEditingController _staffSearchController;
   late TextEditingController _studentSearchController;
   
-  bool _isLoading = true;
+  bool _isLoading = true, hasPermission = false;
 
   @override
   void initState() {
@@ -47,6 +50,10 @@ class _UserManagementPageState extends State<UserManagementPage> with SingleTick
     _tabController = TabController(length: 2, vsync: this);
     _staffSearchController = TextEditingController();
     _studentSearchController = TextEditingController();
+
+    // check if user has permission to access page
+    hasPermission = widget.userProvider.user?.role == UserRole.admin || 
+      (widget.userProvider.user?.role == UserRole.staff && widget.userProvider.user?.isVerified == true);
     
     // load users when page initializes
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -156,7 +163,7 @@ class _UserManagementPageState extends State<UserManagementPage> with SingleTick
         centerTitle: true,
         title: Text(AppLocale.userManagement.getString(context)),
         backgroundColor: colorScheme.secondary,
-        bottom: widget.userProvider.user?.role == UserRole.admin ? TabBar(
+        bottom: hasPermission ? TabBar(
           controller: _tabController,
           tabs: [
             Tab(text: AppLocale.staff.getString(context)),
@@ -165,16 +172,9 @@ class _UserManagementPageState extends State<UserManagementPage> with SingleTick
           indicatorColor: colorScheme.onSecondary,
           labelColor: colorScheme.onSecondary,
         ) : null,
-        actions: [
-          if (widget.userProvider.user?.role == UserRole.admin)
-            IconButton(
-              icon: const Icon(Icons.add),
-              onPressed: () => NavigationHelper.navigateToInviteNewUserPage(context),
-            ),
-        ],
       ),
       backgroundColor: colorScheme.tertiary,
-      body: widget.userProvider.user?.role == UserRole.admin 
+      body: hasPermission
         ? _isLoading 
           ? const Center(child: CircularProgressIndicator())
           : TabBarView(
@@ -190,13 +190,6 @@ class _UserManagementPageState extends State<UserManagementPage> with SingleTick
             ), 
             tablet: Container(),
           ),
-      floatingActionButton: widget.userProvider.user?.role == UserRole.admin
-        ? FloatingActionButton(
-            onPressed: () => NavigationHelper.navigateToInviteNewUserPage(context),
-            backgroundColor: colorScheme.primary,
-            child: const Icon(Icons.add),
-          )
-        : null,
     );
   }
 
@@ -290,6 +283,7 @@ class _UserManagementPageState extends State<UserManagementPage> with SingleTick
     ColorScheme colorScheme = Theme.of(context).colorScheme;
     UserRole role;
     String name, email, userID;
+    bool isVerified = false;
     
     // handle different user types (won't display admin)
     if (user is Staff) {
@@ -297,11 +291,13 @@ class _UserManagementPageState extends State<UserManagementPage> with SingleTick
       name = user.name;
       email = user.email;
       userID = user.userID;
+      isVerified = user.isVerified;
     } else if (user is Student) {
       role = UserRole.student;
       name = user.name;
       email = user.email;
       userID = user.userID;
+      isVerified = user.isVerified;
     } else {
       return Container(); // unsupported user type
     }
@@ -311,27 +307,66 @@ class _UserManagementPageState extends State<UserManagementPage> with SingleTick
       elevation: 2,
       child: GestureDetector(
         onTap: () => _handleUserAction(userID),
-        child: ListTile(
-          leading: CircleAvatar(
-            backgroundColor: colorScheme.primary,
-            child: Text(
-              name.isNotEmpty ? name[0].toUpperCase() : '?',
-              style: TextStyle(color: colorScheme.onPrimary),
-            ),
-          ),
-          title: Text(name),
-          subtitle: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(email),
-              Text('${AppLocale.role.getString(context)}: ${_getLocalizedRoleName(role)}', 
-                style: TextStyle(
-                  color: _getRoleColor(role),
-                  fontWeight: FontWeight.bold,
+        child: Stack(
+          children: [
+            ListTile(
+              leading: CircleAvatar(
+                backgroundColor: colorScheme.primary,
+                child: Text(
+                  name.isNotEmpty ? name[0].toUpperCase() : '?',
+                  style: TextStyle(color: colorScheme.onPrimary),
                 ),
               ),
-            ],
-          ),
+              title: Text(name),
+              subtitle: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(email),
+                  Text('${AppLocale.role.getString(context)}: ${_getLocalizedRoleName(role)}', 
+                    style: TextStyle(
+                      color: _getRoleColor(role),
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Positioned(
+              top: 8,
+              right: 8,
+              child: _buildVerificationIcon(isVerified),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildVerificationIcon(bool isVerified) {
+    Color tickColor;
+    String tooltip;
+    
+    if (isVerified) {
+      tickColor = Colors.green;
+      tooltip = AppLocale.verified.getString(context);
+    } else {
+      tickColor = Colors.grey;
+      tooltip = AppLocale.notVerified.getString(context);
+    }
+    
+    return Tooltip(
+      message: tooltip,
+      child: Container(
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: Colors.white,
+          border: Border.all(color: tickColor, width: 2),
+        ),
+        padding: const EdgeInsets.all(2),
+        child: Icon(
+          Icons.check,
+          color: tickColor,
+          size: 16,
         ),
       ),
     );
