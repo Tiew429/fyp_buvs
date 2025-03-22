@@ -31,8 +31,8 @@ class UserRepository {
       // create user document in the role-specific subcollection
       final auth_user.CollectionReference roleCollection = _firestore
         .collection('users')
-        .doc(role.stringValue)
-        .collection(role.stringValue);
+        .doc(roleString)
+        .collection(roleString);
 
       final Map<String, dynamic> userData = {
         'userID': userId,
@@ -50,19 +50,19 @@ class UserRepository {
       if (role == model_user.UserRole.student) {
         // add student-specific data
         await _firestore.collection("users")
-          .doc(role.stringValue)
-          .collection(role.stringValue)
+          .doc(roleString)
+          .collection(roleString)
           .doc(userId)
-          .set({
+          .update({
             'isEligibleForVoting': false,
           });
       } else if (role == model_user.UserRole.staff) {
         // add staff-specific data with department
         await _firestore.collection("users")
-          .doc(role.stringValue)
-          .collection(role.stringValue)
+          .doc(roleString)
+          .collection(roleString)
           .doc(userId)
-          .set({
+          .update({
             'department': newUser.department ?? 'General',
           });
         

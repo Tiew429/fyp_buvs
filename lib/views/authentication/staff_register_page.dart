@@ -116,7 +116,6 @@ class _StaffRegisterPageState extends State<StaffRegisterPage> {
             setState(() {
               _isLoading = false;
             });
-            SnackbarUtil.showSnackBar(context, AppLocale.registrationSuccess.getString(context));
           }
         }).catchError((error) {
           // handle any errors and set loading to false
@@ -124,7 +123,6 @@ class _StaffRegisterPageState extends State<StaffRegisterPage> {
             setState(() {
               _isLoading = false;
             });
-            SnackbarUtil.showSnackBar(context, AppLocale.registrationFailed.getString(context));
           }
         });
       } else {
@@ -142,7 +140,6 @@ class _StaffRegisterPageState extends State<StaffRegisterPage> {
             setState(() {
               _isLoading = false;
             });
-            SnackbarUtil.showSnackBar(context, AppLocale.registrationSuccess.getString(context));
           }
         }).catchError((error) {
           // handle any errors and set loading to false
@@ -150,7 +147,6 @@ class _StaffRegisterPageState extends State<StaffRegisterPage> {
             setState(() {
               _isLoading = false;
             });
-            SnackbarUtil.showSnackBar(context, AppLocale.registrationFailed.getString(context));
           }
         });
       }
