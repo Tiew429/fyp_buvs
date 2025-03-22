@@ -222,6 +222,7 @@ class AuthService {
     String department = 'General',
   ]) async {
     try {
+      bool registerSuccess = false;
       // check if username or email is already taken
       final bool usernameExists = await _isUsernameTaken(username);
       if (usernameExists) {
@@ -237,18 +238,21 @@ class AuthService {
 
       // create user in firestore + firebase authentication
       if (role == model_user.UserRole.staff) {
-        await userRepo.createUser(
+        print('Creating staff user with department: $department');
+        registerSuccess = await userRepo.createUser(
           Staff(
             userID: '', // will be assigned internally in createUser method
             name: username,
             email: email,
+            role: role,
             walletAddress: walletAddress,
-            department: department,
+            department: department, // Ensure department is passed here
           ),
           password,
         );
+        print('Staff user created successfully');
       } else {
-        await userRepo.createUser(
+        registerSuccess = await userRepo.createUser(
           Student(
             userID: '', // will be assigned internally in createUser method
             name: username,
@@ -259,7 +263,15 @@ class AuthService {
           ),
           password,
         );
+        print('Student user created successfully');
       }
+
+      if (!registerSuccess) {
+        return;
+      }
+
+      // success message
+      SnackbarUtil.showSnackBar(context, AppLocale.registrationSuccess.getString(context));
 
       // if user does not have a wallet address, just navigate to login page
       if (walletAddress.isEmpty) {
@@ -270,8 +282,10 @@ class AuthService {
         SnackbarUtil.showSnackBar(context, '${AppLocale.walletConnectionSuccessful.getString(context)}!');
       }
     } on auth_user.FirebaseAuthException catch (e) {
+      print('Firebase Auth Error: ${e.code} - ${e.message}');
       SnackbarUtil.showSnackBar(context, 'Registration failed: ${e.message}');
     } catch (e) {
+      print('Registration Error: $e');
       SnackbarUtil.showSnackBar(context, 'Registration failed: $e');
     }
   }

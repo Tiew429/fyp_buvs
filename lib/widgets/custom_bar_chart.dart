@@ -58,7 +58,7 @@ class _CustomBarChartState extends State<CustomBarChart> {
             ),
             sideTitles: SideTitles(
               showTitles: true,
-              getTitlesWidget: (value, meta) => bottomTitles(value, meta, xAxisList),
+              getTitlesWidget: (value, meta) => bottomTitles(value, meta, xAxisList, context),
               reservedSize: 42,
             ),
           ),
@@ -67,11 +67,11 @@ class _CustomBarChartState extends State<CustomBarChart> {
               yAxisName,
               style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
             ),
-            sideTitles: const SideTitles(
+            sideTitles: SideTitles(
               showTitles: true,
               reservedSize: 50,
               // interval: interval,
-              getTitlesWidget: leftTitles,
+              getTitlesWidget: (value, meta) => leftTitles(value, meta, context),
             ),
           ),
         ),
@@ -106,12 +106,11 @@ class _CustomBarChartState extends State<CustomBarChart> {
   }
 }
 
-Widget bottomTitles(
-    double value, TitleMeta meta, List<String> bottomTilesData) {
+Widget bottomTitles(double value, TitleMeta meta, List<String> bottomTilesData, BuildContext context) {
   final Widget text = Text(
     bottomTilesData[value.toInt()],
-    style: const TextStyle(
-      color: Colors.black,
+    style: TextStyle(
+      color: Theme.of(context).colorScheme.onPrimary,
       fontWeight: FontWeight.bold,
       fontSize: 12,
     ),
@@ -124,12 +123,12 @@ Widget bottomTitles(
   );
 }
 
-Widget leftTitles(double value, TitleMeta meta) {
+Widget leftTitles(double value, TitleMeta meta, BuildContext context) {
   final formattedValue = (value).toStringAsFixed(0);
   final Widget text = Text(
     formattedValue,
-    style: const TextStyle(
-      color: Colors.black,
+    style: TextStyle(
+      color: Theme.of(context).colorScheme.onPrimary,
       fontWeight: FontWeight.bold,
       fontSize: 12,
     ),

@@ -83,7 +83,6 @@ class _RegisterPageState extends State<RegisterPage> {
             setState(() {
               _isLoading = false;
             });
-            SnackbarUtil.showSnackBar(context, AppLocale.registrationSuccess.getString(context));
           }
         }).catchError((error) {
           // handle any errors and set loading to false
@@ -91,7 +90,6 @@ class _RegisterPageState extends State<RegisterPage> {
             setState(() {
               _isLoading = false;
             });
-            SnackbarUtil.showSnackBar(context, AppLocale.registrationFailed.getString(context));
           }
         });
       } else {
@@ -102,7 +100,6 @@ class _RegisterPageState extends State<RegisterPage> {
             setState(() {
               _isLoading = false;
             });
-            SnackbarUtil.showSnackBar(context, AppLocale.registrationSuccess.getString(context));
           }
         }).catchError((error) {
           // handle any errors and set loading to false
@@ -110,7 +107,6 @@ class _RegisterPageState extends State<RegisterPage> {
             setState(() {
               _isLoading = false;
             });
-            SnackbarUtil.showSnackBar(context, AppLocale.registrationFailed.getString(context));
           }
         });
       }

@@ -12,7 +12,7 @@ class UserRepository {
   final _firestore = auth_user.FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  Future<void> createUser<T> (model_user.User newUser, String password) async {
+  Future<bool> createUser<T> (dynamic newUser, String password) async {
     try {
       // 1. create user in firebase authentication
       final UserCredential userCredential = await _auth
@@ -24,22 +24,57 @@ class UserRepository {
       // 2. store user data in firestore
       final String userId = userCredential.user!.uid;
       final model_user.UserRole role = newUser.role;
+      final String roleString = role.stringValue;
+      
+      print("Role string value: $roleString");
+      
+      // create user document in the role-specific subcollection
       final auth_user.CollectionReference roleCollection = _firestore
         .collection('users')
         .doc(role.stringValue)
         .collection(role.stringValue);
 
-      await roleCollection.doc(userId).set({
+      final Map<String, dynamic> userData = {
         'userID': userId,
         'username': newUser.name,
         'email': newUser.email,
-        'role': newUser.role.stringValue,
-        'walletAddress': newUser.walletAddress,
+        'role': roleString,
+        'walletAddress': newUser.walletAddress ?? '',
         'bio': '',
         'isVerified': false,
-      });
+      };
+
+      await roleCollection.doc(userId).set(userData);
+
+      // 3. store role-specific data in separate collections
+      if (role == model_user.UserRole.student) {
+        // add student-specific data
+        await _firestore.collection("users")
+          .doc(role.stringValue)
+          .collection(role.stringValue)
+          .doc(userId)
+          .set({
+            'isEligibleForVoting': false,
+          });
+      } else if (role == model_user.UserRole.staff) {
+        // add staff-specific data with department
+        await _firestore.collection("users")
+          .doc(role.stringValue)
+          .collection(role.stringValue)
+          .doc(userId)
+          .set({
+            'department': newUser.department ?? 'General',
+          });
+        
+        // log to verify the department is being saved
+        print('Creating staff user with department: ${newUser.department}');
+      }
+      
+      print('User created successfully with ID: $userId and role: ${role.stringValue}');
+      return true;
     } catch (e) {
-      print(e);
+      print('Error creating user: $e');
+      return false;
     }
   }
 
