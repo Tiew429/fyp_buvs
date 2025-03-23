@@ -23,7 +23,7 @@ class SmartContractService {
   
   final Map<String, dynamic> _eventCache = {};
   DateTime _lastCacheRefresh = DateTime.now();
-  final Duration _cacheDuration = const Duration(minutes: 2);
+  final Duration _cacheDuration = const Duration(seconds: 10);
   
   Future<void> initialize() async {
     if (rootNavigatorKey.currentContext == null) {
@@ -344,6 +344,80 @@ class SmartContractService {
       return true;
     } catch (e) {
       debugPrint("Smart_Contract_Service (addCandidatesToVotingEvent): $e");
+      return false;
+    }
+  }
+  
+  Future<bool> confirmCandidateInVotingEvent(String votingEventID, Candidate candidate) async {
+    print("Smart_Contract_Service (confirmCandidateInVotingEvent): Confirming candidate in voting event in blockchain.");
+    
+    try {
+      if (!await checkIfVotingEventExists(votingEventID)) {
+        print("Smart_Contract_Service (confirmCandidateInVotingEvent): Voting event ID '$votingEventID' not found in blockchain.");
+        return false;
+      }
+
+      final List<dynamic> candidateIDList = [];
+      candidateIDList.add(candidate.candidateID);
+
+      final EthereumAddress candidateWalletAddress = EthereumAddress.fromHex(candidate.walletAddress);
+      final List<EthereumAddress> walletAddressList = [];
+      walletAddressList.add(candidateWalletAddress);
+
+      final bool success = await writeFunction('addCandidates', [
+        votingEventID,
+        candidateIDList,
+        walletAddressList,
+      ]);
+
+      // check if transaction was successful
+      if (!success) {
+        print("Smart_Contract_Service (addCandidatesToVotingEvent): Transaction was rejected or failed.");
+        return false;
+      }
+
+      print("Smart_Contract_Service (addCandidatesToVotingEvent): Candidates added successfully.");
+      return true;
+    } catch (e) {
+      debugPrint("Smart_Contract_Service (addCandidatesToVotingEvent): $e");
+      return false;
+    }
+  }
+
+  Future<bool> removeCandidateFromBlockchain(String votingEventID, String candidateWalletAddress) async {
+    print("Smart_Contract_Service (removeCandidateFromBlockchain): Removing candidate from voting event.");
+
+    try {
+      // Check if the voting event exists
+      if (!await checkIfVotingEventExists(votingEventID)) {
+        print("Smart_Contract_Service (removeCandidateFromBlockchain): Voting event ID '$votingEventID' not found in blockchain.");
+        return false;
+      }
+
+      // Ensure wallet address has 0x prefix
+      String address = candidateWalletAddress;
+      if (!address.startsWith('0x')) {
+        address = '0x$address';
+      }
+
+      // Convert address string to EthereumAddress
+      final EthereumAddress candidateAddress = EthereumAddress.fromHex(address);
+
+      // Call the smart contract function to remove candidate
+      final bool success = await writeFunction('removeCandidate', [
+        votingEventID,
+        candidateAddress,
+      ]);
+      
+      if (!success) {
+        print("Smart_Contract_Service (removeCandidateFromBlockchain): Transaction was rejected or failed.");
+        return false;
+      }
+
+      print("Smart_Contract_Service (removeCandidateFromBlockchain): Candidate removed successfully.");
+      return true;
+    } catch (e) {
+      debugPrint("Smart_Contract_Service (removeCandidateFromBlockchain): $e");
       return false;
     }
   }

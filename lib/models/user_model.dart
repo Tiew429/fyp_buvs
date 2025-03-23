@@ -7,6 +7,7 @@ class User {
   String _bio;
   bool _isVerified;
   String _avatarUrl;
+  bool _freezed;
 
   User({
     required String userID,
@@ -17,6 +18,7 @@ class User {
     String bio = '',
     bool isVerified = false,
     String avatarUrl = '',
+    required bool freezed,
   }) : _userID = userID,
        _name = name,
        _email = email,
@@ -24,7 +26,8 @@ class User {
        _walletAddress = walletAddress,
        _bio = bio,
        _isVerified = isVerified,
-       _avatarUrl = avatarUrl;
+       _avatarUrl = avatarUrl,
+       _freezed = freezed;
   
   // getter
   String get userID => _userID;
@@ -35,6 +38,7 @@ class User {
   String get bio => _bio;
   bool get isVerified => _isVerified;
   String get avatarUrl => _avatarUrl;
+  bool get freezed => _freezed;
 
   // setter
   void setWalletAddress(String walletAddress) => _walletAddress = walletAddress;
@@ -67,6 +71,7 @@ class User {
       bio: json['bio'],
       isVerified: json['isVerified'],
       avatarUrl: json['avatarUrl'] ?? '',
+      freezed: json['freezed'],
     );
   }
 
@@ -88,6 +93,7 @@ class User {
       bio: _bio,
       isVerified: isVerified ?? _isVerified,
       avatarUrl: avatarUrl ?? _avatarUrl,
+      freezed: _freezed,
     );
   }
 }

@@ -272,20 +272,66 @@ class _ProfilePageViewPageState extends State<ProfilePageViewPage> {
     final String initials = name.isNotEmpty 
         ? name.split(' ').map((word) => word.isNotEmpty ? word[0].toUpperCase() : '').join('')
         : '?';
+    final colorScheme = Theme.of(context).colorScheme;
     
     return Column(
       children: [
         CircleAvatar(
           radius: 50,
-          backgroundColor: Theme.of(context).colorScheme.primary,
-          child: Text(
-            initials.length > 2 ? initials.substring(0, 2) : initials,
-            style: TextStyle(
-              fontSize: 30,
-              fontWeight: FontWeight.bold,
-              color: Theme.of(context).colorScheme.onPrimary,
-            ),
-          ),
+          backgroundColor: colorScheme.primary,
+          child: _user.avatarUrl != null && _user.avatarUrl.isNotEmpty
+              ? ClipOval(
+                  child: widget.userProvider.cachedAvatarImage != null && _user.userID == widget.userProvider.user?.userID
+                      ? Image(
+                          image: widget.userProvider.cachedAvatarImage!,
+                          width: 100,
+                          height: 100,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Text(
+                              initials.length > 2 ? initials.substring(0, 2) : initials,
+                              style: TextStyle(
+                                fontSize: 30,
+                                fontWeight: FontWeight.bold,
+                                color: colorScheme.onPrimary,
+                              ),
+                            );
+                          },
+                        )
+                      : Image.network(
+                          _user.avatarUrl,
+                          width: 100,
+                          height: 100,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Text(
+                              initials.length > 2 ? initials.substring(0, 2) : initials,
+                              style: TextStyle(
+                                fontSize: 30,
+                                fontWeight: FontWeight.bold,
+                                color: colorScheme.onPrimary,
+                              ),
+                            );
+                          },
+                          loadingBuilder: (context, child, loadingProgress) {
+                            if (loadingProgress == null) return child;
+                            return CircularProgressIndicator(
+                              color: colorScheme.onPrimary,
+                              value: loadingProgress.expectedTotalBytes != null
+                                  ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
+                                  : null,
+                            );
+                          },
+                        ),
+                )
+              : Text(
+                  initials.length > 2 ? initials.substring(0, 2) : initials,
+                  style: TextStyle(
+                    fontSize: 30,
+                    fontWeight: FontWeight.bold,
+                    color: colorScheme.onPrimary,
+                  ),
+                ),
         ),
         const SizedBox(height: 12),
         Text(

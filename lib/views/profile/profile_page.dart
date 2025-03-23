@@ -1,5 +1,6 @@
 import 'package:blockchain_university_voting_system/localization/app_locale.dart';
 import 'package:blockchain_university_voting_system/models/user_model.dart';
+import 'package:blockchain_university_voting_system/provider/user_provider.dart';
 import 'package:blockchain_university_voting_system/routes/navigation_helper.dart';
 import 'package:blockchain_university_voting_system/widgets/scrollable_widget.dart';
 import 'package:flutter/material.dart';
@@ -7,36 +8,38 @@ import 'package:flutter_localization/flutter_localization.dart';
 import 'package:reown_appkit/reown_appkit.dart';
 
 class ProfilePage extends StatefulWidget {
-  final User _user;
-  final ReownAppKitModal _appKitModal;
+  final UserProvider userProvider;
+  final ReownAppKitModal appKitModal;
 
   const ProfilePage({
     super.key,
-    required User user,
-    required ReownAppKitModal appKitModal,
-  }) :_user = user,
-      _appKitModal = appKitModal;
+    required this.userProvider,
+    required this.appKitModal,
+  });
 
   @override
   State<ProfilePage> createState() => _ProfilePageState();
 }
 
 class _ProfilePageState extends State<ProfilePage> {
+  User? _user;
   late String role;
 
   @override
   void initState() {
     super.initState();
-    print("avatar url: ${widget._user.avatarUrl}");
+    _user = widget.userProvider.user;
+
+    print("avatar url: ${_user!.avatarUrl}");
   }
 
   @override
   Widget build(BuildContext context) {
-    if (widget._user.role == UserRole.admin) {
+    if (_user!.role == UserRole.admin) {
       role = AppLocale.admin.getString(context);
-    } else if (widget._user.role == UserRole.staff) {
+    } else if (_user!.role == UserRole.staff) {
       role = AppLocale.staff.getString(context);
-    } else if (widget._user.role == UserRole.student) {
+    } else if (_user!.role == UserRole.student) {
       role = AppLocale.student.getString(context);
     }
     
@@ -84,10 +87,10 @@ class _ProfilePageState extends State<ProfilePage> {
                         child: CircleAvatar(
                           radius: screenSize.shortestSide * 0.12,
                           backgroundColor: colorScheme.onPrimary.withOpacity(0.2),
-                          child: widget._user.avatarUrl.isNotEmpty
+                          child: widget.userProvider.cachedAvatarImage != null
                             ? ClipOval(
-                                child: Image.network(
-                                  widget._user.avatarUrl,
+                                child: Image(
+                                  image: widget.userProvider.cachedAvatarImage!,
                                   width: screenSize.shortestSide * 0.24,
                                   height: screenSize.shortestSide * 0.24,
                                   fit: BoxFit.cover,
@@ -98,23 +101,39 @@ class _ProfilePageState extends State<ProfilePage> {
                                       color: colorScheme.onPrimary,
                                     );
                                   },
-                                  loadingBuilder: (context, child, loadingProgress) {
-                                    if (loadingProgress == null) return child;
-                                    return CircularProgressIndicator(
-                                      color: colorScheme.onPrimary,
-                                      value: loadingProgress.expectedTotalBytes != null
-                                          ? loadingProgress.cumulativeBytesLoaded /
-                                              loadingProgress.expectedTotalBytes!
-                                          : null,
-                                    );
-                                  },
                                 ),
                               )
-                            : Icon(
-                                Icons.person,
-                                size: screenSize.shortestSide * 0.15,
-                                color: colorScheme.onPrimary,
-                              ),
+                            : _user!.avatarUrl.isNotEmpty
+                                ? ClipOval(
+                                    child: Image.network(
+                                      _user!.avatarUrl,
+                                      width: screenSize.shortestSide * 0.24,
+                                      height: screenSize.shortestSide * 0.24,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (context, error, stackTrace) {
+                                        return Icon(
+                                          Icons.person,
+                                          size: screenSize.shortestSide * 0.15,
+                                          color: colorScheme.onPrimary,
+                                        );
+                                      },
+                                      loadingBuilder: (context, child, loadingProgress) {
+                                        if (loadingProgress == null) return child;
+                                        return CircularProgressIndicator(
+                                          color: colorScheme.onPrimary,
+                                          value: loadingProgress.expectedTotalBytes != null
+                                              ? loadingProgress.cumulativeBytesLoaded /
+                                                  loadingProgress.expectedTotalBytes!
+                                              : null,
+                                        );
+                                      },
+                                    ),
+                                  )
+                                : Icon(
+                                    Icons.person,
+                                    size: screenSize.shortestSide * 0.15,
+                                    color: colorScheme.onPrimary,
+                                  ),
                         ),
                       ),
                     ],
@@ -124,7 +143,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       Column(
                         children: [
                           Text(
-                            widget._user.name,
+                            _user!.name,
                             style: TextStyle(
                               fontSize: 22,
                               fontWeight: FontWeight.bold,
@@ -133,7 +152,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           ),
                           const SizedBox(height: 5),
                           Text(
-                            widget._user.email,
+                            _user!.email,
                             style: TextStyle(
                               fontSize: 16,
                               color: colorScheme.onPrimary.withOpacity(0.9),
@@ -209,18 +228,18 @@ class _ProfilePageState extends State<ProfilePage> {
                     context: context,
                     icon: Icons.person,
                     title: AppLocale.bio.getString(context),
-                    content: widget._user.bio.isEmpty 
+                    content: _user!.bio.isEmpty 
                         ? "No bio information yet." 
-                        : widget._user.bio,
+                        : _user!.bio,
                   ),
                   const SizedBox(height: 15),
                   _buildInfoCard(
                     context: context,
                     icon: Icons.account_balance_wallet,
                     title: AppLocale.walletAddress.getString(context),
-                    content: widget._user.walletAddress.isEmpty
+                    content: _user!.walletAddress.isEmpty
                         ? AppLocale.haveNotConnectedWithCryptoWallet.getString(context)
-                        : widget._user.walletAddress,
+                        : _user!.walletAddress,
                   ),
                   const SizedBox(height: 25),
                   Text(
@@ -234,13 +253,13 @@ class _ProfilePageState extends State<ProfilePage> {
                   const SizedBox(height: 20),
                   _buildActionCard(
                     context: context,
-                    title: widget._appKitModal.isConnected
+                    title: widget.appKitModal.isConnected
                         ? AppLocale.cryptocurrencyWalletAccountConnected.getString(context)
                         : AppLocale.connectWithCryptoWallet.getString(context),
                     icon: Icons.account_balance_wallet,
                     leadingImage: 'assets/images/fox.png',
                     onTap: () {
-                      widget._appKitModal.openModalView();
+                      widget.appKitModal.openModalView();
                     },
                   ),
                   const SizedBox(height: 15),

@@ -12,15 +12,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localization/flutter_localization.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:provider/provider.dart';
 
 class EditProfilePage extends StatefulWidget {
-  final User _user;
+  final UserProvider userProvider;
 
   const EditProfilePage({
     super.key,
-    required User user,
-  }) :_user = user;
+    required this.userProvider,
+  });
 
   @override
   State<EditProfilePage> createState() => _EditProfilePageState();
@@ -35,6 +34,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
   File? _selectedImage;
   bool _isImageLoading = false;
   String? _imageUrl;
+  User? _user;
 
   @override
   void dispose() {
@@ -48,11 +48,13 @@ class _EditProfilePageState extends State<EditProfilePage> {
   @override
   void initState() {
     super.initState();
-    _emailController.text = widget._user.email;
-    _usernameController.text = widget._user.name;
-    _walletAddressController.text = widget._user.walletAddress;
-    _bioController.text = widget._user.bio;
-    _imageUrl = widget._user.avatarUrl;
+    _user = widget.userProvider.user;
+
+    _emailController.text = _user!.email;
+    _usernameController.text = _user!.name;
+    _walletAddressController.text = _user!.walletAddress;
+    _bioController.text = _user!.bio;
+    _imageUrl = _user!.avatarUrl;
   }
 
   Future<void> _pickImage() async {
@@ -89,7 +91,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
       final storageRef = FirebaseStorage.instance.ref();
       
       // create a reference to the user's profile image
-      final profileImageRef = storageRef.child('profile_images/${widget._user.userID}.jpg');
+      final profileImageRef = storageRef.child('profile_images/${_user!.userID}.jpg');
       
       // upload the file
       await profileImageRef.putFile(_selectedImage!);
@@ -120,18 +122,18 @@ class _EditProfilePageState extends State<EditProfilePage> {
       final uploadedImageUrl = await _uploadImageToFirebase();
       
       final updatedUser = User(
-        userID: widget._user.userID,
+        userID: _user!.userID,
         email: _emailController.text,
         name: _usernameController.text,
         walletAddress: _walletAddressController.text,
         bio: _bioController.text,
-        role: widget._user.role,
-        isVerified: widget._user.isVerified,
+        role: _user!.role,
+        isVerified: _user!.isVerified,
         avatarUrl: uploadedImageUrl ?? _imageUrl ?? '',
+        freezed: _user!.freezed,
       );
       
-      final userProvider = Provider.of<UserProvider>(context, listen: false);
-      await userProvider.updateUser(updatedUser);
+      await widget.userProvider.updateUser(updatedUser);
       
       if (context.mounted) {
         SnackbarUtil.showSnackBar(context, AppLocale.profileUpdated.getString(context));
@@ -198,10 +200,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
                                   fit: BoxFit.cover,
                                 ),
                               )
-                            : _imageUrl != null && _imageUrl!.isNotEmpty
+                            : widget.userProvider.cachedAvatarImage != null
                                 ? ClipOval(
-                                    child: Image.network(
-                                      _imageUrl!,
+                                    child: Image(
+                                      image: widget.userProvider.cachedAvatarImage!,
                                       width: screenSize.shortestSide * 0.3,
                                       height: screenSize.shortestSide * 0.3,
                                       fit: BoxFit.cover,
@@ -212,22 +214,38 @@ class _EditProfilePageState extends State<EditProfilePage> {
                                           color: colorScheme.primary,
                                         );
                                       },
-                                      loadingBuilder: (context, child, loadingProgress) {
-                                        if (loadingProgress == null) return child;
-                                        return CircularProgressIndicator(
-                                          value: loadingProgress.expectedTotalBytes != null
-                                              ? loadingProgress.cumulativeBytesLoaded /
-                                                  loadingProgress.expectedTotalBytes!
-                                              : null,
-                                        );
-                                      },
                                     ),
                                   )
-                                : Icon(
-                                    Icons.person,
-                                    size: screenSize.shortestSide * 0.15,
-                                    color: colorScheme.primary,
-                                  ),
+                                : _imageUrl != null && _imageUrl!.isNotEmpty
+                                    ? ClipOval(
+                                        child: Image.network(
+                                          _imageUrl!,
+                                          width: screenSize.shortestSide * 0.3,
+                                          height: screenSize.shortestSide * 0.3,
+                                          fit: BoxFit.cover,
+                                          errorBuilder: (context, error, stackTrace) {
+                                            return Icon(
+                                              Icons.person,
+                                              size: screenSize.shortestSide * 0.15,
+                                              color: colorScheme.primary,
+                                            );
+                                          },
+                                          loadingBuilder: (context, child, loadingProgress) {
+                                            if (loadingProgress == null) return child;
+                                            return CircularProgressIndicator(
+                                              value: loadingProgress.expectedTotalBytes != null
+                                                  ? loadingProgress.cumulativeBytesLoaded /
+                                                      loadingProgress.expectedTotalBytes!
+                                                  : null,
+                                            );
+                                          },
+                                        ),
+                                      )
+                                    : Icon(
+                                        Icons.person,
+                                        size: screenSize.shortestSide * 0.15,
+                                        color: colorScheme.primary,
+                                      ),
                       ),
                       const SizedBox(
                         width: 20,
@@ -340,7 +358,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 const SizedBox(
                   height: 20,
                 ),
-                if (widget._user.role == UserRole.staff || widget._user.role == UserRole.student)
+                if (_user!.role == UserRole.staff || _user!.role == UserRole.student)
                   // if the user is staff or student, then show the verification status button
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -351,7 +369,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                         Text(AppLocale.verificationStatus.getString(context)),
                         const SizedBox(width: 30),
                         CustomConfirmButton(
-                          text: widget._user.isVerified
+                          text: _user!.isVerified
                               ? AppLocale.verified.getString(context)
                               : AppLocale.notVerified.getString(context),
                           onPressed: () => NavigationHelper.navigateToUserVerificationPage(context),

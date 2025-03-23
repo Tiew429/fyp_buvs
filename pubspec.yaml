@@ -17,6 +17,7 @@ dependencies:
   fl_chart: ^0.70.2
   flutter:
     sdk: flutter
+  flutter_cache_manager: ^3.4.1
   flutter_dotenv: ^5.2.1
   flutter_local_notifications: ^19.0.0
   flutter_localization: ^0.3.1

@@ -1,6 +1,7 @@
 import 'package:blockchain_university_voting_system/localization/app_locale.dart';
 import 'package:blockchain_university_voting_system/models/user_model.dart';
 import 'package:blockchain_university_voting_system/models/voting_event_model.dart';
+import 'package:blockchain_university_voting_system/provider/user_provider.dart';
 import 'package:blockchain_university_voting_system/provider/wallet_provider.dart';
 import 'package:blockchain_university_voting_system/routes/navigation_helper.dart';
 import 'package:blockchain_university_voting_system/provider/voting_event_provider.dart';
@@ -12,18 +13,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localization/flutter_localization.dart';
 
 class VotingListPage extends StatefulWidget {
-  final User _user;
-  final VotingEventProvider _votingEventProvider;
-  final WalletProvider _walletProvider;
+  final UserProvider userProvider;
+  final VotingEventProvider votingEventProvider;
+  final WalletProvider walletProvider;
 
   const VotingListPage({
     super.key, 
-    required User user,
-    required VotingEventProvider votingEventViewModel,
-    required WalletProvider walletProvider,
-  }) :_user = user,
-      _votingEventProvider = votingEventViewModel,
-      _walletProvider = walletProvider;
+    required this.userProvider,
+    required this.votingEventProvider,
+    required this.walletProvider,
+  });
+
 
   @override
   State<VotingListPage> createState() => _VotingListPageState();
@@ -41,7 +41,7 @@ class _VotingListPageState extends State<VotingListPage> {
     _searchController = TextEditingController();
     
     // set up a listener to update when the provider changes
-    widget._votingEventProvider.addListener(_updateEventList);
+    widget.votingEventProvider.addListener(_updateEventList);
     
     // delay loading data until build is complete
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -53,7 +53,7 @@ class _VotingListPageState extends State<VotingListPage> {
   
   @override
   void dispose() {
-    widget._votingEventProvider.removeListener(_updateEventList);
+    widget.votingEventProvider.removeListener(_updateEventList);
     _searchController.dispose();
     super.dispose();
   }
@@ -64,7 +64,7 @@ class _VotingListPageState extends State<VotingListPage> {
     
     setState(() {
       // get all non-deprecated events
-      _votingEventList = widget._votingEventProvider.votingEventList
+      _votingEventList = widget.votingEventProvider.votingEventList
           .where((event) => event.status.name != 'deprecated')
           .toList();
       _sortVotingEvents(_votingEventList);
@@ -74,7 +74,7 @@ class _VotingListPageState extends State<VotingListPage> {
   }
 
   Future<void> _loadVotingEvents() async {
-    await widget._votingEventProvider.loadVotingEvents();
+    await widget.votingEventProvider.loadVotingEvents();
     _updateEventList();
   }
 
@@ -132,7 +132,7 @@ class _VotingListPageState extends State<VotingListPage> {
         centerTitle: true,
         backgroundColor: colorScheme.secondary,
         actions: [
-          if (widget._user.role == UserRole.admin || widget._user.role == UserRole.staff)
+          if (widget.userProvider.user!.role == UserRole.admin || widget.userProvider.user!.role == UserRole.staff)
             IconButton(
               icon: const Icon(Icons.pending_actions),
               tooltip: AppLocale.pendingVotingEvent.getString(context),
@@ -141,8 +141,8 @@ class _VotingListPageState extends State<VotingListPage> {
         ],
       ),
       backgroundColor: colorScheme.tertiary,
-      body: widget._walletProvider.walletAddress == null || 
-            widget._walletProvider.walletAddress!.isEmpty
+      body: widget.walletProvider.walletAddress == null || 
+            widget.walletProvider.walletAddress!.isEmpty
         ? Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -203,7 +203,7 @@ class _VotingListPageState extends State<VotingListPage> {
                                 children: [
                                   ..._filteredVotingEventList.map((votingEvent) => VotingEventBox(
                                     onTap: () {
-                                      widget._votingEventProvider.selectVotingEvent(votingEvent);
+                                      widget.votingEventProvider.selectVotingEvent(votingEvent);
                                       NavigationHelper.navigateToVotingEventPage(context);
                                     },
                                     votingEvent: votingEvent,
@@ -218,10 +218,10 @@ class _VotingListPageState extends State<VotingListPage> {
                 ),
               ),
       floatingActionButton: (
-        (widget._user.role == UserRole.admin ||
-        widget._user.role == UserRole.staff) &&
-        (widget._walletProvider.walletAddress != null &&
-        widget._walletProvider.walletAddress!.isNotEmpty)
+        (widget.userProvider.user!.role == UserRole.admin ||
+        widget.userProvider.user!.role == UserRole.staff) &&
+        (widget.walletProvider.walletAddress != null &&
+        widget.walletProvider.walletAddress!.isNotEmpty)
       ) ? FloatingActionButton.extended(
         onPressed: () => NavigationHelper.navigateToVotingEventCreatePage(context),
         icon: const Icon(Icons.add),

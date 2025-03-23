@@ -74,25 +74,25 @@ class Candidate {
     };
   }
 
-  static List<Candidate> convertToCandidateList(List<dynamic> candidates) {
-    List<Candidate> candidateList = [];
-
-    for (var candidate in candidates) {
-      if (candidate is Candidate) {
-        candidateList.add(candidate);
-      } else if (candidate is Map) {
-        Candidate candidateData = Candidate.fromMap({
-          'candidateID': candidate['candidateID'],
-          'name': candidate['name'],
-          'description': candidate['description'],
-          'walletAddress': candidate['walletAddress'],
-          'votingEventID': candidate['votingEventID'],
-          'isConfirmed': candidate['isConfirmed'],
-          'avatarUrl': candidate['avatarUrl'],
-        });
-        candidateList.add(candidateData);
-      }
-    }
-    return candidateList;
+  // create a copy of this Candidate with optional updated fields
+  Candidate copyWith({
+    String? candidateID,
+    String? name,
+    String? bio,
+    int? votesReceived,
+    bool? isConfirmed,
+    String? avatarUrl,
+  }) {
+    return Candidate(
+      candidateID: this.candidateID,
+      userID: userID,
+      name: name ?? this.name,
+      bio: bio ?? this.bio,
+      votingEventID: votingEventID,
+      walletAddress: walletAddress,
+      votesReceived: votesReceived ?? this.votesReceived,
+      isConfirmed: isConfirmed ?? this.isConfirmed,
+      avatarUrl: avatarUrl ?? this.avatarUrl,
+    );
   }
 }

@@ -127,6 +127,7 @@ class WalletConnectService {
         } else {
           print("WalletConnectService: User's wallet address is the same as the event's address");
           updateWalletAddress(context);
+          SnackbarUtil.showSnackBar(context, AppLocale.walletConnected.getString(context));
           return;
         }
       }

@@ -8,6 +8,7 @@ class Admin extends User {
     required super.walletAddress,
     super.isVerified,
     super.avatarUrl,
+    required super.freezed
   }) : super(role: UserRole.admin);
 
   factory Admin.fromJson(Map<String, dynamic> json) {
@@ -18,6 +19,7 @@ class Admin extends User {
       walletAddress: json['walletAddress'],
       isVerified: json['isVerified'],
       avatarUrl: json['avatarUrl'],
+      freezed: json['freezed'],
     );
   }
 }

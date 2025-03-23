@@ -9,7 +9,7 @@ import 'package:blockchain_university_voting_system/repository/voting_event_repo
 import 'package:flutter/material.dart';
 import 'package:reown_appkit/reown_appkit.dart';
 
-class VotingEventProvider extends ChangeNotifier{
+class VotingEventProvider extends ChangeNotifier {
   final VotingEventRepository _votingEventRepository = VotingEventRepository();
 
   late VotingEvent _selectedVotingEvent;
@@ -21,10 +21,12 @@ class VotingEventProvider extends ChangeNotifier{
   // getter
   VotingEvent get selectedVotingEvent => _selectedVotingEvent;
   List<VotingEvent> get votingEventList => _votingEventList;
-  List<VotingEvent> get availableVotingEvents => 
-    _votingEventList.where((event) => event.status == VotingEventStatus.available).toList();
-  List<VotingEvent> get deprecatedVotingEvents => 
-    _votingEventList.where((event) => event.status == VotingEventStatus.deprecated).toList();
+  List<VotingEvent> get availableVotingEvents => _votingEventList
+      .where((event) => event.status == VotingEventStatus.available)
+      .toList();
+  List<VotingEvent> get deprecatedVotingEvents => _votingEventList
+      .where((event) => event.status == VotingEventStatus.deprecated)
+      .toList();
   bool get isLoading => _isLoading;
 
   // setter
@@ -38,22 +40,19 @@ class VotingEventProvider extends ChangeNotifier{
     print("Voting_Event_Provider: Starting polling.");
     // 取消现有的轮询
     _pollingTimer?.cancel();
-    
+
     // 立即获取最新数据
     _forceRefreshVotingEvents();
 
     // 设置定时器定期获取数据
-    _pollingTimer = Timer.periodic(
-      const Duration(minutes: 2), 
-      (timer) {
-        print("Voting_Event_Provider: Polling for new data.");
-        _forceRefreshVotingEvents();
-      }
-    );
-    
+    _pollingTimer = Timer.periodic(const Duration(minutes: 2), (timer) {
+      print("Voting_Event_Provider: Polling for new data.");
+      _forceRefreshVotingEvents();
+    });
+
     polling = true;
   }
-  
+
   void stopPolling() {
     if (_pollingTimer != null) {
       _pollingTimer!.cancel();
@@ -68,10 +67,10 @@ class VotingEventProvider extends ChangeNotifier{
     try {
       _isLoading = true;
       notifyListeners();
-      
+
       _votingEventList = await _votingEventRepository.getVotingEventList();
       print("Voting_Event_Provider: Refreshed with ${_votingEventList.length} events.");
-      
+
       _isLoading = false;
       notifyListeners();
     } catch (e) {
@@ -83,18 +82,18 @@ class VotingEventProvider extends ChangeNotifier{
 
   Future<void> loadVotingEvents() async {
     if (_isLoading) return;
-    
+
     try {
       _isLoading = true;
       notifyListeners();
-      
+
       // 总是从数据源获取最新数据
       _votingEventList = await _votingEventRepository.getVotingEventList(manualRefresh: true);
       print("Voting_Event_Provider: Loaded ${_votingEventList.length} events.");
-      
+
       _isLoading = false;
       notifyListeners();
-      
+
       // 如果尚未开始轮询，启动轮询
       if (!polling) {
         startPolling();
@@ -116,19 +115,18 @@ class VotingEventProvider extends ChangeNotifier{
   }
 
   Future<bool> createVotingEvent(
-    String title,
-    String description,
-    DateTime? startDate,
-    DateTime? endDate,
-    TimeOfDay? startTime,
-    TimeOfDay? endTime,
-    String walletAddress,
-    String userID,
-    {File? imageFile}
-  ) async {
+      String title,
+      String description,
+      DateTime? startDate,
+      DateTime? endDate,
+      TimeOfDay? startTime,
+      TimeOfDay? endTime,
+      String walletAddress,
+      String userID,
+      {File? imageFile}) async {
     print("Voting_Event_Provider: Creating VotingEvent object.");
     String imageUrl = '';
-    
+
     VotingEvent newVotingEvent = VotingEvent(
       votingEventID: "VE-${_votingEventList.length + 1}",
       title: title,
@@ -161,7 +159,7 @@ class VotingEventProvider extends ChangeNotifier{
         await _votingEventRepository.deleteVotingEventImage(imageUrl);
       }
     }
-    
+
     return success;
   }
 
@@ -179,25 +177,19 @@ class VotingEventProvider extends ChangeNotifier{
           votingEvent.endDate == oldVotingEvent.endDate &&
           votingEvent.status == oldVotingEvent.status &&
           votingEvent.candidates == oldVotingEvent.candidates &&
-          votingEvent.voters == oldVotingEvent.voters
-      ) {
+          votingEvent.voters == oldVotingEvent.voters) {
         updateBlockchain = false;
         print("Voting_Event_Provider: updateBlockchain: $updateBlockchain");
       } else {
         print("Voting_Event_Provider: updateBlockchain: $updateBlockchain");
       }
-      
+
       bool success = await _votingEventRepository.updateVotingEvent(votingEvent, updateBlockchain);
       return success;
     } catch (e) {
       print("Voting_Event_Provider: Error updating voting event: $e");
       return false;
     }
-  }
-
-  Future<void> deleteVotingEvent(VotingEvent votingEvent) async {
-    print("Voting_Event_Provider: Removing voting event.");
-    await _votingEventRepository.deleteVotingEvent(votingEvent);
   }
 
   Future<bool> deprecateVotingEvent(VotingEvent votingEvent) async {
@@ -207,10 +199,10 @@ class VotingEventProvider extends ChangeNotifier{
       VotingEvent deprecatedEvent = votingEvent.copyWith(
         status: VotingEventStatus.deprecated,
       );
-      
+
       // update the event using existing method
       bool success = await updateVotingEvent(deprecatedEvent, votingEvent);
-      
+
       if (success) {
         // update the local list
         int index = _votingEventList.indexWhere((event) => event.votingEventID == votingEvent.votingEventID);
@@ -219,7 +211,7 @@ class VotingEventProvider extends ChangeNotifier{
           notifyListeners();
         }
       }
-      
+
       return success;
     } catch (e) {
       print("Voting_Event_Provider: Error deprecating voting event: $e");
@@ -234,11 +226,73 @@ class VotingEventProvider extends ChangeNotifier{
     VotingEvent cloneEvent = _selectedVotingEvent.copyWith(
       candidates: newCandidates,
     );
-    
-    bool success = await _votingEventRepository.addCandidatesToVotingEvent(cloneEvent);
+
+    bool success =
+        await _votingEventRepository.addCandidatesToVotingEvent(cloneEvent);
 
     if (success) {
       _selectedVotingEvent = cloneEvent; // put after the repository call to avoid race condition
+
+      // also update the event in the list
+      int index = _votingEventList.indexWhere((event) => event.votingEventID == cloneEvent.votingEventID);
+      if (index != -1) {
+        _votingEventList[index] = cloneEvent;
+      }
+
+      notifyListeners();
+    }
+
+    return success;
+  }
+
+  Future<bool> removeCandidates(Candidate candidate) async {
+    print("Voting_Event_Provider: Removing candidates.");
+    List<Candidate> candidatesToRemove = _selectedVotingEvent.candidates.toList();
+    candidatesToRemove.remove(candidate);
+    VotingEvent cloneEvent = _selectedVotingEvent.copyWith(
+      candidates: candidatesToRemove,
+    );
+
+    bool success = await _votingEventRepository.removeCandidateFromVotingEvent(cloneEvent.votingEventID, candidate.walletAddress);
+
+    if (success) {
+      _selectedVotingEvent =
+          cloneEvent; // put after the repository call to avoid race condition
+
+      // also update the event in the list
+      int index = _votingEventList.indexWhere(
+          (event) => event.votingEventID == cloneEvent.votingEventID);
+      if (index != -1) {
+        _votingEventList[index] = cloneEvent;
+      }
+
+      notifyListeners();
+    }
+
+    return success;
+  }
+
+  Future<bool> updateCandidate(Candidate candidate) async {
+    print("Voting_Event_Provider: Updating candidate.");
+    List<Candidate> candidates = _selectedVotingEvent.candidates.toList();
+    candidates.removeWhere((c) => c.walletAddress == candidate.walletAddress);
+    candidates.add(candidate);
+    VotingEvent cloneEvent = _selectedVotingEvent.copyWith(
+      candidates: candidates,
+    );
+
+    bool success = await _votingEventRepository.updateCandidateInVotingEvent(
+        cloneEvent.votingEventID, candidate);
+
+    if (success) {
+      _selectedVotingEvent = cloneEvent; // put after the repository call to avoid race condition
+
+      // also update the event in the list
+      int index = _votingEventList.indexWhere((event) => event.votingEventID == cloneEvent.votingEventID);
+      if (index != -1) {
+        _votingEventList[index] = cloneEvent;
+      }
+
       notifyListeners();
     }
 
@@ -257,45 +311,41 @@ class VotingEventProvider extends ChangeNotifier{
       if (_selectedVotingEvent.imageUrl.isNotEmpty) {
         await _votingEventRepository.deleteVotingEventImage(_selectedVotingEvent.imageUrl);
       }
-      
+
       // upload the new image
-      String imageUrl = await _votingEventRepository.uploadVotingEventImage(
-        imageFile, 
-        _selectedVotingEvent.votingEventID
-      );
-      
+      String imageUrl = await _votingEventRepository.uploadVotingEventImage(imageFile, _selectedVotingEvent.votingEventID);
+
       if (imageUrl.isEmpty) {
         return false;
       }
-      
+
       // update the voting event with the new image URL
       VotingEvent updatedEvent = _selectedVotingEvent.copyWith(imageUrl: imageUrl);
-      
+
       // update in firebase only, no need to update blockchain
       bool success = await _votingEventRepository.updateVotingEventInFirebase(updatedEvent);
-      
+
       if (success) {
         // update the selected voting event
         _selectedVotingEvent = updatedEvent;
-        
+
         // update in the list
-        int index = _votingEventList.indexWhere(
-          (event) => event.votingEventID == _selectedVotingEvent.votingEventID
-        );
+        int index = _votingEventList.indexWhere((event) => event.votingEventID == _selectedVotingEvent.votingEventID);
         if (index != -1) {
           _votingEventList[index] = updatedEvent;
         }
-        
+
         notifyListeners();
       }
-      
+
       return success;
     } catch (e) {
-      print("Voting_Event_Provider (updateVotingEventImage): Error updating image: $e");
+      print(
+          "Voting_Event_Provider (updateVotingEventImage): Error updating image: $e");
       return false;
     }
   }
-  
+
   // remove the image from a voting event
   Future<bool> removeVotingEventImage() async {
     print("Voting_Event_Provider: Removing voting event image.");
@@ -303,34 +353,181 @@ class VotingEventProvider extends ChangeNotifier{
       if (_selectedVotingEvent.imageUrl.isEmpty) {
         return true; // nothing to remove
       }
-      
+
       // delete the image from storage
       await _votingEventRepository.deleteVotingEventImage(_selectedVotingEvent.imageUrl);
-      
+
       // update the voting event with empty image URL
       VotingEvent updatedEvent = _selectedVotingEvent.copyWith(imageUrl: '');
-      
+
       // update in firebase only
       bool success = await _votingEventRepository.updateVotingEventInFirebase(updatedEvent);
-      
+
       if (success) {
         // update the selected voting event
         _selectedVotingEvent = updatedEvent;
-        
+
         // update in the list
-        int index = _votingEventList.indexWhere(
-          (event) => event.votingEventID == _selectedVotingEvent.votingEventID
-        );
+        int index = _votingEventList.indexWhere((event) => event.votingEventID == _selectedVotingEvent.votingEventID);
         if (index != -1) {
           _votingEventList[index] = updatedEvent;
         }
-        
+
         notifyListeners();
       }
-      
+
       return success;
     } catch (e) {
-      print("Voting_Event_Provider (removeVotingEventImage): Error removing image: $e");
+      print(
+          "Voting_Event_Provider (removeVotingEventImage): Error removing image: $e");
+      return false;
+    }
+  }
+
+  // add a student as a pending candidate
+  Future<bool> addPendingCandidate(User user, String bio) async {
+    print("Voting_Event_Provider: Adding pending candidate.");
+    try {
+      // create a new candidate with isConfirmed = false
+      Candidate newCandidate = Candidate(
+        candidateID: "CAND_${DateTime.now().millisecondsSinceEpoch}",
+        userID: user.userID,
+        name: user.name,
+        bio: bio,
+        votingEventID: _selectedVotingEvent.votingEventID,
+        walletAddress: user.walletAddress,
+        isConfirmed: false,
+        avatarUrl: user.avatarUrl,
+      );
+
+      // get current pending candidates
+      List<Candidate> pendingCandidates = _selectedVotingEvent.pendingCandidates.toList();
+
+      // check if user is already a pending candidate
+      bool isAlreadyPending = pendingCandidates.any((c) => c.walletAddress == user.walletAddress);
+      if (isAlreadyPending) {
+        print("Voting_Event_Provider: User is already a pending candidate.");
+        return false;
+      }
+
+      // check if user is already a confirmed candidate
+      bool isAlreadyConfirmed = _selectedVotingEvent.candidates.any((c) => c.walletAddress == user.walletAddress);
+      if (isAlreadyConfirmed) {
+        print("Voting_Event_Provider: User is already a confirmed candidate.");
+        return false;
+      }
+
+      // add to pending candidates
+      pendingCandidates.add(newCandidate);
+
+      // create updated voting event
+      VotingEvent updatedEvent = _selectedVotingEvent.copyWith(
+        pendingCandidates: pendingCandidates,
+      );
+
+      // update in firebase only
+      bool success = await _votingEventRepository.updateVotingEventInFirebase(updatedEvent);
+
+      if (success) {
+        // update the selected voting event
+        _selectedVotingEvent = updatedEvent;
+
+        // update in the list
+        int index = _votingEventList.indexWhere((event) => event.votingEventID == _selectedVotingEvent.votingEventID);
+        if (index != -1) {
+          _votingEventList[index] = updatedEvent;
+        }
+
+        notifyListeners();
+      }
+
+      return success;
+    } catch (e) {
+      print(
+          "Voting_Event_Provider (addPendingCandidate): Error adding pending candidate: $e");
+      return false;
+    }
+  }
+
+  // move a candidate from pending to confirmed
+  Future<bool> confirmPendingCandidate(Candidate candidate) async {
+    print("Voting_Event_Provider: Confirming pending candidate.");
+    try {
+      // remove from pending
+      List<Candidate> pendingCandidates = _selectedVotingEvent.pendingCandidates.toList();
+      pendingCandidates.removeWhere((c) => c.walletAddress == candidate.walletAddress);
+
+      // update candidate to confirmed
+      Candidate confirmedCandidate = candidate.copyWith(
+        candidateID: "CAND_${_selectedVotingEvent.candidates.length}",
+        isConfirmed: true,
+      );
+
+      // add to confirmed candidates
+      List<Candidate> confirmedCandidates = _selectedVotingEvent.candidates.toList();
+      confirmedCandidates.add(confirmedCandidate);
+
+      // create updated voting event
+      VotingEvent updatedEvent = _selectedVotingEvent.copyWith(
+        pendingCandidates: pendingCandidates,
+        candidates: confirmedCandidates,
+      );
+
+      // update in firebase and blockchain
+      bool success = await _votingEventRepository.confirmCandidateInVotingEvent(updatedEvent, confirmedCandidate);
+
+      if (success) {
+        // update the selected voting event
+        _selectedVotingEvent = updatedEvent;
+
+        // update in the list
+        int index = _votingEventList.indexWhere((event) => event.votingEventID == _selectedVotingEvent.votingEventID);
+        if (index != -1) {
+          _votingEventList[index] = updatedEvent;
+        }
+
+        notifyListeners();
+      }
+
+      return success;
+    } catch (e) {
+      print("Voting_Event_Provider (confirmPendingCandidate): Error confirming candidate: $e");
+      return false;
+    }
+  }
+
+  // reject a pending candidate
+  Future<bool> rejectPendingCandidate(Candidate candidate) async {
+    print("Voting_Event_Provider: Rejecting pending candidate.");
+    try {
+      // remove from pending
+      List<Candidate> pendingCandidates = _selectedVotingEvent.pendingCandidates.toList();
+      pendingCandidates.removeWhere((c) => c.walletAddress == candidate.walletAddress);
+
+      // create updated voting event
+      VotingEvent updatedEvent = _selectedVotingEvent.copyWith(
+        pendingCandidates: pendingCandidates,
+      );
+
+      // update in firebase only
+      bool success = await _votingEventRepository.updateVotingEventInFirebase(updatedEvent);
+
+      if (success) {
+        // update the selected voting event
+        _selectedVotingEvent = updatedEvent;
+
+        // update in the list
+        int index = _votingEventList.indexWhere((event) => event.votingEventID == _selectedVotingEvent.votingEventID);
+        if (index != -1) {
+          _votingEventList[index] = updatedEvent;
+        }
+
+        notifyListeners();
+      }
+
+      return success;
+    } catch (e) {
+      print("Voting_Event_Provider (rejectPendingCandidate): Error rejecting candidate: $e");
       return false;
     }
   }
@@ -340,5 +537,4 @@ class VotingEventProvider extends ChangeNotifier{
     _pollingTimer?.cancel();
     super.dispose();
   }
-
 }

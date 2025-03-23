@@ -1,4 +1,5 @@
 import 'package:blockchain_university_voting_system/data/router_path.dart';
+import 'package:blockchain_university_voting_system/models/candidate_model.dart';
 import 'package:blockchain_university_voting_system/routes/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -85,6 +86,14 @@ class NavigationHelper {
   }
   static void navigateToAddCandidatePage(BuildContext context) {
     context.push('/${RouterPath.addcandidatepage.path}');
+  }
+
+  static void navigateToEditCandidatePage(BuildContext context, Candidate candidate) {
+    context.push('/${RouterPath.editcandidatepage.path}', 
+      extra: {
+        'candidate': candidate,
+      },
+    );
   }
 
   // pending VE

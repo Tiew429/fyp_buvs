@@ -140,7 +140,6 @@ class AuthService {
       print("User address: ${userRetrieved?.walletAddress}");
       if (userRetrieved != null) {
         setUserAndLoginAndNavigate(context, userRetrieved);
-        SnackbarUtil.showSnackBar(context, AppLocale.loginSuccess.getString(context));
         return;
       }
 
@@ -200,7 +199,22 @@ class AuthService {
           bio: userData['bio'],
           isVerified: userData['isVerified'],
           avatarUrl: userData['avatarUrl'],
+          freezed: userData['freezed'],
         );
+
+        final UserProvider userProvider = Provider.of<UserProvider>(context, listen: false);
+
+        if (role == model_user.UserRole.staff) {
+            print("user is staff");
+            userProvider.setDepartment(userData['department']);
+          } else if (role == model_user.UserRole.student) {
+            print("user is student");
+            print("isEligibleForVoting: ${userData['isEligibleForVoting']}");
+            userProvider.setIsEligibleForVoting(userData['isEligibleForVoting']);
+          } else {
+            print("user is admin");
+          }
+
         setUserAndLoginAndNavigate(context, user);
         userFound = true;
         break;
@@ -247,7 +261,8 @@ class AuthService {
             email: email,
             role: role,
             walletAddress: walletAddress,
-            department: department, // Ensure department is passed here
+            department: department,
+            freezed: false,
           ),
           password,
         );
@@ -261,6 +276,7 @@ class AuthService {
             role: role,
             walletAddress: walletAddress,
             isEligibleForVoting: false,
+            freezed: false,
           ),
           password,
         );

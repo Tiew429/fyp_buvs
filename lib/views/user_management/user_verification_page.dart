@@ -53,7 +53,7 @@ class _UserVerificationPageState extends State<UserVerificationPage> {
   
   Future<void> _initializeData() async {
     _user = widget.userProvider.user;
-    
+
     // check if the current user is admin or staff
     // if the staff is not verified, then the staff can't verify other users, it will display the verification page of the user itself
     if ((_user.role == UserRole.staff && _user.isVerified) || _user.role == UserRole.admin) {

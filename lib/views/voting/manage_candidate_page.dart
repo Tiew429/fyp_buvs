@@ -1,22 +1,25 @@
 import 'package:blockchain_university_voting_system/localization/app_locale.dart';
 import 'package:blockchain_university_voting_system/models/candidate_model.dart';
 import 'package:blockchain_university_voting_system/models/voting_event_model.dart';
+import 'package:blockchain_university_voting_system/provider/candidate_provider.dart';
 import 'package:blockchain_university_voting_system/routes/navigation_helper.dart';
 import 'package:blockchain_university_voting_system/utils/snackbar_util.dart';
 import 'package:blockchain_university_voting_system/provider/voting_event_provider.dart';
-import 'package:blockchain_university_voting_system/widgets/custom_animated_button.dart';
 import 'package:blockchain_university_voting_system/widgets/empty_state_widget.dart';
 import 'package:blockchain_university_voting_system/widgets/response_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localization/flutter_localization.dart';
 
 class ManageCandidatePage extends StatefulWidget {
-  final VotingEventProvider _votingEventViewModel;
+  final VotingEventProvider _votingEventProvider;
+  final CandidateProvider _candidateProvider;
 
   const ManageCandidatePage({
     super.key,
-    required VotingEventProvider votingEventViewModel,
-  }) :_votingEventViewModel = votingEventViewModel;
+    required VotingEventProvider votingEventProvider,
+    required CandidateProvider candidateProvider,
+  }) :_votingEventProvider = votingEventProvider, 
+      _candidateProvider = candidateProvider;
 
   @override
   State<ManageCandidatePage> createState() => _ManageCandidatePageState();
@@ -33,10 +36,10 @@ class _ManageCandidatePageState extends State<ManageCandidatePage> with SingleTi
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
-    _votingEvent = widget._votingEventViewModel.selectedVotingEvent;
-    _confirmedCandidates = Candidate.convertToCandidateList(_votingEvent.candidates);
+    _votingEvent = widget._votingEventProvider.selectedVotingEvent;
+    _confirmedCandidates = _votingEvent.candidates;
     print("Confirmed Candidates: ${_confirmedCandidates.length}");
-    _pendingCandidates = Candidate.convertToCandidateList(_votingEvent.pendingCandidates);
+    _pendingCandidates = _votingEvent.pendingCandidates;
     print("Pending Candidates: ${_pendingCandidates.length}");
   }
 
@@ -76,10 +79,10 @@ class _ManageCandidatePageState extends State<ManageCandidatePage> with SingleTi
       body: TabBarView(
         controller: _tabController,
         children: [
-          // Confirmed candidates tab
+          // confirmed candidates tab
           _buildConfirmedCandidatesTab(),
           
-          // Pending candidates tab
+          // pending candidates tab
           _buildPendingCandidatesTab(),
         ],
       ),
@@ -125,20 +128,25 @@ class _ManageCandidatePageState extends State<ManageCandidatePage> with SingleTi
                             children: [
                               Padding(
                                 padding: const EdgeInsets.all(12.0),
-                                child: Row(
-                                  children: [
+            child: Row(
+              children: [
                                     CircleAvatar(
                                       backgroundColor: colorScheme.primary,
-                                      child: Text(
-                                        candidate.name.isNotEmpty ? candidate.name[0].toUpperCase() : '?',
-                                        style: TextStyle(color: colorScheme.onPrimary),
-                                      ),
+                                      backgroundImage: candidate.avatarUrl != '' && candidate.avatarUrl.isNotEmpty
+                                          ? widget._candidateProvider.getCandidateAvatar(candidate)
+                                          : null,
+                                      child: candidate.avatarUrl != '' && candidate.avatarUrl.isNotEmpty
+                                          ? null
+                                          : Text(
+                                              candidate.name.isNotEmpty ? candidate.name[0].toUpperCase() : '?',
+                                              style: TextStyle(color: colorScheme.onPrimary),
+                                            ),
                                     ),
                                     const SizedBox(width: 16),
                                     Expanded(
-                                      child: Column(
+                  child: Column(
                                         crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
+                    children: [
                                           Text(
                                             candidate.name,
                                             style: const TextStyle(
@@ -155,16 +163,21 @@ class _ManageCandidatePageState extends State<ManageCandidatePage> with SingleTi
                                               style: TextStyle(
                                                 color: colorScheme.onSurface.withOpacity(0.7),
                                               ),
-                                            ),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                                    IconButton(
+                                      icon: Icon(Icons.delete, color: Colors.red.shade300),
+                                      onPressed: () => _showRemoveCandidateConfirmDialog(candidate),
+                                      tooltip: AppLocale.removeCandidate.getString(context),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
                       ),
                   ),).toList(),
                 ),
@@ -188,75 +201,143 @@ class _ManageCandidatePageState extends State<ManageCandidatePage> with SingleTi
             : Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                 child: Column(
-                  children: _pendingCandidates.map((candidate) => Padding(
-                    padding: const EdgeInsets.only(bottom: 16.0),
-                    child: Card(
-                      elevation: 2,
-                      child: InkWell(
-                        onTap: () => _showCandidateDetails(candidate),
-                        child: Stack(
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.all(12.0),
-                              child: Row(
-                                children: [
-                                  CircleAvatar(
-                                    backgroundColor: colorScheme.primaryContainer,
-                                    child: Text(
-                                      candidate.name.isNotEmpty ? candidate.name[0].toUpperCase() : '?',
-                                      style: TextStyle(color: colorScheme.onPrimaryContainer),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 16),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          candidate.name,
-                                          style: const TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 16,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 4),
-                                        if (candidate.bio.isNotEmpty) 
-                                          Text(
-                                            candidate.bio,
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                            style: TextStyle(
-                                              color: colorScheme.onSurface.withOpacity(0.7),
-                                            ),
-                                          ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Positioned(
-                              bottom: 8,
-                              right: 8,
-                              child: Row(
-                                children: [
-                                  CustomAnimatedButton(
-                                    onPressed: () => _confirmCandidate(candidate),
-                                    text: AppLocale.confirm.getString(context),
-                                    backgroundColor: Colors.green,
-                                  ),
-                                  const SizedBox(width: 8),
-                                  CustomAnimatedButton(
-                                    onPressed: () => _rejectCandidate(candidate),
-                                    text: AppLocale.reject.getString(context),
-                                    backgroundColor: Colors.red,
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
+                  children: _pendingCandidates.map((candidate) => Card(
+                    margin: const EdgeInsets.only(bottom: 16.0),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      side: BorderSide(
+                        color: colorScheme.primary.withOpacity(0.2),
+                        width: 1,
                       ),
+                    ),
+                    elevation: 3,
+                    child: Column(
+                      children: [
+                        // Candidate info section
+                        ListTile(
+                          contentPadding: const EdgeInsets.all(16),
+                          leading: Hero(
+                            tag: 'candidate-${candidate.candidateID}',
+                            child: CircleAvatar(
+                              radius: 30,
+                              backgroundColor: colorScheme.primary,
+                              backgroundImage: candidate.avatarUrl != '' && candidate.avatarUrl.isNotEmpty
+                                  ? widget._candidateProvider.getCandidateAvatar(candidate)
+                                  : null,
+                              child: candidate.avatarUrl != '' && candidate.avatarUrl.isNotEmpty
+                                  ? null
+                                  : Text(
+                                      candidate.name.isNotEmpty ? candidate.name[0].toUpperCase() : '?',
+                                      style: TextStyle(
+                                        color: colorScheme.onPrimary,
+                                        fontSize: 24,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                            ),
+                          ),
+                          title: Text(
+                            candidate.name,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
+                            ),
+                          ),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const SizedBox(height: 6),
+                              // Pending badge
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                decoration: BoxDecoration(
+                                  color: Colors.amber.withOpacity(0.2),
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(color: Colors.amber, width: 1),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(Icons.pending, size: 14, color: Colors.amber.shade800),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      AppLocale.pending.getString(context),
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.amber.shade800,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              if (candidate.bio.isNotEmpty) 
+                                Text(
+                                  candidate.bio,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    color: colorScheme.onSurface.withOpacity(0.7),
+                                  ),
+                                ),
+                            ],
+                          ),
+                          trailing: IconButton(
+                            icon: const Icon(Icons.info_outline),
+                            onPressed: () => _showCandidateDetails(candidate),
+                            tooltip: AppLocale.viewDetails.getString(context),
+                          ),
+                        ),
+                        
+                        // Action buttons section with divider
+                        Divider(height: 1, thickness: 1, color: colorScheme.outline.withOpacity(0.2)),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              Expanded(
+                                child: ElevatedButton.icon(
+                                  onPressed: () => _rejectCandidate(candidate),
+                                  icon: const Icon(Icons.cancel, size: 20),
+                                  label: Text(
+                                    AppLocale.reject.getString(context),
+                                    style: const TextStyle(fontWeight: FontWeight.bold),
+                                  ),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.red.shade100,
+                                    foregroundColor: Colors.red.shade800,
+                                    padding: const EdgeInsets.symmetric(vertical: 12),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: ElevatedButton.icon(
+                                  onPressed: () => _confirmCandidate(candidate),
+                                  icon: const Icon(Icons.check_circle, size: 20),
+                                  label: Text(
+                                    AppLocale.approve.getString(context),
+                                    style: const TextStyle(fontWeight: FontWeight.bold),
+                                  ),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.green.shade100,
+                                    foregroundColor: Colors.green.shade800,
+                                    padding: const EdgeInsets.symmetric(vertical: 12),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
                   )).toList(),
                 ),
@@ -273,6 +354,20 @@ class _ManageCandidatePageState extends State<ManageCandidatePage> with SingleTi
       builder: (context) => AlertDialog(
         title: Row(
           children: [
+            CircleAvatar(
+              backgroundColor: colorScheme.primary,
+              backgroundImage: candidate.avatarUrl != '' && candidate.avatarUrl.isNotEmpty
+                  ? widget._candidateProvider.getCandidateAvatar(candidate)
+                  : null,
+              radius: 18,
+              child: candidate.avatarUrl != '' && candidate.avatarUrl.isNotEmpty
+                  ? null
+                  : Text(
+                      candidate.name.isNotEmpty ? candidate.name[0].toUpperCase() : '?',
+                      style: TextStyle(color: colorScheme.onPrimary),
+                    ),
+            ),
+            const SizedBox(width: 10),
             Expanded(child: Text(candidate.name)),
           ],
         ),
@@ -309,6 +404,13 @@ class _ManageCandidatePageState extends State<ManageCandidatePage> with SingleTi
             ),
             const SizedBox(height: 4),
             SelectableText(candidate.userID),
+            const SizedBox(height: 4),
+            const Text(
+              "Candidate ID:",
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 4),
+            SelectableText(candidate.candidateID),
           ],
         ),
         actions: [
@@ -324,9 +426,157 @@ class _ManageCandidatePageState extends State<ManageCandidatePage> with SingleTi
               ),
             ),
           ),
+          ElevatedButton.icon(
+            onPressed: () {
+              Navigator.of(context).pop();
+              _showRemoveCandidateConfirmDialog(candidate);
+            },
+            icon: const Icon(Icons.delete, color: Colors.white),
+            label: Text(
+              AppLocale.removeCandidate.getString(context),
+              style: const TextStyle(color: Colors.white),
+            ),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+            ),
+          ),
+          ElevatedButton.icon(
+            onPressed: () {
+              Navigator.of(context).pop();
+              NavigationHelper.navigateToEditCandidatePage(context, candidate);
+            },
+            icon: const Icon(Icons.edit, color: Colors.white),
+            label: Text(
+              AppLocale.editCandidate.getString(context),
+              style: const TextStyle(color: Colors.white),
+            ),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.blue,
+            ),
+          ),
         ],
       ),
     );
+  }
+
+  // show confirm dialog for removing a candidate
+  void _showRemoveCandidateConfirmDialog(Candidate candidate) {
+    final colorScheme = Theme.of(context).colorScheme;
+    
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(AppLocale.removeCandidate.getString(context)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "Are you sure you want to remove this candidate?",
+              style: TextStyle(color: colorScheme.onPrimary),
+            ),
+            const SizedBox(height: 16),
+            Container(
+              decoration: BoxDecoration(
+                border: Border.all(color: colorScheme.primary.withOpacity(0.3)),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: ListTile(
+                leading: CircleAvatar(
+                  backgroundColor: colorScheme.primary,
+                  backgroundImage: candidate.avatarUrl != '' && candidate.avatarUrl.isNotEmpty
+                      ? widget._candidateProvider.getCandidateAvatar(candidate)
+                      : null,
+                  child: candidate.avatarUrl != '' && candidate.avatarUrl.isNotEmpty
+                      ? null
+                      : Text(
+                          candidate.name.isNotEmpty ? candidate.name[0].toUpperCase() : '?',
+                          style: TextStyle(color: colorScheme.onPrimary),
+                        ),
+                ),
+                title: Text(candidate.name),
+                subtitle: Text(
+                  "ID: ${candidate.candidateID}",
+                  style: TextStyle(fontSize: 12),
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              "This action cannot be undone.",
+              style: const TextStyle(color: Colors.red, fontSize: 12),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            style: TextButton.styleFrom(
+              backgroundColor: colorScheme.primary,
+            ),
+            child: Text(
+              AppLocale.cancel.getString(context),
+              style: TextStyle(
+                color: colorScheme.onPrimary,
+              ),
+            ),
+          ),
+          ElevatedButton.icon(
+            onPressed: () {
+              Navigator.of(context).pop();
+              _removeCandidate(candidate);
+            },
+            icon: const Icon(Icons.delete, color: Colors.white),
+            label: Text(
+              AppLocale.removeCandidate.getString(context),
+              style: const TextStyle(color: Colors.white),
+            ),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // remove candidate from voting event
+  Future<void> _removeCandidate(Candidate candidate) async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      // call removeCandidates from VotingEventProvider
+      bool success = await widget._votingEventProvider.removeCandidates(candidate);
+      
+      if (success) {
+        setState(() {
+          _confirmedCandidates.remove(candidate);
+          _isLoading = false;
+        });
+        
+        if (mounted) {
+          SnackbarUtil.showSnackBar(
+            context, 
+            "${AppLocale.candidate.getString(context)} ${candidate.name} removed successfully"
+          );
+        }
+      } else {
+        throw Exception("Failed to remove candidate ${candidate.name}");
+      }
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+      
+      if (mounted) {
+        SnackbarUtil.showSnackBar(
+          context, 
+          "Error removing candidate: $e"
+        );
+      }
+    }
   }
 
   Future<void> _confirmCandidate(Candidate candidate) async {
@@ -335,25 +585,26 @@ class _ManageCandidatePageState extends State<ManageCandidatePage> with SingleTi
     });
 
     try {
-      // In a real app, you would call a method in your viewmodel to confirm the candidate
-      // For example: await widget._votingEventViewModel.confirmCandidate(candidate);
+      // use the provider to confirm the pending candidate
+      bool success = await widget._votingEventProvider.confirmPendingCandidate(candidate);
       
-      // For this example, we'll just simulate a delay and remove from pending list
-      await Future.delayed(const Duration(seconds: 1));
-      
-      setState(() {
-        _pendingCandidates.remove(candidate);
-        // Add to confirmed candidates if needed
-        candidate.setIsConfirmed(true);
-        _confirmedCandidates.add(candidate);
-        _isLoading = false;
-      });
-      
-      if (mounted) {
-        SnackbarUtil.showSnackBar(
-          context, 
-          "${AppLocale.candidate.getString(context)} ${candidate.name} ${AppLocale.available.getString(context)}"
-        );
+      if (success) {
+        setState(() {
+          // update local lists
+          _pendingCandidates.remove(candidate);
+          Candidate confirmedCandidate = candidate.copyWith(isConfirmed: true);
+          _confirmedCandidates.add(confirmedCandidate);
+          _isLoading = false;
+        });
+        
+        if (mounted) {
+          SnackbarUtil.showSnackBar(
+            context, 
+            "${AppLocale.candidate.getString(context)} ${candidate.name} ${AppLocale.available.getString(context)}"
+          );
+        }
+      } else {
+        throw Exception("Failed to confirm candidate");
       }
     } catch (e) {
       setState(() {
@@ -375,22 +626,23 @@ class _ManageCandidatePageState extends State<ManageCandidatePage> with SingleTi
     });
 
     try {
-      // In a real app, you would call a method in your viewmodel to reject the candidate
-      // For example: await widget._votingEventViewModel.rejectCandidate(candidate);
+      // use the provider to reject the pending candidate
+      bool success = await widget._votingEventProvider.rejectPendingCandidate(candidate);
       
-      // For this example, we'll just simulate a delay and remove from pending list
-      await Future.delayed(const Duration(seconds: 1));
-      
-      setState(() {
-        _pendingCandidates.remove(candidate);
-        _isLoading = false;
-      });
-      
-      if (mounted) {
-        SnackbarUtil.showSnackBar(
-          context, 
-          "${AppLocale.candidate.getString(context)} ${candidate.name} ${AppLocale.rejected.getString(context)}"
-        );
+      if (success) {
+        setState(() {
+          _pendingCandidates.remove(candidate);
+          _isLoading = false;
+        });
+        
+        if (mounted) {
+          SnackbarUtil.showSnackBar(
+            context, 
+            "${AppLocale.candidate.getString(context)} ${candidate.name} ${AppLocale.rejected.getString(context)}"
+          );
+        }
+      } else {
+        throw Exception("Failed to reject candidate");
       }
     } catch (e) {
       setState(() {

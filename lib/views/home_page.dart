@@ -1,5 +1,4 @@
 import 'package:blockchain_university_voting_system/localization/app_locale.dart';
-import 'package:blockchain_university_voting_system/models/user_model.dart';
 import 'package:blockchain_university_voting_system/provider/user_management_provider.dart';
 import 'package:blockchain_university_voting_system/provider/user_provider.dart';
 import 'package:blockchain_university_voting_system/views/dashboard/dashboard_page.dart';
@@ -10,7 +9,6 @@ import 'package:flutter_localization/flutter_localization.dart';
 import 'package:reown_appkit/appkit_modal.dart';
 
 class HomePage extends StatefulWidget {
-  final User user;
   final ReownAppKitModal appKitModal;
   final int? index;
   final UserProvider userProvider;
@@ -19,7 +17,6 @@ class HomePage extends StatefulWidget {
 
   const HomePage({
     super.key,
-    required this.user,
     required this.appKitModal,
     required this.userProvider,
     required this.userManagementProvider,
@@ -62,11 +59,11 @@ class _HomePageState extends State<HomePage> {
         },
         children: [
           DashboardPage(
-            user: widget.user,
+            user: widget.userProvider.user!,
             userProvider: widget.userProvider,
             userManagementProvider: widget.userManagementProvider,
           ),
-          ProfilePage(user: widget.user, appKitModal: widget.appKitModal),
+          ProfilePage(userProvider: widget.userProvider, appKitModal: widget.appKitModal),
           const SettingsPage(),
         ],
       ),

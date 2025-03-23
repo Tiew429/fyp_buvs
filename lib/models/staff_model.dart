@@ -12,6 +12,7 @@ class Staff extends User {
     super.isVerified,
     super.avatarUrl,
     String department = 'General',
+    required super.freezed,
   }) : _department = department,
        super(role: UserRole.staff);
   
@@ -31,6 +32,7 @@ class Staff extends User {
       isVerified: json['isVerified'] ?? false,
       department: json['department'] ?? 'General',
       avatarUrl: json['avatarUrl'] ?? '',
+      freezed: json['freezed'],
     );
   }
 }

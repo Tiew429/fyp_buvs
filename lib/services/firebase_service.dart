@@ -105,7 +105,7 @@ class FirebaseService {
       onDidReceiveNotificationResponse: (NotificationResponse response) {
         // handle local notification click event
         if (response.payload != null) {
-          final data = json.decode(response.payload!);
+          // final data = json.decode(response.payload!);
           // handle notification data, for example navigate to specific page
         }
       },
@@ -157,7 +157,7 @@ class FirebaseService {
     // handle notification based on type and data, for example navigate to specific page
     // for example: if notification is about new voting, navigate to voting detail page
     if (data.containsKey('type') && data['type'] == 'voting_event') {
-      final votingEventId = data['voting_event_id'];
+      // final votingEventId = data['voting_event_id'];
       // navigate to specific page
       // NavigationHelper.navigateToSpecificPage(votingEventId);
     }

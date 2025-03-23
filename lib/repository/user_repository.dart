@@ -138,13 +138,19 @@ class UserRepository {
           final userData = doc.data() as Map<String, dynamic>;
           final UserProvider userProvider = Provider.of(rootNavigatorKey.currentContext!, listen: false);
 
+          print("checking user role");
+
           if (role == model_user.UserRole.staff) {
+            print("user is staff");
             userProvider.setDepartment(userData['department']);
             return Staff.fromJson(userData);
           } else if (role == model_user.UserRole.student) {
+            print("user is student");
+            print("isEligibleForVoting: ${userData['isEligibleForVoting']}");
             userProvider.setIsEligibleForVoting(userData['isEligibleForVoting']);
             return Student.fromJson(userData);
           } else {
+            print("user is admin");
             return Admin.fromJson(userData);
           }
         }

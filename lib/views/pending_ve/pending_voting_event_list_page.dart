@@ -27,7 +27,6 @@ class _PendingVotingEventListPageState extends State<PendingVotingEventListPage>
   late List<VotingEvent> _pendingAndDeprecatedEvents = [];
   String _searchQuery = '';
   late TextEditingController _searchController;
-  VotingEvent? _selectedEvent;
 
   @override
   void initState() {
@@ -35,7 +34,7 @@ class _PendingVotingEventListPageState extends State<PendingVotingEventListPage>
     _searchController = TextEditingController();
     
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      _loadVotingEvents();
+    _loadVotingEvents();
     });
   }
 
@@ -129,10 +128,6 @@ class _PendingVotingEventListPageState extends State<PendingVotingEventListPage>
   }
 
   void _showVotingEventDetails(VotingEvent event) {
-    setState(() {
-      _selectedEvent = event;
-    });
-    
     _showEventDetailsDialog(event);
   }
 
@@ -327,7 +322,7 @@ class _PendingVotingEventListPageState extends State<PendingVotingEventListPage>
       ),
       backgroundColor: colorScheme.tertiary,
       body: _isLoading 
-        ? const Center(child: CircularProgressIndicator())
+              ? const Center(child: CircularProgressIndicator())
         : RefreshIndicator(
             onRefresh: _loadVotingEvents,
             child: Column(
@@ -352,7 +347,7 @@ class _PendingVotingEventListPageState extends State<PendingVotingEventListPage>
                       )
                     : ScrollableResponsiveWidget(
                         phone: Column(
-                          children: [
+                      children: [
                             ..._getFilteredEvents().map((votingEvent) => VotingEventBox(
                               onTap: () => _showVotingEventDetails(votingEvent),
                               votingEvent: votingEvent,
@@ -360,11 +355,11 @@ class _PendingVotingEventListPageState extends State<PendingVotingEventListPage>
                           ],
                         ),
                         tablet: Container(),
-                      ),
+                          ),
+                        ),
+                      ],
                     ),
-              ],
-            ),
-          ),
+      ),
     );
   }
 }

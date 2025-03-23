@@ -210,6 +210,10 @@ class AppLocale {
   static const String deprecate = 'deprecate';
   static const String failedToUpdateVotingEventImage = 'failed to update voting event image';
   static const String failedToRemoveVotingEventImage = 'failed to remove voting event image';
+  static const String votingInProgress = 'voting in progress';
+  static const String voteSuccess = 'vote success';
+  static const String voteFailed = 'vote failed';
+  static const String deletingVotingEvent = 'deleting voting event...';
 
   // student
   static const String notEligibleForVoting = 'not eligible for voting';
@@ -234,10 +238,23 @@ class AppLocale {
   static const String errorConfirmingCandidate = 'error confirming candidate';
   static const String errorRejectingCandidate = 'error rejecting candidate';
   static const String addCandidate = 'add candidate';
+  static const String editCandidate = 'edit candidate';
+  static const String updateCandidate = 'update candidate';
+  static const String candidateUpdatedSuccessfully = 'candidate updated successfully';
+  static const String errorUpdatingCandidate = 'error updating candidate';
+  static const String removeCandidate = 'remove candidate';
   static const String candidatesAddedSuccessfully = 'candidates added successfully';
   static const String errorAddingCandidates = 'error adding candidates';
   static const String addSelectedCandidates = 'add selected candidates';
   static const String addingCandidates = 'adding candidates...';
+  static const String updatingCandidate = 'updating candidate...';
+  static const String registerAsCandidate = 'register as candidate';
+  static const String candidateBioDescription = 'tell us about yourself and why you want to be a candidate';
+  static const String enterBio = 'enter your bio';
+  static const String registeringAsCandidate = 'registering as candidate...';
+  static const String registeredAsCandidateSuccess = 'successfully registered as candidate';
+  static const String failedToRegisterAsCandidate = 'failed to register as candidate';
+  static const String viewDetails = 'view details';
 
   // report
   static const String report = 'report';
@@ -619,6 +636,10 @@ class AppLocale {
     deprecate: 'deprecate',
     failedToUpdateVotingEventImage: 'failed to update voting event image',
     failedToRemoveVotingEventImage: 'failed to remove voting event image',
+    votingInProgress: 'voting in progress', 
+    voteSuccess: 'vote success',
+    voteFailed: 'vote failed', 
+    deletingVotingEvent: 'deleting voting event...',
 
     // student
     notEligibleForVoting: 'Not eligible for voting',
@@ -643,10 +664,23 @@ class AppLocale {
     errorConfirmingCandidate: 'Error confirming candidate',
     errorRejectingCandidate: 'Error rejecting candidate',
     addCandidate: 'Add Candidate',
+    editCandidate: 'Edit Candidate',
+    updateCandidate: 'Update Candidate',
+    candidateUpdatedSuccessfully: 'Candidate updated successfully',
+    errorUpdatingCandidate: 'Error updating candidate',
+    removeCandidate: 'Remove Candidate',
     candidatesAddedSuccessfully: 'Candidates added successfully',
     errorAddingCandidates: 'Error adding candidates',
     addSelectedCandidates: 'Add Selected Candidates',
     addingCandidates: 'Adding candidates...',
+    updatingCandidate: 'Updating candidate...',
+    registerAsCandidate: 'Register as Candidate',
+    candidateBioDescription: 'Tell us about yourself and why you want to be a candidate',
+    enterBio: 'Enter your bio',
+    registeringAsCandidate: 'Registering as candidate...',
+    registeredAsCandidateSuccess: 'Successfully registered as candidate',
+    failedToRegisterAsCandidate: 'Failed to register as candidate',
+    viewDetails: 'View Details',
 
     // report
     report: 'Report',
@@ -980,6 +1014,8 @@ class AppLocale {
     deprecate: 'Membekukan',
     failedToUpdateVotingEventImage: 'gagal mengemas kini imej acara pemungutan suara',
     failedToRemoveVotingEventImage: 'gagal menghapus imej acara pemungutan suara',
+    votingInProgress: 'Pengundian sedang berlangsung',
+    viewDetails: 'Lihat Maklumat',
 
     // student
     notEligibleForVoting: 'Tidak layak untuk pengundian', 
@@ -1004,10 +1040,22 @@ class AppLocale {
     errorConfirmingCandidate: 'Kesalahan mengkonfirmasi calon',
     errorRejectingCandidate: 'Kesalahan menolak calon',
     addCandidate: 'Tambah Calon',
+    editCandidate: 'Edit Calon',
+    updateCandidate: 'Update Calon',
+    candidateUpdatedSuccessfully: 'Calon berjaya dikemaskini',
+    errorUpdatingCandidate: 'Kesalahan mengemas kini calon',
+    removeCandidate: 'Buang Calon',
     candidatesAddedSuccessfully: 'Calon berjaya ditambahkan',
     errorAddingCandidates: 'Kesalahan menambahkan calon',
     addSelectedCandidates: 'Tambah Calon yang Dipilih',
     addingCandidates: 'Menambahkan calon...',
+    updatingCandidate: 'Mengemas kini calon...',
+    registerAsCandidate: 'Daftar Sebagai Calon',
+    candidateBioDescription: 'Ceritakan tentang diri anda dan mengapa anda ingin menjadi calon',
+    enterBio: 'Masukkan bio anda',
+    registeringAsCandidate: 'Mendaftar sebagai calon...',
+    registeredAsCandidateSuccess: 'Berjaya mendaftar sebagai calon',
+    failedToRegisterAsCandidate: 'Gagal mendaftar sebagai calon',
 
     // report
     report: 'Laporan',
@@ -1341,6 +1389,10 @@ class AppLocale {
     deprecate: '弃用',
     failedToUpdateVotingEventImage: '无法更新投票活动图片',
     failedToRemoveVotingEventImage: '无法删除投票活动图片',
+    votingInProgress: '投票进行中',
+    voteSuccess: '投票成功',
+    voteFailed: '投票失败',
+    deletingVotingEvent: '正在删除投票活动...',
 
     // student
     notEligibleForVoting: '不符合投票资格',
@@ -1365,10 +1417,23 @@ class AppLocale {
     errorConfirmingCandidate: '确认候选人失败',
     errorRejectingCandidate: '拒绝候选人失败',
     addCandidate: '添加候选人',
+    editCandidate: '编辑候选人',
+    updateCandidate: '更新候选人',
+    candidateUpdatedSuccessfully: '候选人已更新成功',
+    errorUpdatingCandidate: '更新候选人失败',
+    removeCandidate: '删除候选人',
     candidatesAddedSuccessfully: '候选人已添加成功',
     errorAddingCandidates: '添加候选人失败',
     addSelectedCandidates: '添加选定候选人',
     addingCandidates: '添加候选人...',
+    updatingCandidate: '更新候选人...',
+    registerAsCandidate: '注册成为候选人',
+    candidateBioDescription: '告诉我们关于您自己以及为什么想成为候选人',
+    enterBio: '输入您的简介',
+    registeringAsCandidate: '正在注册成为候选人...',
+    registeredAsCandidateSuccess: '成功注册为候选人',
+    failedToRegisterAsCandidate: '注册候选人失败',
+    viewDetails: '查看详情',
 
     // report
     report: '报告',

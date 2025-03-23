@@ -1,5 +1,6 @@
 import 'package:blockchain_university_voting_system/blockchain/wallet_connect_service.dart';
 import 'package:blockchain_university_voting_system/data/router_path.dart';
+import 'package:blockchain_university_voting_system/provider/candidate_provider.dart';
 import 'package:blockchain_university_voting_system/provider/notification_provider.dart';
 import 'package:blockchain_university_voting_system/provider/student_provider.dart';
 import 'package:blockchain_university_voting_system/provider/user_management_provider.dart';
@@ -24,6 +25,7 @@ import 'package:blockchain_university_voting_system/views/user_management/profil
 import 'package:blockchain_university_voting_system/views/user_management/user_management_page.dart';
 import 'package:blockchain_university_voting_system/views/user_management/user_verification_page.dart';
 import 'package:blockchain_university_voting_system/views/voting/add_candidate_page.dart';
+import 'package:blockchain_university_voting_system/views/voting/edit_candidate_page.dart';
 import 'package:blockchain_university_voting_system/views/voting/edit_voting_event_page.dart';
 import 'package:blockchain_university_voting_system/views/voting/manage_candidate_page.dart';
 import 'package:blockchain_university_voting_system/views/voting/voting_event_create_page.dart';
@@ -186,7 +188,17 @@ List<RouteBase> router(String initialRoute, GlobalKey<NavigatorState> navigatorK
     }
     return null;
   }
-  
+
+  CandidateProvider? getCandidateProvider() {
+    try {
+      if (navigatorKey.currentContext != null) {
+        return Provider.of<CandidateProvider>(navigatorKey.currentContext!, listen: false);
+      }
+    } catch (e) {
+      debugPrint('Error getting CandidateProvider: $e');
+    }
+    return null;
+  }
 
   Page<dynamic> buildPageWithAppKitModal(
     BuildContext context, 
@@ -426,9 +438,8 @@ List<RouteBase> router(String initialRoute, GlobalKey<NavigatorState> navigatorK
           context, 
           state, 
           (appKitModal) => HomePage(
-            user: user, 
-            appKitModal: appKitModal,
             userProvider: getUserProvider()!,
+            appKitModal: appKitModal, 
             userManagementProvider: getUserManagementProvider()!,
           )
         );
@@ -447,7 +458,7 @@ List<RouteBase> router(String initialRoute, GlobalKey<NavigatorState> navigatorK
           );
         }
         return buildPageWithAnimation(
-          EditProfilePage(user: user), 
+          EditProfilePage(userProvider: getUserProvider()!), 
           state,
         );
       },
@@ -468,8 +479,8 @@ List<RouteBase> router(String initialRoute, GlobalKey<NavigatorState> navigatorK
         }
         return buildPageWithAnimation(
           VotingListPage(
-            user: user,
-            votingEventViewModel: getVotingEventProvider()!,
+            userProvider: getUserProvider()!,
+            votingEventProvider: getVotingEventProvider()!,
             walletProvider: getWalletProvider()!,
           ), 
           state,
@@ -515,7 +526,8 @@ List<RouteBase> router(String initialRoute, GlobalKey<NavigatorState> navigatorK
           VotingEventPage(
             user: user,
             isEligibleToVote: isEligibleToVote,
-            votingEventViewModel: getVotingEventProvider()!,
+            votingEventProvider: getVotingEventProvider()!,
+            candidateProvider: getCandidateProvider()!,
           ), 
           state,
         );
@@ -539,7 +551,8 @@ List<RouteBase> router(String initialRoute, GlobalKey<NavigatorState> navigatorK
       pageBuilder: (context, state) {
         return buildPageWithAnimation(
           ManageCandidatePage(
-            votingEventViewModel: getVotingEventProvider()!,
+            votingEventProvider: getVotingEventProvider()!,
+            candidateProvider: getCandidateProvider()!,
           ), 
           state,
         );
@@ -553,6 +566,26 @@ List<RouteBase> router(String initialRoute, GlobalKey<NavigatorState> navigatorK
           AddCandidatePage(
             votingEventProvider: getVotingEventProvider()!,
             studentProvider: getStudentProvider()!,
+          ), 
+          state,
+        );
+      },
+    ),
+    GoRoute(
+      path: '/${RouterPath.editcandidatepage.path}',
+      name: RouterPath.editcandidatepage.path,
+      pageBuilder: (context, state) {
+        final Map<String, dynamic> extras = state.extra as Map<String, dynamic>? ?? {
+          'candidate': null,
+        };
+        
+        final candidate = extras['candidate'];
+        
+        return buildPageWithAnimation(
+          EditCandidatePage(
+            votingEventProvider: getVotingEventProvider()!,
+            candidateProvider: getCandidateProvider()!,
+            candidate: candidate,
           ), 
           state,
         );
