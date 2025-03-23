@@ -213,7 +213,7 @@ class _ManageCandidatePageState extends State<ManageCandidatePage> with SingleTi
                     elevation: 3,
                     child: Column(
                       children: [
-                        // Candidate info section
+                        // candidate info section
                         ListTile(
                           contentPadding: const EdgeInsets.all(16),
                           leading: Hero(
@@ -247,7 +247,7 @@ class _ManageCandidatePageState extends State<ManageCandidatePage> with SingleTi
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               const SizedBox(height: 6),
-                              // Pending badge
+                              // pending badge
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                                 decoration: BoxDecoration(
@@ -290,7 +290,7 @@ class _ManageCandidatePageState extends State<ManageCandidatePage> with SingleTi
                           ),
                         ),
                         
-                        // Action buttons section with divider
+                        // action buttons section with divider
                         Divider(height: 1, thickness: 1, color: colorScheme.outline.withOpacity(0.2)),
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),

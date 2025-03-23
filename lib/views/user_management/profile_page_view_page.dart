@@ -5,12 +5,15 @@ import 'package:blockchain_university_voting_system/models/user_model.dart';
 import 'package:blockchain_university_voting_system/provider/user_management_provider.dart';
 import 'package:blockchain_university_voting_system/provider/user_provider.dart';
 import 'package:blockchain_university_voting_system/routes/navigation_helper.dart';
+import 'package:blockchain_university_voting_system/utils/snackbar_util.dart';
 import 'package:blockchain_university_voting_system/widgets/centered_container.dart';
 import 'package:blockchain_university_voting_system/widgets/scrollable_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localization/flutter_localization.dart';
 import 'dart:async';
+
+import 'package:intl/intl.dart';
 
 class ProfilePageViewPage extends StatefulWidget {
   final UserProvider userProvider;
@@ -145,9 +148,15 @@ class _ProfilePageViewPageState extends State<ProfilePageViewPage> {
         GestureDetector(
           onLongPressStart: (_) => _showFreezeDialog(),
           child: ElevatedButton.icon(
-            onPressed: () => _showFreezeDialog(),
+            onPressed: () {
+              widget.userManagementProvider.selectedUser.freezed ? SnackbarUtil.showSnackBar(context, AppLocale.accountHasBeenFrozen.getString(context)) : 
+                _showFreezeDialog();
+            },
             icon: const Icon(Icons.block),
-            label: Text(AppLocale.freezeAccount.getString(context)),
+            label: Text(
+              widget.userManagementProvider.selectedUser.freezed ? AppLocale.accountHasBeenFrozen.getString(context) : 
+                AppLocale.freezeAccount.getString(context),
+            ),
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.red,
               foregroundColor: colorScheme.onPrimary,
@@ -155,6 +164,27 @@ class _ProfilePageViewPageState extends State<ProfilePageViewPage> {
             ),
           ),
         ),
+
+        if (widget.userManagementProvider.selectedUser.role == UserRole.student)
+          GestureDetector(
+            onLongPressStart: (_) => _showEligibleDialog(),
+            child: ElevatedButton.icon(
+              onPressed: () {
+                !widget.userManagementProvider.selectedUser.isEligibleForVoting ? SnackbarUtil.showSnackBar(context, AppLocale.accountIsAlreadyInEligibleForVoting.getString(context)) : 
+                  _showEligibleDialog();
+              },
+              icon: const Icon(Icons.block),
+              label: Text(
+                !widget.userManagementProvider.selectedUser.isEligibleForVoting ? AppLocale.accountIsAlreadyInEligibleForVoting.getString(context) : 
+                  AppLocale.setInEligibleForVoting.getString(context),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.yellow,
+                foregroundColor: colorScheme.onPrimary,
+                minimumSize: const Size(double.infinity, 48),
+              ),
+            ),
+          ),
       ],
     );
   }
@@ -215,6 +245,7 @@ class _ProfilePageViewPageState extends State<ProfilePageViewPage> {
                       _isFreezing = false;
                       _freezeProgress = 0.0;
                     });
+                    Navigator.of(context).pop(); // close dialog
                   },
                   child: ElevatedButton(
                     onPressed: null, // disable normal press
@@ -235,8 +266,89 @@ class _ProfilePageViewPageState extends State<ProfilePageViewPage> {
       },
     );
   }
+
+  void _showEligibleDialog() {
+    ColorScheme colorScheme = Theme.of(context).colorScheme;
+    TextEditingController reasonController = TextEditingController();
+    bool isButtonEnabled = false;
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: Text(AppLocale.eligibleForVoting.getString(context)),
+              content: widget.userManagementProvider.inEligibleRecord != null ? Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(AppLocale.provideReasonForEligibility.getString(context)),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: reasonController,
+                    onChanged: (text) {
+                      setState(() {
+                        isButtonEnabled = text.trim().isNotEmpty;
+                      });
+                    },
+                    decoration: InputDecoration(
+                      hintText: AppLocale.enterReason.getString(context),
+                      border: const OutlineInputBorder(),
+                    ),
+                    maxLines: 3,
+                  ),
+                ],
+              ) : Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    AppLocale.userMarkedIneligible.getString(context),
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 8),
+                  Text("${AppLocale.reason.getString(context)}: ${widget.userManagementProvider.inEligibleRecord!.reason}"),
+                  const SizedBox(height: 8),
+                  Text("${AppLocale.reportedDate.getString(context)}: ${DateFormat.yMMMd().format(widget.userManagementProvider.inEligibleRecord!.dateReported)}"),
+                  const SizedBox(height: 8),
+                  Text("${AppLocale.markedBy.getString(context)}: ${widget.userManagementProvider.inEligibleRecord!.markedBy}"),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: Text(AppLocale.close.getString(context),
+                    style: TextStyle(color: colorScheme.primary)),
+                ),
+                if (widget.userManagementProvider.inEligibleRecord == null)
+                  ElevatedButton(
+                    onPressed: isButtonEnabled
+                        ? () {
+                            String reason = reasonController.text.trim();
+                            if (reason.isEmpty) {
+                              SnackbarUtil.showSnackBar(context, AppLocale.reasonCannotBeEmpty.getString(context));
+                              return;
+                            }
+                            widget.userManagementProvider.setStudentInEligibleForVoting(reason, widget.userProvider.user!.name);
+                            Navigator.of(context).pop();
+                            SnackbarUtil.showSnackBar(context, AppLocale.userEligibilityUpdated.getString(context));
+                          }
+                        : null,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: isButtonEnabled ? colorScheme.secondary : Colors.grey,
+                      foregroundColor: colorScheme.onPrimary,
+                    ),
+                    child: Text(AppLocale.setEligible.getString(context)),
+                  ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
   
-  void _startFreezeProgress(StateSetter dialogSetState) {
+  Future<bool> _startFreezeProgress(StateSetter dialogSetState) async {
     // simulate progress over 3 seconds
     const totalDuration = 3000; // 3 seconds
     const updateInterval = 100; // update every 100ms
@@ -244,7 +356,7 @@ class _ProfilePageViewPageState extends State<ProfilePageViewPage> {
     int elapsed = 0;
     
     // setup a timer that updates progress
-    Timer.periodic(const Duration(milliseconds: updateInterval), (timer) {
+    Timer.periodic(const Duration(milliseconds: updateInterval), (timer) async {
       if (!_isFreezing) {
         timer.cancel();
         return;
@@ -257,14 +369,13 @@ class _ProfilePageViewPageState extends State<ProfilePageViewPage> {
       
       if (elapsed >= totalDuration) {
         timer.cancel();
-        Navigator.of(context).pop(); // close dialog
-        
-        // implement freeze account functionality
+        await widget.userManagementProvider.freezeUser();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(AppLocale.accountHasBeenFrozen.getString(context))),
         );
       }
     });
+    return true;
   }
   
   Widget _buildAvatar() {

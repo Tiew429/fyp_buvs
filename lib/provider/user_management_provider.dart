@@ -1,3 +1,4 @@
+import 'package:blockchain_university_voting_system/models/eligible_record_model.dart';
 import 'package:blockchain_university_voting_system/models/staff_model.dart';
 import 'package:blockchain_university_voting_system/models/student_model.dart';
 import 'package:blockchain_university_voting_system/models/user_model.dart';
@@ -13,10 +14,12 @@ class UserManagementProvider extends ChangeNotifier {
   List<Staff> _staffList = [];
   List<Student> _studentList = [];
   dynamic _selectedUser;
+  IneligibleRecord? _inEligibleRecord;
 
   List<Staff> get staffList => _staffList;
   List<Student> get studentList => _studentList;
   dynamic get selectedUser => _selectedUser;
+  IneligibleRecord? get inEligibleRecord => _inEligibleRecord;
 
   void setStaffList(List<Staff> staffList) {
     _staffList = staffList;
@@ -37,7 +40,33 @@ class UserManagementProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> deleteUser(String userID, UserRole role) async {}
+  Future<bool> freezeUser() async {
+    try {
+      await _userManagementRepository.freezeUser(_selectedUser.userID, _selectedUser.role, _selectedUser.email);
+      _selectedUser.freezed = true;
+      return true;
+    } catch (e) {
+      print("Error freezing user (user_management_provider): $e");
+      return false;
+    }
+  }
+
+  Future<bool> setStudentInEligibleForVoting(String reason, String markedBy) async {
+    try {
+      IneligibleRecord ineligibleRecord = IneligibleRecord(
+        userID: _selectedUser.userID,
+        reason: reason,
+        dateReported: DateTime.now(),
+        markedBy: markedBy,
+      );
+      await _userManagementRepository.setInEligibleForVoting(ineligibleRecord);
+      _inEligibleRecord = ineligibleRecord;
+      return true;
+    } catch (e) {
+      print("Error set ineligibility for student account: $e");
+    return false;
+    }
+  }
 
   Future<void> selectUser(String userID) async {
     try {
@@ -54,6 +83,9 @@ class UserManagementProvider extends ChangeNotifier {
       if (staff == null) {
         try {
           student = _studentList.firstWhere((student) => student.userID == userID);
+          if (!student.isEligibleForVoting) {
+            _inEligibleRecord = await _userManagementRepository.getInEligibleReason(student.userID);
+          }
         } catch (e) {
           student = null;
         }

@@ -4,6 +4,7 @@ import 'package:blockchain_university_voting_system/provider/notification_provid
 import 'package:blockchain_university_voting_system/provider/user_provider.dart';
 import 'package:blockchain_university_voting_system/routes/navigation_keys.dart';
 import 'package:blockchain_university_voting_system/services/fcm_functions.dart';
+import 'package:blockchain_university_voting_system/utils/send_email_util.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -295,6 +296,36 @@ class FirebaseService {
         
     } catch (e) {
       print('Error sending notifications to all users: $e');
+    }
+  }
+
+  static Future<void> sendUserAccountFreezedNotification(String userID, String email) async {
+    try {
+      NotificationProvider notificationProvider = Provider.of(rootNavigatorKey.currentContext!, listen: false);
+      UserProvider userProvider = Provider.of(rootNavigatorKey.currentContext!, listen: false);
+
+      await notificationProvider.sendNotification(
+        title: 'Your account has been freezed !!!',
+        message: 'Your account has been freezed due to some illegal actions.\nPlease contact this email if you think this is an incorrect action.\nEmail: tiewjj-wp21@student.tarc.edu.my',
+        senderID: userProvider.user!.userID,
+        receiverIDs: [userID],
+        type: 'verification',
+      );
+
+      await SendEmailUtil.sendEmail(
+        email, 
+        'Your account has been freezed !!!', 
+        '''
+<h2>Blockchain University Voting System</h2> 
+<p>Your account has been <strong>freezed</strong> due to some illegal actions.</p> 
+<p>If you believe this is a mistake, please contact us at: 
+<a href="mailto:tiewjj-wp21@student.tarc.edu.my">tiewjj-wp21@student.tarc.edu.my</a></p> 
+<p>Thank you.</p>
+''',
+      );
+        
+    } catch (e) {
+      print('Error sending notifications to user: $e');
     }
   }
 }

@@ -11,4 +11,8 @@ class FirebasePathUtil {
     return FirebaseFirestore.instance.collection('users');
   }
 
+  static CollectionReference getInEligibleRecord(String userID) {
+    return FirebaseFirestore.instance.collection('inEligibleRecord').doc(userID).collection(userID);
+  }
+
 }

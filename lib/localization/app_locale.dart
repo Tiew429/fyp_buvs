@@ -106,6 +106,15 @@ class AppLocale {
   static const String noStaffMembersFound = 'no staff members found';
   static const String noPermissionToAccessUserManagement = 'no permission to access user management';
   static const String searchStaff = 'search staff';
+  static const String provideReasonForEligibility = 'provide reason for eligibility';
+  static const String reasonCannotBeEmpty = 'reason cannot be empty';
+  static const String userEligibilityUpdated = 'user eligibility updated';
+  static const String setEligible = 'set eligible';
+  static const String accountIsAlreadyInEligibleForVoting = 'account is already ineligible for voting';
+  static const String setInEligibleForVoting = 'set ineligible for voting';
+  static const String userMarkedIneligible = 'user marked ineligible';
+  static const String reportedDate = 'reported date';
+  static const String markedBy = 'marked by';
 
   // notications
   static const String notifications = 'notifications';
@@ -528,11 +537,20 @@ class AppLocale {
     thisWillPreventTheUserFromLoggingIn: 'This will prevent the user from logging in.',
     holdToConfirmFreezing: 'Hold to confirm freezing',
     holdToFreeze: 'Hold to Freeze',
-    failedToLoadUsers: 'failed to load users',
-    noPermissionToAccessPage: 'no permission to access page',
-    noStaffMembersFound: 'no staff members found',
-    noPermissionToAccessUserManagement: 'no permission to access user management',
-    searchStaff: 'search staff',
+    failedToLoadUsers: 'Failed to load users',
+    noPermissionToAccessPage: 'No permission to access page',
+    noStaffMembersFound: 'No staff members found',
+    noPermissionToAccessUserManagement: 'No permission to access user management',
+    searchStaff: 'Search staff',
+    provideReasonForEligibility: 'Provide reason for eligibility',
+    reasonCannotBeEmpty: 'Reason cannot be empty',
+    userEligibilityUpdated: 'User eligibility updated',
+    setEligible: 'Set Eligible',
+    accountIsAlreadyInEligibleForVoting: 'Account is already ineligible for voting',
+    setInEligibleForVoting: 'Set ineligible for voting',
+    userMarkedIneligible: 'User marked ineligible',
+    reportedDate: 'Reported date',
+    markedBy: 'Marked by',
 
     // notifications
     notifications: 'Notifications',
@@ -911,6 +929,15 @@ class AppLocale {
     noStaffMembersFound: 'tiada ahli kakitangan ditemui',
     noPermissionToAccessUserManagement: 'tiada kebenaran untuk mengakses pengurusan pengguna',
     searchStaff: 'cari kakitangan',
+    provideReasonForEligibility: 'Berikan sebab untuk layak',
+    reasonCannotBeEmpty: 'Sebab tidak boleh kosong',
+    userEligibilityUpdated: 'Status layak pengguna dikemas kini',
+    setEligible: 'Set layak',
+    accountIsAlreadyInEligibleForVoting: 'Akaun sudah tidak layak untuk pengundian',
+    setInEligibleForVoting: 'Set tidak layak untuk pengundian',
+    userMarkedIneligible: 'Pengguna ditandakan tidak layak',
+    reportedDate: 'Tarikh dilaporkan',
+    markedBy: 'Ditandakan oleh',
 
     // notifications
     notifications: 'Notifikasi',
@@ -1285,6 +1312,15 @@ class AppLocale {
     noStaffMembersFound: '没有找到职员',
     noPermissionToAccessUserManagement: '没有权限访问用户管理',
     searchStaff: '搜索职员',
+    provideReasonForEligibility: '提供投票资格的理由',
+    reasonCannotBeEmpty: '理由不能为空',
+    userEligibilityUpdated: '用户投票资格已更新',
+    setEligible: '设置为符合投票资格',
+    accountIsAlreadyInEligibleForVoting: '账户已符合投票资格',
+    setInEligibleForVoting: '设置为不符合投票资格',
+    userMarkedIneligible: '用户被标记为不符合投票资格',
+    reportedDate: '报告日期',
+    markedBy: '标记者',
 
     // notifications
     notifications: '通知',

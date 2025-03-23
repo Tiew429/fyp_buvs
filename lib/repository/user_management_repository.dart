@@ -1,6 +1,8 @@
+import 'package:blockchain_university_voting_system/models/eligible_record_model.dart';
 import 'package:blockchain_university_voting_system/models/staff_model.dart';
 import 'package:blockchain_university_voting_system/models/student_model.dart';
 import 'package:blockchain_university_voting_system/models/user_model.dart';
+import 'package:blockchain_university_voting_system/services/firebase_service.dart';
 import 'package:blockchain_university_voting_system/utils/firebase_path_util.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'dart:io';
@@ -50,6 +52,54 @@ class UserManagementRepository {
       return true;
     } catch (e) {
       print('Error verifying user: $e');
+      return false;
+    }
+  }
+
+  Future<bool> freezeUser(String userID, UserRole role, String email) async {
+    try {
+      final userCollection = FirebasePathUtil.getUserCollection(role);
+      await userCollection.doc(userID).update({'freezed': true});
+      await FirebaseService.sendUserAccountFreezedNotification(userID, email);
+      return true;
+    } catch (e) {
+      print("Error freezing user: $e");
+      return false;
+    }
+  }
+
+  Future<IneligibleRecord?> getInEligibleReason(String userID) async {
+    try {
+      final docSnapshot = await FirebasePathUtil.getInEligibleRecord(userID).doc(userID).get();
+
+      if (docSnapshot.exists) {
+        return IneligibleRecord(
+          userID: userID, 
+          reason: docSnapshot['reason'], 
+          dateReported: docSnapshot['dateReported'], 
+          markedBy: docSnapshot['markedBy'],
+        );
+      } else {
+        return null;
+      }
+    } catch (e) {
+      print("Error returning ineligible reason: $e");
+      return null;
+    }
+  }
+
+  Future<bool> setInEligibleForVoting(IneligibleRecord inEligibleRecord) async {
+    try {
+      final userCollection = FirebasePathUtil.getInEligibleRecord(inEligibleRecord.userID);
+      await userCollection.doc(inEligibleRecord.userID).set({
+        'userID': inEligibleRecord.userID,
+        'reason': inEligibleRecord.reason,
+        'dateReported': inEligibleRecord.dateReported,
+        'markedBy': inEligibleRecord.markedBy,
+      });
+      return true;
+    } catch (e) {
+      print("Error freezing user: $e");
       return false;
     }
   }
