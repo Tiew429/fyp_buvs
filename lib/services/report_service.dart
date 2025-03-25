@@ -23,19 +23,19 @@ class ReportService {
           content: Text(AppLocale.selectExportFormat.getString(context)),
           actions: <Widget>[
             TextButton(
-              child: const Text('Excel'),
+              child: Text('Excel', style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),),
               onPressed: () {
                 Navigator.of(context).pop('excel');
               },
             ),
             TextButton(
-              child: const Text('PDF'),
+              child: Text('PDF', style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),),
               onPressed: () {
                 Navigator.of(context).pop('pdf');
               },
             ),
             TextButton(
-              child: Text(AppLocale.cancel.getString(context)),
+              child: Text(AppLocale.cancel.getString(context), style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),),
               onPressed: () {
                 Navigator.of(context).pop(null);
               },

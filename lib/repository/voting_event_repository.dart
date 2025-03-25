@@ -188,8 +188,7 @@ class VotingEventRepository {
               startTime != null &&
               TimeOfDay.now().isAfter(startTime)) {
             try {
-              List<dynamic> voteResults = await _smartContractService
-                  .getVoteResultsFromBlockchain(votingEventID);
+              List<dynamic> voteResults = await _smartContractService.getVoteResultsFromBlockchain(votingEventID);
 
               // check if voteResults has the expected structure
               if (voteResults.length >= 2) {
@@ -254,8 +253,7 @@ class VotingEventRepository {
                   // if the voter is found in firestore, add the voter to the voters list
                   for (Student voter in votersInFirestore) {
                     if (voter.walletAddress.isNotEmpty &&
-                        voter.walletAddress.toLowerCase() ==
-                            addressStr.toLowerCase()) {
+                        voter.walletAddress.toLowerCase() == addressStr.toLowerCase()) {
                       voters.add(voter);
                       votersInFirestore.remove(voter); // to improve performance
                       break;

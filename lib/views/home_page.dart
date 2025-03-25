@@ -39,7 +39,13 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     _currentIndex = widget.index ?? 0;
     _pageController = PageController(initialPage: _currentIndex);
-    _userAccountFreezed = widget.userProvider.user!.freezed;
+    
+    if (widget.userProvider.user != null) {
+      _userAccountFreezed = widget.userProvider.user!.freezed;
+    } else {
+      _userAccountFreezed = false;
+    }
+
     print("freeze? : $_userAccountFreezed");
   }
 

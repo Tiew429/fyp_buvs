@@ -13,6 +13,8 @@ Future<void> saveLoginStatus(
   // save user details as a JSON string
   String userDetailsJson = jsonEncode(userDetails.toJson());
   await prefs.setString('userDetails', userDetailsJson);
+
+  print("save login status (freeze account?): ${userDetails.freezed}");
 }
 
 Future<User?> loadUserLoginStatus() async {

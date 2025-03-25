@@ -71,7 +71,7 @@ class User {
       bio: json['bio'],
       isVerified: json['isVerified'],
       avatarUrl: json['avatarUrl'] ?? '',
-      freezed: json['freezed'],
+      freezed: json['freezed'] ?? false,
     );
   }
 

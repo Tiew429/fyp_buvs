@@ -562,8 +562,7 @@ class _VotingEventPageState extends State<VotingEventPage> {
                                   onPressed: () => _delete(),
                                   backgroundColor: Colors.red,
                                   text: AppLocale.delete.getString(context),
-                                  width:
-                                      MediaQuery.of(context).size.width * 0.3,
+                                  width: MediaQuery.of(context).size.width * 0.3,
                                 ),
                               ],
                             ),
@@ -579,8 +578,7 @@ class _VotingEventPageState extends State<VotingEventPage> {
                                 CustomAnimatedButton(
                                   onPressed: () => _exportToReport(),
                                   backgroundColor: Colors.indigo,
-                                  text: AppLocale.exportToReport
-                                      .getString(context),
+                                  text: AppLocale.exportToReport.getString(context),
                                 ),
                               ],
                             ),

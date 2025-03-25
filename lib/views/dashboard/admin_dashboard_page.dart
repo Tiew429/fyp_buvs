@@ -156,17 +156,6 @@ class _AdminDashboardState extends State<AdminDashboard> {
         phone: Column(
           children: [
             Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Text(
-                AppLocale.upcomingVotingEvent.getString(context),
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).colorScheme.onTertiary,
-                ),
-              ),
-            ),
-            Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: CustomSearchBox(
                 controller: _searchController,

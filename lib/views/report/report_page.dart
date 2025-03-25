@@ -1,9 +1,11 @@
 import 'package:blockchain_university_voting_system/localization/app_locale.dart';
 import 'package:blockchain_university_voting_system/models/candidate_model.dart';
+import 'package:blockchain_university_voting_system/models/user_model.dart';
 import 'package:blockchain_university_voting_system/models/voting_event_model.dart';
 import 'package:blockchain_university_voting_system/provider/user_provider.dart';
 import 'package:blockchain_university_voting_system/provider/wallet_provider.dart';
 import 'package:blockchain_university_voting_system/provider/voting_event_provider.dart';
+import 'package:blockchain_university_voting_system/routes/navigation_helper.dart';
 import 'package:blockchain_university_voting_system/services/report_service.dart';
 import 'package:blockchain_university_voting_system/utils/snackbar_util.dart';
 import 'package:blockchain_university_voting_system/widgets/custom_search_box.dart';
@@ -54,10 +56,35 @@ class _ReportPageState extends State<ReportPage> {
   Future<void> _loadVotingEvents() async {
     await widget._votingEventProvider.loadVotingEvents();
     setState(() {
-      // get only ended events
-      _votingEventList = widget._votingEventProvider.votingEventList
-          .where((event) => _getEventStatus(event) == AppLocale.ended.getString(context))
-          .toList();
+      // filter events based on user role
+      if (widget._userProvider.user!.role == UserRole.admin || 
+          widget._userProvider.user!.role == UserRole.staff) {
+        // admin and staff see all ended events (original behavior)
+        _votingEventList = widget._votingEventProvider.votingEventList
+            .where((event) => _getEventStatus(event) == AppLocale.ended.getString(context))
+            .toList();
+      } else {
+        // students only see ended events where they participated
+        _votingEventList = widget._votingEventProvider.votingEventList
+            .where((event) {
+              // check if the event is ended
+              bool isEnded = _getEventStatus(event) == AppLocale.ended.getString(context);
+              
+              // check if the current user is a candidate
+              bool isCandidate = event.candidates.any(
+                (candidate) => candidate.userID == widget._userProvider.user!.userID
+              );
+              
+              // check if the current user is a voter
+              bool isVoter = event.voters.any(
+                (voter) => voter.userID == widget._userProvider.user!.userID
+              );
+              
+              // return true if the event is ended and the user is either a candidate or voter
+              return isEnded && (isCandidate || isVoter);
+            })
+            .toList();
+      }
       _sortVotingEvents(_votingEventList);
       _filteredVotingEventList = _votingEventList;
       _isLoading = false;
@@ -193,7 +220,8 @@ class _ReportPageState extends State<ReportPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(AppLocale.report.getString(context)),
+        title: widget._userProvider.user!.role == UserRole.student ? 
+          Text(AppLocale.results.getString(context)) : Text(AppLocale.report.getString(context)),
         centerTitle: true,
         backgroundColor: colorScheme.secondary,
       ),
@@ -259,7 +287,12 @@ class _ReportPageState extends State<ReportPage> {
                                 children: [
                                   ..._filteredVotingEventList.map((votingEvent) => VotingEventBox(
                                     onTap: () {
-                                      _showReportGenerationDialog(votingEvent);
+                                      if (widget._userProvider.user!.role == UserRole.student) {
+                                        widget._votingEventProvider.selectVotingEvent(votingEvent);
+                                        NavigationHelper.navigateToVotingEventPage(context);
+                                      } else {
+                                        _showReportGenerationDialog(votingEvent);
+                                      }
                                     },
                                     votingEvent: votingEvent,
                                   )),
