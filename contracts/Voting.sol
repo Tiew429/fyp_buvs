@@ -2,6 +2,14 @@
 pragma solidity ^0.8.0;
 
 contract Voting {
+    // store admin address while this contract deployed
+    address public admin;
+
+    constructor() {
+        admin = msg.sender;
+    }
+
+
     //----------
     // STRUCTS
     //----------
@@ -201,7 +209,7 @@ contract Voting {
         VotingEvent storage votingEvent = votingEvents[_eventID];
 
         require(votingEvent.eventID != bytes32(0), "Voting event does not exist");
-        require(msg.sender == votingEvent.createdBy, "Only event creator can update");
+        require(msg.sender == votingEvent.createdBy || msg.sender == admin, "Only event creator can update");
         require(block.timestamp < votingEvent.startDate, "Event already started, cannot update");
 
         // update event details
@@ -220,7 +228,7 @@ contract Voting {
         VotingEvent storage votingEvent = votingEvents[_eventID];
 
         require(votingEvent.eventID != bytes32(0), "Voting event does not exist");
-        require(msg.sender == votingEvent.createdBy, "Only event creator can remove");
+        require(msg.sender == votingEvent.createdBy || msg.sender == admin, "Only event creator can remove");
         require(block.timestamp < votingEvent.startDate, "Event already started, cannot remove");
 
         // change voting event status to deprecated (1)
@@ -242,19 +250,20 @@ contract Voting {
         require(votingEvent.eventID != bytes32(0), "Voting event does not exist");
         require(!hasVoted[_eventID][msg.sender], "Already voted in this event");
         require(block.timestamp >= votingEvent.startDate && block.timestamp <= votingEvent.endDate, "Voting not active");
-
-        // Ensure msg.sender is in the voters list
-        bool isRegisteredVoter = false;
-        for (uint256 i = 0; i < votingEvent.voters.length; i++) {
-            if (votingEvent.voters[i] == msg.sender) {
-                isRegisteredVoter = true;
-                break;
-            }
-        }
-        require(isRegisteredVoter, "You are not registered to vote in this event");
+        require(msg.sender != votingEvent.createdBy && msg.sender != admin, "Voting event creator and the admin cannot vote");
 
         // Check if candidate exists
         require(candidatesByEvent[_eventID][_candidateID].walletAddress != address(0), "Candidate does not exist");
+
+        // Check if msg.sender is a candidate in this event
+        bool isCandidate = false;
+        for (uint256 i = 0; i < votingEvent.candidates.length; i++) {
+            if (votingEvent.candidates[i] == msg.sender) {
+                isCandidate = true;
+                break;
+            }
+        }
+        require(!isCandidate, "Candidate cannot vote in this event");
 
         // Record vote
         Vote memory newVote = Vote({
@@ -269,6 +278,7 @@ contract Voting {
         hasVoted[_eventID][msg.sender] = true;
         votesHistory.push(newVote);
         voteByEvent[_eventID].push(newVote);
+        votingEvent.voters.push(msg.sender);
 
         emit VoteCast(_eventID, msg.sender, _candidateID);
     }
@@ -283,7 +293,7 @@ contract Voting {
         VotingEvent storage votingEvent = votingEvents[_eventID];
 
         require(votingEvent.eventID != bytes32(0), "Voting event does not exist");
-        require(msg.sender == votingEvent.createdBy, "Only event creator can add candidate");
+        require(msg.sender == votingEvent.createdBy || msg.sender == admin, "Only event creator can add candidate");
         require(block.timestamp < votingEvent.startDate, "Event already started, cannot add candidate");
         require(_candidateIDStrs.length == _walletAddresses.length, "Candidate IDs and wallet addresses count mismatch");
         require(_candidateIDStrs.length > 0, "No candidates provided");
@@ -295,6 +305,7 @@ contract Voting {
             require(walletAddress != address(0), "Invalid wallet address");
             require(_candidateID != bytes32(0), "Invalid candidate ID");
             require(candidatesByEvent[_eventID][_candidateID].walletAddress == address(0), "Candidate already exists");
+            require(walletAddress != msg.sender && walletAddress != admin, "Voting event creator and admin cannot participate in the event");
 
             Candidate memory newCandidate = Candidate({
                 candidateID: _candidateID,
@@ -318,7 +329,7 @@ contract Voting {
         VotingEvent storage votingEvent = votingEvents[_eventID];
 
         require(votingEvent.eventID != bytes32(0), "Voting event does not exist");
-        require(msg.sender == votingEvent.createdBy, "Only event creator can remove candidate");
+        require(msg.sender == votingEvent.createdBy || msg.sender == admin, "Only event creator can remove candidate");
         require(block.timestamp < votingEvent.startDate, "Event already started, cannot remove candidate");
 
         bool found = false;
@@ -337,59 +348,6 @@ contract Voting {
 
         // emit candidate removal event
         emit CandidateRemove(_eventID, _candidate);
-    }
-
-    // add voter to a voting event
-    function addVoter(string memory _eventIDStr, address _student) public {
-        bytes32 _eventID = stringToBytes32(_eventIDStr);
-        VotingEvent storage votingEvent = votingEvents[_eventID];
-
-        require(votingEvent.eventID != bytes32(0), "Voting event does not exist");
-        require(msg.sender == votingEvent.createdBy, "Only event creator can add voter");
-        require(block.timestamp < votingEvent.startDate,"Event already started, cannot add student");
-
-        // ensure the student is not in list
-        for (uint256 i = 0; i < votingEvent.voters.length; i++) {
-            require(votingEvent.voters[i] != _student, "Student already registered");
-        }
-        for (uint256 i = 0; i < votingEvent.candidates.length; i++) {
-            require(votingEvent.candidates[i] != _student, "Student is already in candidates list");
-        }
-
-        // add voter into list
-        votingEvent.voters.push(_student);
-
-        // emit voter add event
-        emit VoterAdd(_eventID, _student);
-    }
-
-    // remove voter from a voting event
-    function removeVoter(
-        string memory _eventIDStr,
-        address _student
-    ) public {
-        bytes32 _eventID = stringToBytes32(_eventIDStr);
-        VotingEvent storage votingEvent = votingEvents[_eventID];
-
-        require(votingEvent.eventID != bytes32(0), "Voting event does not exist");
-        require(msg.sender == votingEvent.createdBy, "Only event creator can remove voter");
-        require(block.timestamp < votingEvent.startDate, "Event already started, cannot remove student");
-
-        bool found = false;
-        for (uint256 i = 0; i < votingEvent.voters.length; i++) {
-            if (votingEvent.voters[i] == _student) {
-                votingEvent.voters[i] = votingEvent.voters[
-                        votingEvent.voters.length - 1
-                    ];
-                votingEvent.voters.pop();
-                found = true;
-                break;
-            }
-        }
-        require(found, "Student not found");
-
-        // emit voter removal event
-        emit VoterRemove(_eventID, _student);
     }
 
     //--------------------
