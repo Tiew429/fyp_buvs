@@ -46,9 +46,6 @@ class AuthService {
   // check is user in database by wallet address
   Future<void> checkUserByWalletAddress(String walletAddress) async {}
 
-  // check is user in database by biometrics
-  Future<void> checkUserByBiometrics(String hahaha, String soHard) async {}
-
   /// Check if the given username already exists across all roles
   Future<bool> _isUsernameTaken(String username) async {
     final roles = model_user.UserRoleExtension.getAllUserRoles();
@@ -151,9 +148,6 @@ class AuthService {
       SnackbarUtil.showSnackBar(context, 'Login failed: $e');
     }
   }
-
-  // call after success accessed with Biometrics (fingerprint)
-  Future<void> loginWithBiometrics() async {}
 
   // save login status
   Future<void> setUserAndLoginAndNavigate(context, model_user.User user) async {

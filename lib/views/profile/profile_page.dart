@@ -262,16 +262,6 @@ class _ProfilePageState extends State<ProfilePage> {
                       widget.appKitModal.openModalView();
                     },
                   ),
-                  const SizedBox(height: 15),
-                  _buildActionCard(
-                    context: context,
-                    title: AppLocale.setBiometricAuthentication.getString(context),
-                    icon: Icons.fingerprint,
-                    leadingImage: 'assets/images/security.png',
-                    onTap: () {
-                      // Add biometric authentication setup
-                    },
-                  ),
                   const SizedBox(height: 30),
                 ],
               ),

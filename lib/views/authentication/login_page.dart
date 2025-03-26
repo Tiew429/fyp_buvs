@@ -162,14 +162,18 @@ class _LoginPageState extends State<LoginPage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text('${AppLocale.areYouStaffMember.getString(context)}? '),
-                      GestureDetector(
-                        onTap: () => NavigationHelper.navigateToStaffRegisterPage(context),
-                        child: Text(AppLocale.registerAsStaff.getString(context),
-                          style: const TextStyle(
-                            color: Colors.lightBlue,
+                      Column(
+                        children: [
+                          Text('${AppLocale.areYouStaffMember.getString(context)} ?'),
+                          GestureDetector(
+                            onTap: () => NavigationHelper.navigateToStaffRegisterPage(context),
+                            child: Text(AppLocale.registerAsStaff.getString(context),
+                              style: const TextStyle(
+                                color: Colors.lightBlue,
+                              ),
+                            ),
                           ),
-                        ),
+                        ]
                       ),
                     ],
                   ),
@@ -177,7 +181,7 @@ class _LoginPageState extends State<LoginPage> {
                   Text('${AppLocale.otherLoginMethods.getString(context)}:'),
                   const SizedBox(height: 20,),
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       AppKitModalConnectButton(
                         appKit: widget._appKitModal,
@@ -190,13 +194,6 @@ class _LoginPageState extends State<LoginPage> {
                             width: 50,
                             height: 50,
                           ),
-                        ),
-                      ),
-                      GestureDetector(
-                        onTap: () {},
-                        child: Image.asset('assets/images/security.png',
-                          width: 50,
-                          height: 50,
                         ),
                       ),
                     ],

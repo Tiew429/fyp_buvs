@@ -626,7 +626,7 @@ class _SendNotificationPageState extends State<SendNotificationPage> with Single
                                           Padding(
                                             padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
                                             child: Text(
-                                              AppLocale.staffSection.getString(context),
+                                              AppLocale.staff.getString(context),
                                               style: const TextStyle(
                                                 fontWeight: FontWeight.bold,
                                                 fontSize: 16,
@@ -645,7 +645,7 @@ class _SendNotificationPageState extends State<SendNotificationPage> with Single
                                           Padding(
                                             padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
                                             child: Text(
-                                              AppLocale.studentsSection.getString(context),
+                                              AppLocale.student.getString(context),
                                               style: const TextStyle(
                                                 fontWeight: FontWeight.bold,
                                                 fontSize: 16,

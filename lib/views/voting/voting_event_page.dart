@@ -541,21 +541,16 @@ class _VotingEventPageState extends State<VotingEventPage> {
                         // action buttons for admin/staff before event starts
                         if (!ongoing &&
                             !isEnded &&
-                            (widget._user.role == UserRole.admin ||
-                                widget._user.walletAddress ==
-                                    _votingEvent.createdBy))
+                            (widget._user.role == UserRole.admin || widget._user.walletAddress == _votingEvent.createdBy))
                           Padding(
                             padding: const EdgeInsets.only(top: 16.0),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.end,
                               children: [
                                 CustomAnimatedButton(
-                                  onPressed: () => NavigationHelper
-                                      .navigateToManageCandidatePage(context),
-                                  text: AppLocale.manageCandidate
-                                      .getString(context),
-                                  width:
-                                      MediaQuery.of(context).size.width * 0.3,
+                                  onPressed: () => NavigationHelper.navigateToManageCandidatePage(context),
+                                  text: AppLocale.manageCandidate.getString(context),
+                                  width: MediaQuery.of(context).size.width * 0.3,
                                 ),
                                 const SizedBox(width: 12),
                                 CustomAnimatedButton(
