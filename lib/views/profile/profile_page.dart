@@ -284,7 +284,7 @@ class _ProfilePageState extends State<ProfilePage> {
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: colorScheme.surface,
+        color: colorScheme.secondary,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -302,7 +302,7 @@ class _ProfilePageState extends State<ProfilePage> {
               Icon(
                 icon,
                 size: 20,
-                color: colorScheme.secondary,
+                color: colorScheme.onPrimary,
               ),
               const SizedBox(width: 8),
               Text(
@@ -343,7 +343,7 @@ class _ProfilePageState extends State<ProfilePage> {
         width: double.infinity,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         decoration: BoxDecoration(
-          color: colorScheme.surface,
+          color: colorScheme.secondary,
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(

@@ -45,7 +45,7 @@ class VotingEventProvider extends ChangeNotifier {
     _forceRefreshVotingEvents();
 
     // 设置定时器定期获取数据
-    _pollingTimer = Timer.periodic(const Duration(minutes: 2), (timer) {
+    _pollingTimer = Timer.periodic(const Duration(minutes: 1), (timer) {
       print("Voting_Event_Provider: Polling for new data.");
       _forceRefreshVotingEvents();
     });
@@ -106,8 +106,10 @@ class VotingEventProvider extends ChangeNotifier {
   }
 
   // methods
-  Future<List<VotingEvent>> getVotingEventList(ReownAppKitModal appKitModal) async =>
-    await _votingEventRepository.getVotingEventList();
+  Future<List<VotingEvent>> getVotingEventList(ReownAppKitModal appKitModal) async {
+    _forceRefreshVotingEvents();
+    return await _votingEventRepository.getVotingEventList();
+  }
 
   Future<void> updateVotingEventList(ReownAppKitModal appKitModal) async {
     _votingEventList = await getVotingEventList(appKitModal);
@@ -152,6 +154,7 @@ class VotingEventProvider extends ChangeNotifier {
     if (success) {
       _votingEventList.add(newVotingEvent);
       // notify listeners that the list has been updated
+      _forceRefreshVotingEvents();
       notifyListeners();
     } else {
       // if insert failed but we uploaded an image, delete it
@@ -185,6 +188,7 @@ class VotingEventProvider extends ChangeNotifier {
       }
 
       bool success = await _votingEventRepository.updateVotingEvent(votingEvent, updateBlockchain);
+      _forceRefreshVotingEvents();
       return success;
     } catch (e) {
       print("Voting_Event_Provider: Error updating voting event: $e");
@@ -208,6 +212,7 @@ class VotingEventProvider extends ChangeNotifier {
         int index = _votingEventList.indexWhere((event) => event.votingEventID == votingEvent.votingEventID);
         if (index != -1) {
           _votingEventList[index] = deprecatedEvent;
+          _forceRefreshVotingEvents();
           notifyListeners();
         }
       }
@@ -237,6 +242,7 @@ class VotingEventProvider extends ChangeNotifier {
       int index = _votingEventList.indexWhere((event) => event.votingEventID == cloneEvent.votingEventID);
       if (index != -1) {
         _votingEventList[index] = cloneEvent;
+        _forceRefreshVotingEvents();
       }
 
       notifyListeners();
@@ -264,6 +270,7 @@ class VotingEventProvider extends ChangeNotifier {
           (event) => event.votingEventID == cloneEvent.votingEventID);
       if (index != -1) {
         _votingEventList[index] = cloneEvent;
+        _forceRefreshVotingEvents();
       }
 
       notifyListeners();
@@ -291,6 +298,7 @@ class VotingEventProvider extends ChangeNotifier {
       int index = _votingEventList.indexWhere((event) => event.votingEventID == cloneEvent.votingEventID);
       if (index != -1) {
         _votingEventList[index] = cloneEvent;
+        _forceRefreshVotingEvents();
       }
 
       notifyListeners();
@@ -333,6 +341,7 @@ class VotingEventProvider extends ChangeNotifier {
         int index = _votingEventList.indexWhere((event) => event.votingEventID == _selectedVotingEvent.votingEventID);
         if (index != -1) {
           _votingEventList[index] = updatedEvent;
+          _forceRefreshVotingEvents();
         }
 
         notifyListeners();
@@ -371,6 +380,7 @@ class VotingEventProvider extends ChangeNotifier {
         int index = _votingEventList.indexWhere((event) => event.votingEventID == _selectedVotingEvent.votingEventID);
         if (index != -1) {
           _votingEventList[index] = updatedEvent;
+          _forceRefreshVotingEvents();
         }
 
         notifyListeners();
@@ -436,6 +446,7 @@ class VotingEventProvider extends ChangeNotifier {
         int index = _votingEventList.indexWhere((event) => event.votingEventID == _selectedVotingEvent.votingEventID);
         if (index != -1) {
           _votingEventList[index] = updatedEvent;
+          _forceRefreshVotingEvents();
         }
 
         notifyListeners();
@@ -484,6 +495,7 @@ class VotingEventProvider extends ChangeNotifier {
         int index = _votingEventList.indexWhere((event) => event.votingEventID == _selectedVotingEvent.votingEventID);
         if (index != -1) {
           _votingEventList[index] = updatedEvent;
+          _forceRefreshVotingEvents();
         }
 
         notifyListeners();
@@ -520,6 +532,7 @@ class VotingEventProvider extends ChangeNotifier {
         int index = _votingEventList.indexWhere((event) => event.votingEventID == _selectedVotingEvent.votingEventID);
         if (index != -1) {
           _votingEventList[index] = updatedEvent;
+          _forceRefreshVotingEvents();
         }
 
         notifyListeners();

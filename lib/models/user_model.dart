@@ -45,6 +45,7 @@ class User {
   void setBio(String bio) => _bio = bio;
   void setIsVerified(bool value) => _isVerified = value;
   void setAvatarUrl(String avatarUrl) => _avatarUrl = avatarUrl;
+  void setFreezed(bool value) => _freezed = value;
 
   // convert a User object to JSON
   Map<String, dynamic> toJson() {

@@ -1,3 +1,4 @@
+import 'package:blockchain_university_voting_system/database/shared_preferences.dart';
 import 'package:blockchain_university_voting_system/localization/app_locale.dart';
 import 'package:blockchain_university_voting_system/provider/user_management_provider.dart';
 import 'package:blockchain_university_voting_system/provider/user_provider.dart';
@@ -30,15 +31,13 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  late int _currentIndex;
+  int _currentIndex = 0;
   late PageController _pageController;
   bool _userAccountFreezed = true;
 
   @override
   void initState() {
     super.initState();
-    _currentIndex = widget.index ?? 0;
-    _pageController = PageController(initialPage: _currentIndex);
     
     if (widget.userProvider.user != null) {
       _userAccountFreezed = widget.userProvider.user!.freezed;
@@ -47,6 +46,21 @@ class _HomePageState extends State<HomePage> {
     }
 
     print("freeze? : $_userAccountFreezed");
+    
+    // initialize with widget.index if provided
+    _currentIndex = widget.index ?? 0;
+    _pageController = PageController(initialPage: _currentIndex);
+    
+    // then load the last page index from preferences and update if needed
+    getLastPageIndex().then((value) {
+      if (value != null && mounted) {
+        setState(() {
+          _currentIndex = value;
+          // jump to the correct page without animation
+          _pageController.jumpToPage(_currentIndex);
+        });
+      }
+    });
   }
 
   @override
@@ -64,9 +78,9 @@ class _HomePageState extends State<HomePage> {
         body: PageView(
           controller: _pageController,
           physics: const BouncingScrollPhysics(),
-          onPageChanged: (index) {
+          onPageChanged: (pageIndex) {
             setState(() {
-              _currentIndex = index;
+              _currentIndex = pageIndex;
             });
           },
           children: [
@@ -82,12 +96,13 @@ class _HomePageState extends State<HomePage> {
         bottomNavigationBar: BottomNavigationBar(
           backgroundColor: colorScheme.secondary,
           currentIndex: _currentIndex,
-          onTap: (index) {
+          onTap: (pageIndex) {
             _pageController.animateToPage(
-              index,
+              pageIndex,
               duration: const Duration(milliseconds: 300),
               curve: Curves.easeInOut,
             );
+            saveLastPageIndex(pageIndex);
           },
           items: [
             BottomNavigationBarItem(

@@ -67,3 +67,13 @@ Future<bool?> getSpecificNotificationEnabled(String notificationType) async {
   final prefs = await SharedPreferences.getInstance();
   return prefs.getBool('notification_${notificationType}_enabled');
 }
+
+Future<int?> getLastPageIndex() async {
+  final prefs = await SharedPreferences.getInstance();
+  return prefs.getInt('lastPageIndex');
+}
+
+Future<void> saveLastPageIndex(int pageIndex) async {
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.setInt('lastPageIndex', pageIndex);
+}

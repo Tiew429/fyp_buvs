@@ -7,6 +7,7 @@ import 'package:blockchain_university_voting_system/provider/user_provider.dart'
 import 'package:blockchain_university_voting_system/routes/navigation_helper.dart';
 import 'package:blockchain_university_voting_system/utils/snackbar_util.dart';
 import 'package:blockchain_university_voting_system/widgets/centered_container.dart';
+import 'package:blockchain_university_voting_system/widgets/progress_circular.dart';
 import 'package:blockchain_university_voting_system/widgets/scrollable_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -14,6 +15,7 @@ import 'package:flutter_localization/flutter_localization.dart';
 import 'dart:async';
 
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ProfilePageViewPage extends StatefulWidget {
   final UserProvider userProvider;
@@ -34,6 +36,8 @@ class _ProfilePageViewPageState extends State<ProfilePageViewPage> {
   late final UserRole _userRole;
   bool _isFreezing = false;
   double _freezeProgress = 0.0;
+  bool _isDarkTheme = false;
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -52,6 +56,17 @@ class _ProfilePageViewPageState extends State<ProfilePageViewPage> {
     } else {
       _userRole = UserRole.admin;
     }
+
+    _loadThemePreference();
+  }
+
+  void _loadThemePreference() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    bool? themeValue = prefs.getBool('theme_mode');
+
+    setState(() {
+      _isDarkTheme = themeValue ?? false; // Use a fallback value
+    });
   }
 
   @override
@@ -60,61 +75,72 @@ class _ProfilePageViewPageState extends State<ProfilePageViewPage> {
 
     return Scaffold(
       appBar: AppBar(
+        // leading: BackButton(
+        //   onPressed: () => NavigationHelper.navigateBack(rootNavigatorKey.currentContext!),
+        // ),
         centerTitle: true,
         title: Text("${_user.name} ${AppLocale.of.getString(context)} ${AppLocale.profile.getString(context)}"),
         backgroundColor: colorScheme.secondary,
       ),
       backgroundColor: colorScheme.tertiary,
-      body: ScrollableWidget(
-        child: CenteredContainer(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                // avatar section
-                _buildAvatar(),
-                
-                const SizedBox(height: 20),
-                
-                // user's basic info
-                _buildInfoCard(
-                  AppLocale.userInformation.getString(context),
-                  [
-                    _buildInfoRow(AppLocale.name.getString(context), _user.name),
-                    _buildInfoRow(AppLocale.email.getString(context), _user.email),
-                    if (_user.bio != null && _user.bio.isNotEmpty)
-                      _buildInfoRow(AppLocale.bio.getString(context), _user.bio),
-                    _buildInfoRow(AppLocale.role.getString(context), _userRole.toString().split('.').last.toUpperCase()),
+      body: Stack(
+        children: [
+          ScrollableWidget(
+            child: CenteredContainer(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    // avatar section
+                    _buildAvatar(),
+                    
+                    const SizedBox(height: 20),
+                    
+                    // user's basic info
+                    _buildInfoCard(
+                      AppLocale.userInformation.getString(context),
+                      [
+                        _buildInfoRow(AppLocale.name.getString(context), _user.name),
+                        _buildInfoRow(AppLocale.email.getString(context), _user.email),
+                        if (_user.bio != null && _user.bio.isNotEmpty)
+                          _buildInfoRow(AppLocale.bio.getString(context), _user.bio),
+                        _buildInfoRow(AppLocale.role.getString(context), _userRole.toString().split('.').last.toUpperCase()),
+                      ],
+                    ),
+                    
+                    const SizedBox(height: 16),
+                    
+                    // blockchain info
+                    _buildInfoCard(
+                      AppLocale.blockchainInformation.getString(context),
+                      [
+                        _buildWalletRow(AppLocale.walletAddress.getString(context), _user.walletAddress),
+                        _buildInfoRow(AppLocale.verified.getString(context), _user.isVerified ? "Yes" : "No", 
+                          valueColor: _user.isVerified ? Colors.green : Colors.red),
+                      ],
+                    ),
+                    
+                    const SizedBox(height: 16),
+                    
+                    // role-specific information
+                    if (_user is Staff) _buildStaffInfo(_user),
+                    if (_user is Student) _buildStudentInfo(_user),
+                    
+                    const SizedBox(height: 24),
+                    
+                    // action buttons
+                    if(_canManageUser()) _buildActionButtons(),
                   ],
                 ),
-                
-                const SizedBox(height: 16),
-                
-                // blockchain info
-                _buildInfoCard(
-                  AppLocale.blockchainInformation.getString(context),
-                  [
-                    _buildWalletRow(AppLocale.walletAddress.getString(context), _user.walletAddress),
-                    _buildInfoRow(AppLocale.verified.getString(context), _user.isVerified ? "Yes" : "No", 
-                      valueColor: _user.isVerified ? Colors.green : Colors.red),
-                  ],
-                ),
-                
-                const SizedBox(height: 16),
-                
-                // role-specific information
-                if (_user is Staff) _buildStaffInfo(_user),
-                if (_user is Student) _buildStudentInfo(_user),
-                
-                const SizedBox(height: 24),
-                
-                // action buttons
-                if(_canManageUser()) _buildActionButtons(),
-              ],
+              ),
             ),
           ),
-        ),
+          if (_isLoading)
+            ProgressCircular(
+              isLoading: _isLoading,
+            ),
+        ],
       ),
     );
   }
@@ -136,7 +162,7 @@ class _ProfilePageViewPageState extends State<ProfilePageViewPage> {
           icon: const Icon(Icons.verified_user),
           label: Text(AppLocale.verifyUserInformation.getString(context)),
           style: ElevatedButton.styleFrom(
-            backgroundColor: colorScheme.secondary,
+            backgroundColor: colorScheme.secondary.withOpacity(0.1),
             foregroundColor: colorScheme.onPrimary,
             minimumSize: const Size(double.infinity, 48),
           ),
@@ -158,13 +184,16 @@ class _ProfilePageViewPageState extends State<ProfilePageViewPage> {
                 AppLocale.freezeAccount.getString(context),
             ),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
+              backgroundColor: _isDarkTheme ? Colors.red.withOpacity(0.5) : Colors.red,
               foregroundColor: colorScheme.onPrimary,
               minimumSize: const Size(double.infinity, 48),
             ),
           ),
         ),
 
+        const SizedBox(height: 12),
+
+        // voting eligible button
         if (widget.userManagementProvider.selectedUser.role == UserRole.student)
           GestureDetector(
             onLongPressStart: (_) => _showEligibleDialog(),
@@ -179,7 +208,7 @@ class _ProfilePageViewPageState extends State<ProfilePageViewPage> {
                   AppLocale.setInEligibleForVoting.getString(context),
               ),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.yellow,
+                backgroundColor: _isDarkTheme ? Colors.yellow.withOpacity(0.2) : Colors.yellow,
                 foregroundColor: colorScheme.onPrimary,
                 minimumSize: const Size(double.infinity, 48),
               ),
@@ -245,7 +274,6 @@ class _ProfilePageViewPageState extends State<ProfilePageViewPage> {
                       _isFreezing = false;
                       _freezeProgress = 0.0;
                     });
-                    Navigator.of(context).pop(); // close dialog
                   },
                   child: ElevatedButton(
                     onPressed: null, // disable normal press
@@ -369,10 +397,17 @@ class _ProfilePageViewPageState extends State<ProfilePageViewPage> {
       
       if (elapsed >= totalDuration) {
         timer.cancel();
-        await widget.userManagementProvider.freezeUser();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocale.accountHasBeenFrozen.getString(context))),
-        );
+        setState(() {
+          _isLoading = true;
+        });
+        if (Navigator.canPop(context)) {
+          Navigator.of(context, rootNavigator: true).pop();
+        }
+        setState(() async {
+          await widget.userManagementProvider.freezeUser();
+          _isLoading = false;
+        });
+        SnackbarUtil.showSnackBar(context, (AppLocale.accountHasBeenFrozen.getString(context)));
       }
     });
     return true;

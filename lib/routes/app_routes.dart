@@ -7,8 +7,6 @@ import 'package:blockchain_university_voting_system/provider/user_management_pro
 import 'package:blockchain_university_voting_system/provider/wallet_provider.dart';
 import 'package:blockchain_university_voting_system/provider/user_provider.dart';
 import 'package:blockchain_university_voting_system/provider/voting_event_provider.dart';
-import 'package:blockchain_university_voting_system/views/audit/audit_list_page.dart';
-import 'package:blockchain_university_voting_system/views/audit/voting_event_audit_logs_page.dart';
 import 'package:blockchain_university_voting_system/views/authentication/login_page.dart';
 import 'package:blockchain_university_voting_system/views/authentication/register_page.dart';
 import 'package:blockchain_university_voting_system/views/authentication/staff_register_page.dart';
@@ -21,6 +19,7 @@ import 'package:blockchain_university_voting_system/views/notifications/send_not
 import 'package:blockchain_university_voting_system/views/pending_ve/pending_voting_event_list_page.dart';
 import 'package:blockchain_university_voting_system/views/profile/edit_profile_page.dart';
 import 'package:blockchain_university_voting_system/views/report/report_page.dart';
+import 'package:blockchain_university_voting_system/views/settings/notification_settings_page.dart';
 import 'package:blockchain_university_voting_system/views/user_management/profile_page_view_page.dart';
 import 'package:blockchain_university_voting_system/views/user_management/user_management_page.dart';
 import 'package:blockchain_university_voting_system/views/user_management/user_verification_page.dart';
@@ -52,7 +51,7 @@ Future<ReownAppKitModal?> preloadAppKitModal(BuildContext context, WalletConnect
   }
   
   try {
-    _cachedAppKitModal = await service.getAppKitModalAsync();
+    _cachedAppKitModal = await service.getAppKitModalAsync(context);
     return _cachedAppKitModal;
   } catch (e) {
     debugPrint('Error preloading AppKitModal: $e');
@@ -243,7 +242,7 @@ List<RouteBase> router(String initialRoute, GlobalKey<NavigatorState> navigatorK
       barrierColor: colorScheme.tertiary,
       transitionDuration: const Duration(milliseconds: 300),
       child: FutureBuilder<ReownAppKitModal>(
-        future: getWalletConnectService()?.getAppKitModalAsync(),
+        future: getWalletConnectService()?.getAppKitModalAsync(context),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Scaffold(
@@ -666,28 +665,6 @@ List<RouteBase> router(String initialRoute, GlobalKey<NavigatorState> navigatorK
       },
     ),
 
-    // Audit
-    GoRoute(
-      path: '/${RouterPath.auditlistpage.path}',
-      name: RouterPath.auditlistpage.path,
-      pageBuilder: (context, state) {
-        return buildPageWithAnimation(
-          const AuditListPage(), 
-          state,
-        );
-      },
-    ),
-    GoRoute(
-      path: '/${RouterPath.votingeventauditlogspage.path}',
-      name: RouterPath.votingeventauditlogspage.path,
-      pageBuilder: (context, state) {
-        return buildPageWithAnimation(
-          const VotingEventAuditLogsPage(), 
-          state,
-        );
-      },
-    ),
-
     // Notification
     GoRoute(
       path: '/${RouterPath.notificationspage.path}',
@@ -711,6 +688,16 @@ List<RouteBase> router(String initialRoute, GlobalKey<NavigatorState> navigatorK
             userProvider: getUserProvider()!,
             notificationProvider: getNotificationProvider()!,
           ), 
+          state,
+        );
+      },
+    ),
+    GoRoute(
+      path: '/${RouterPath.notificationsettingspage.path}',
+      name: RouterPath.notificationsettingspage.path,
+      pageBuilder: (context, state) {
+        return buildPageWithAnimation(
+          const NotificationSettingsPage(), 
           state,
         );
       },

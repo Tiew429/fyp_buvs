@@ -15,20 +15,12 @@ class SmartContractService {
   late final DeployedContract contract;
   final String contractAddress = dotenv.env['CONTRACT_ADDRESS'] ?? "";
   bool contractLoaded = false;
-  final ReownAppKitModal _appKitModal = Provider
-    .of<WalletConnectService>(
+  final ReownAppKitModal _appKitModal = Provider.of<WalletConnectService>(
       rootNavigatorKey.currentContext!,
       listen: false,
-    ).getAppKitModal();
+    ).getAppKitModal(rootNavigatorKey.currentContext!);
   
-  final Map<String, dynamic> _eventCache = {};
-  DateTime _lastCacheRefresh = DateTime.now();
-  final Duration _cacheDuration = const Duration(seconds: 10);
-  
-  Future<void> initialize() async {
-    if (rootNavigatorKey.currentContext == null) {
-      throw Exception("rootNavigatorKey.currentContext is null");
-    }
+  Future<void> initialize(BuildContext context) async {
     await _loadContract();
   }
 
@@ -69,16 +61,6 @@ class SmartContractService {
     print("Smart_Contract_Service: Retrieving voting events from blockchain.");
     
     try {
-      // check if we can use cached data
-      final now = DateTime.now();
-      if (!forceRefresh && 
-          _eventCache.isNotEmpty && 
-          now.difference(_lastCacheRefresh) < _cacheDuration && 
-          !manualRefresh) {
-        print("Using cached voting events. Count: ${_eventCache.length}");
-        return _eventCache.values.toList();
-      }
-      
       // get the list of voting event IDs
       final dynamic votingEventIDsResult = await readFunction('getVotingEventIDs');
       print("Raw voting event IDs from blockchain: $votingEventIDsResult");
@@ -121,20 +103,13 @@ class SmartContractService {
         }
       }
       
-      // determine which IDs need to be fetched (not in cache or force refresh)
-      List<String> idsToFetch = forceRefresh 
-          ? processedIds 
-          : processedIds.where((id) => !_eventCache.containsKey(id)).toList();
-      
-      if (idsToFetch.isEmpty) {
-        // all events are already in cache
-        return _eventCache.values.toList();
-      }
+      // create a list to store all event details
+      List<dynamic> allEvents = [];
       
       // create a list of futures for parallel execution
-      List<Future<MapEntry<String, dynamic>?>> fetchFutures = [];
+      List<Future<dynamic>> fetchFutures = [];
       
-      for (String eventID in idsToFetch) {
+      for (String eventID in processedIds) {
         fetchFutures.add(_fetchVotingEventWithID(eventID));
       }
       
@@ -142,7 +117,7 @@ class SmartContractService {
       int completedCount = 0;
       final totalToFetch = fetchFutures.length;
       
-      List<MapEntry<String, dynamic>?> results = await Future.wait(
+      List<dynamic> results = await Future.wait(
         fetchFutures.map((future) => future.then((result) {
           completedCount++;
           if (progressCallback != null) {
@@ -152,28 +127,26 @@ class SmartContractService {
         }))
       );
       
-      // update cache with new results
-      for (var entry in results) {
-        if (entry != null) {
-          _eventCache[entry.key] = entry.value;
+      // add all non-null results to our events list
+      for (var result in results) {
+        if (result != null) {
+          allEvents.add(result);
         }
       }
       
-      _lastCacheRefresh = now;
-      return _eventCache.values.toList();
+      print("Smart_Contract_Service (getVotingEventsFromBlockchain): Fetched ${allEvents.length} events directly from blockchain");
+      return allEvents;
     } catch (e) {
       debugPrint("Smart_Contract_Service (getVotingEventsFromBlockchain): $e");
       return [];
     }
   }
 
-  Future<MapEntry<String, dynamic>?> _fetchVotingEventWithID(String eventID) async {
+  Future<dynamic> _fetchVotingEventWithID(String eventID) async {
     try {
       print("Fetching details for event ID: $eventID");
       final dynamic votingEvent = await readFunction('getVotingEvent', [eventID]);
-      if (votingEvent != null) {
-        return MapEntry(eventID, votingEvent);
-      }
+      return votingEvent;
     } catch (e) {
       print("Failed to get details for event ID: $eventID - $e");
     }

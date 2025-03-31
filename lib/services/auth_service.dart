@@ -84,8 +84,7 @@ class AuthService {
 
       // 1. verify with firebase authentication
       if (isEmail) {
-        auth_user.UserCredential userCredential = await _auth
-        .signInWithEmailAndPassword(
+        auth_user.UserCredential userCredential = await _auth.signInWithEmailAndPassword(
           email: emailOrUsername,
           password: password,
         );
@@ -257,6 +256,7 @@ class AuthService {
             walletAddress: walletAddress,
             department: department,
             freezed: false,
+            avatarUrl: '',
           ),
           password,
         );
@@ -269,8 +269,9 @@ class AuthService {
             email: email,
             role: role,
             walletAddress: walletAddress,
-            isEligibleForVoting: false,
+            isEligibleForVoting: true,
             freezed: false,
+            avatarUrl: '',
           ),
           password,
         );

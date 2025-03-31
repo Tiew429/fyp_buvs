@@ -71,8 +71,8 @@ class _ManageCandidatePageState extends State<ManageCandidatePage> with SingleTi
             Tab(text: AppLocale.confirmedCandidate.getString(context)),
             Tab(text: AppLocale.pendingCandidate.getString(context)),
           ],
-          indicatorColor: colorScheme.onSecondary,
-          labelColor: colorScheme.onSecondary,
+          indicatorColor: colorScheme.onPrimary,
+          labelColor: colorScheme.onPrimary,
         ),
       ),
       backgroundColor: colorScheme.tertiary,
@@ -128,8 +128,8 @@ class _ManageCandidatePageState extends State<ManageCandidatePage> with SingleTi
                             children: [
                               Padding(
                                 padding: const EdgeInsets.all(12.0),
-            child: Row(
-              children: [
+                                child: Row(
+                                  children: [
                                     CircleAvatar(
                                       backgroundColor: colorScheme.primary,
                                       backgroundImage: candidate.avatarUrl != '' && candidate.avatarUrl.isNotEmpty
@@ -144,9 +144,9 @@ class _ManageCandidatePageState extends State<ManageCandidatePage> with SingleTi
                                     ),
                                     const SizedBox(width: 16),
                                     Expanded(
-                  child: Column(
+                                      child: Column(
                                         crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
+                                        children: [
                                           Text(
                                             candidate.name,
                                             style: const TextStyle(
@@ -163,21 +163,21 @@ class _ManageCandidatePageState extends State<ManageCandidatePage> with SingleTi
                                               style: TextStyle(
                                                 color: colorScheme.onSurface.withOpacity(0.7),
                                               ),
-                      ),
-                    ],
-                  ),
-                ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
                                     IconButton(
                                       icon: Icon(Icons.delete, color: Colors.red.shade300),
                                       onPressed: () => _showRemoveCandidateConfirmDialog(candidate),
                                       tooltip: AppLocale.removeCandidate.getString(context),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
                   ),).toList(),
                 ),
@@ -472,7 +472,7 @@ class _ManageCandidatePageState extends State<ManageCandidatePage> with SingleTi
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              "Are you sure you want to remove this candidate?",
+              "${AppLocale.areYouSureYouWantToRemoveThisCandidate.getString(context)}?",
               style: TextStyle(color: colorScheme.onPrimary),
             ),
             const SizedBox(height: 16),
@@ -497,13 +497,13 @@ class _ManageCandidatePageState extends State<ManageCandidatePage> with SingleTi
                 title: Text(candidate.name),
                 subtitle: Text(
                   "ID: ${candidate.candidateID}",
-                  style: TextStyle(fontSize: 12),
+                  style: const TextStyle(fontSize: 12),
                 ),
               ),
             ),
             const SizedBox(height: 8),
             Text(
-              "This action cannot be undone.",
+              "${AppLocale.thisActionCannotBeUndone.getString(context)}.",
               style: const TextStyle(color: Colors.red, fontSize: 12),
             ),
           ],

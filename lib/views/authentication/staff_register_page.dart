@@ -183,8 +183,8 @@ class _StaffRegisterPageState extends State<StaffRegisterPage> {
                   padding: const EdgeInsets.symmetric(vertical: 12),
                   decoration: BoxDecoration(
                     color: _selectedRegistrationType == 0
-                        ? colorScheme.secondary
-                        : colorScheme.primary.withOpacity(0.3),
+                        ? colorScheme.primary.withOpacity(0.8)
+                        : colorScheme.secondary,
                     borderRadius: const BorderRadius.only(
                       topLeft: Radius.circular(8),
                       bottomLeft: Radius.circular(8),
@@ -220,8 +220,8 @@ class _StaffRegisterPageState extends State<StaffRegisterPage> {
                   padding: const EdgeInsets.symmetric(vertical: 12),
                   decoration: BoxDecoration(
                     color: _selectedRegistrationType == 1
-                        ? colorScheme.secondary
-                        : colorScheme.primary.withOpacity(0.3),
+                        ? colorScheme.primary.withOpacity(0.8)
+                        : colorScheme.secondary,
                     borderRadius: const BorderRadius.only(
                       topRight: Radius.circular(8),
                       bottomRight: Radius.circular(8),
@@ -270,6 +270,7 @@ class _StaffRegisterPageState extends State<StaffRegisterPage> {
           decoration: BoxDecoration(
             border: Border.all(color: Colors.grey),
             borderRadius: BorderRadius.circular(8),
+            color: Theme.of(context).colorScheme.primary,
           ),
           child: DropdownButtonHideUnderline(
             child: DropdownButton<String>(

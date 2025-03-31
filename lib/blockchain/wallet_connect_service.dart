@@ -20,8 +20,7 @@ class WalletConnectService {
   static final WalletConnectService _instance = WalletConnectService._internal();
   factory WalletConnectService() => _instance;
 
-  Future<void> initialize() async {
-    BuildContext context = rootNavigatorKey.currentContext!;
+  Future<void> initialize(BuildContext context) async {
     
     if (isInitialized) {
       return;
@@ -37,7 +36,7 @@ class WalletConnectService {
       debugPrint("WalletConnectService: Starting initialization...");
       
       _appkitModal = ReownAppKitModal(
-        context: context,
+        context: rootNavigatorKey.currentContext!,
         projectId: '07508ae6495c6f3d32155cb5d27048f8',
         metadata: const PairingMetadata(
           name: 'University Blockchain Voting',
@@ -58,7 +57,7 @@ class WalletConnectService {
       // update wallet address in wallet provider
       updateWalletAddress(context);
 
-      await subscribeToEvents(context);
+      await subscribeToEvents(rootNavigatorKey.currentContext!);
       isInitialized = true;
       
       debugPrint("WalletConnectService: Initialization completed successfully");
@@ -72,10 +71,10 @@ class WalletConnectService {
     }
   }
 
-  Future<ReownAppKitModal> getAppKitModalAsync() async {
+  Future<ReownAppKitModal> getAppKitModalAsync(BuildContext context) async {
     if (!isInitialized || _appkitModal == null) {
       debugPrint("WalletConnectService: AppKitModal not initialized, initializing now...");
-      await initialize();
+      await initialize(context);
     }
     
     if (_appkitModal == null) {
@@ -85,11 +84,11 @@ class WalletConnectService {
     return _appkitModal!;
   }
 
-  ReownAppKitModal getAppKitModal() {
+  ReownAppKitModal getAppKitModal(BuildContext context) {
     if (!isInitialized || _appkitModal == null) {
       debugPrint("WalletConnectService: AppKitModal not initialized, scheduling initialization");
       WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-        initialize();
+        initialize(context);
       });
       throw Exception('WalletConnectService not initialized. Please call initialize() first or use getAppKitModalAsync().');
     }

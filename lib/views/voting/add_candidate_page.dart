@@ -124,6 +124,12 @@ class _AddCandidatePageState extends State<AddCandidatePage> {
         "${AppLocale.student.getString(context)} ${student.name} ${AppLocale.notEligibleForVoting.getString(context)}"
       );
       return;
+    } else if (student.walletAddress.isEmpty || student.walletAddress == "") {
+      SnackbarUtil.showSnackBar(
+        context, 
+        "${AppLocale.student.getString(context)} ${student.name} ${AppLocale.hasNoWalletAddress.getString(context)}"
+      );
+      return;
     }
     
     setState(() {
@@ -286,7 +292,7 @@ class _AddCandidatePageState extends State<AddCandidatePage> {
   Widget _buildStudentItem(Student student) {
     final colorScheme = Theme.of(context).colorScheme;
     bool isSelected = _selectedStudentIds.contains(student.userID);
-    bool isEligible = student.isEligibleForVoting;
+    bool isEligibleToBeToggled = student.isEligibleForVoting && student.walletAddress.isNotEmpty && student.walletAddress != "";
     
     return Card(
       margin: const EdgeInsets.only(bottom: 8.0),
@@ -294,22 +300,22 @@ class _AddCandidatePageState extends State<AddCandidatePage> {
         title: Text(
           student.name,
           style: TextStyle(
-            color: isEligible 
-                ? colorScheme.onSurface 
-                : colorScheme.onSurface.withOpacity(0.5),
+            color: isEligibleToBeToggled 
+                ? colorScheme.onPrimary 
+                : colorScheme.onPrimary.withOpacity(0.5),
           ),
         ),
         subtitle: Text(
           student.email,
           style: TextStyle(
-            color: isEligible 
-                ? colorScheme.onSurface.withOpacity(0.7) 
-                : colorScheme.onSurface.withOpacity(0.3),
+            color: isEligibleToBeToggled 
+                ? colorScheme.onPrimary.withOpacity(0.7) 
+                : colorScheme.onPrimary.withOpacity(0.3),
           ),
         ),
         trailing: Checkbox(
           value: isSelected,
-          onChanged: isEligible 
+          onChanged: isEligibleToBeToggled 
               ? (value) => _toggleStudentSelection(student)
               : null,
         ),
@@ -367,7 +373,7 @@ class _AddCandidatePageState extends State<AddCandidatePage> {
                                 child: Text(
                                   AppLocale.noStudentsFound.getString(context),
                                   style: TextStyle(
-                                    color: colorScheme.onTertiary,
+                                    color: colorScheme.onPrimary,
                                     fontSize: 18,
                                   ),
                                 ),

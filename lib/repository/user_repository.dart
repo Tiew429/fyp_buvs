@@ -42,6 +42,8 @@ class UserRepository {
         'walletAddress': newUser.walletAddress ?? '',
         'bio': '',
         'isVerified': false,
+        'freezed': false,
+        'avatarUrl': '',
       };
 
       await roleCollection.doc(userId).set(userData);

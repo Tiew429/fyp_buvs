@@ -60,8 +60,8 @@ class _LoginPageState extends State<LoginPage> {
       return;
     }
     
-    final emailOrUsername = _usernameOrEmailController.text.trim().toLowerCase();
-    final password = _passwordController.text.trim();
+    final emailOrUsername = _usernameOrEmailController.text;
+    final password = _passwordController.text;
     
     // use future.delayed to ensure the loading indicator has time to appear
     Future.delayed(Duration.zero, () async {

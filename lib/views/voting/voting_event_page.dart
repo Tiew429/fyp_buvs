@@ -1,5 +1,6 @@
 import 'package:blockchain_university_voting_system/localization/app_locale.dart';
 import 'package:blockchain_university_voting_system/models/candidate_model.dart';
+import 'package:blockchain_university_voting_system/models/student_model.dart';
 import 'package:blockchain_university_voting_system/models/user_model.dart';
 import 'package:blockchain_university_voting_system/models/voting_event_model.dart';
 import 'package:blockchain_university_voting_system/provider/candidate_provider.dart';
@@ -61,8 +62,12 @@ class _VotingEventPageState extends State<VotingEventPage> {
     TimeOfDay nowTime = TimeOfDay.now();
 
     bool isVotingCreator = _votingEvent.createdBy == widget._user.walletAddress;
-    hasVoted =
-        _votingEvent.voters.any((voter) => voter.userID == widget._user.userID);
+    
+    for (Student voter in _votingEvent.voters) {
+      print("voter id: ${voter.userID}");
+    }
+
+    hasVoted = _votingEvent.voters.any((voter) => voter.userID == widget._user.userID);
 
     // check if today is within the voting date range
     if (now.isAfter(_votingEvent.startDate!) &&
@@ -113,8 +118,7 @@ class _VotingEventPageState extends State<VotingEventPage> {
         isLoading = true;
         loadingText = AppLocale.votingInProgress.getString(context);
       });
-      bool success =
-          await widget._votingEventProvider.vote(candidate, widget._user);
+      bool success = await widget._votingEventProvider.vote(candidate, widget._user);
       setState(() {
         if (success) {
           hasVoted = true;
@@ -220,8 +224,7 @@ class _VotingEventPageState extends State<VotingEventPage> {
                   const SizedBox(height: 16),
                 SingleChildScrollView(
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 16.0, vertical: 8.0),
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -229,7 +232,7 @@ class _VotingEventPageState extends State<VotingEventPage> {
                         Container(
                           width: double.infinity,
                           decoration: BoxDecoration(
-                            color: colorScheme.surface,
+                            color: colorScheme.secondary,
                             borderRadius: BorderRadius.circular(15),
                             boxShadow: [
                               BoxShadow(
@@ -244,8 +247,7 @@ class _VotingEventPageState extends State<VotingEventPage> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                _votingEvent.title,
+                              Text(_votingEvent.title,
                                 style: const TextStyle(
                                   fontSize: 20,
                                   fontWeight: FontWeight.bold,
@@ -339,9 +341,7 @@ class _VotingEventPageState extends State<VotingEventPage> {
                           ),
 
                         // candidates section
-                        _buildSectionCard(
-                          context,
-                          AppLocale.candidateParticipated.getString(context),
+                        _buildSectionCard(context, AppLocale.candidateParticipated.getString(context), 
                           _votingEvent.candidates.isEmpty
                               ? Center(
                                   child: Padding(
@@ -358,153 +358,87 @@ class _VotingEventPageState extends State<VotingEventPage> {
                                   ),
                                 )
                               : Column(
-                                  children: _votingEvent.candidates
-                                      .map((candidate) => Padding(
-                                            padding: const EdgeInsets.only(
-                                                bottom: 8.0),
-                                            child: Card(
-                                              elevation: 2,
-                                              child: InkWell(
-                                                onTap: () =>
-                                                    _showCandidateDetails(
-                                                        candidate),
-                                                child: Stack(
+                                  children: _votingEvent.candidates.map((candidate) => Padding(
+                                      padding: const EdgeInsets.only(bottom: 8.0),
+                                      child: Card(
+                                        elevation: 2,
+                                        child: InkWell(
+                                          onTap: () => _showCandidateDetails(candidate),
+                                          child: Stack(
+                                            children: [
+                                              Padding(
+                                                padding:const EdgeInsets.all(12.0),
+                                                child: Row(
                                                   children: [
-                                                    Padding(
-                                                      padding:
-                                                          const EdgeInsets.all(
-                                                              12.0),
-                                                      child: Row(
+                                                    CircleAvatar(
+                                                      backgroundColor:colorScheme.secondary,
+                                                      backgroundImage: candidate.avatarUrl != '' &&
+                                                              candidate.avatarUrl.isNotEmpty
+                                                          ? widget._candidateProvider.getCandidateAvatar(candidate)
+                                                          : null,
+                                                      child: candidate.avatarUrl != '' &&
+                                                              candidate.avatarUrl.isNotEmpty
+                                                          ? null
+                                                          : Text(candidate.name.isNotEmpty
+                                                                  ? candidate.name[0].toUpperCase()
+                                                                  : '?',
+                                                              style: TextStyle(
+                                                                  color: colorScheme.onPrimary),
+                                                            ),
+                                                    ),
+                                                    const SizedBox(width: 16),
+                                                    Expanded(
+                                                      child: Column(
+                                                        crossAxisAlignment: CrossAxisAlignment.start,
                                                         children: [
-                                                          CircleAvatar(
-                                                            backgroundColor:
-                                                                colorScheme
-                                                                    .secondary,
-                                                            backgroundImage: candidate
-                                                                            .avatarUrl !=
-                                                                        '' &&
-                                                                    candidate
-                                                                        .avatarUrl
-                                                                        .isNotEmpty
-                                                                ? widget
-                                                                    ._candidateProvider
-                                                                    .getCandidateAvatar(
-                                                                        candidate)
-                                                                : null,
-                                                            child: candidate.avatarUrl !=
-                                                                        '' &&
-                                                                    candidate
-                                                                        .avatarUrl
-                                                                        .isNotEmpty
-                                                                ? null
-                                                                : Text(
-                                                                    candidate
-                                                                            .name
-                                                                            .isNotEmpty
-                                                                        ? candidate
-                                                                            .name[0]
-                                                                            .toUpperCase()
-                                                                        : '?',
-                                                                    style: TextStyle(
-                                                                        color: colorScheme
-                                                                            .onPrimary),
-                                                                  ),
-                                                          ),
-                                                          const SizedBox(
-                                                              width: 16),
-                                                          Expanded(
-                                                            child: Column(
-                                                              crossAxisAlignment:
-                                                                  CrossAxisAlignment
-                                                                      .start,
-                                                              children: [
-                                                                Text(
-                                                                  candidate
-                                                                      .name,
-                                                                  style:
-                                                                      const TextStyle(
-                                                                    fontWeight:
-                                                                        FontWeight
-                                                                            .bold,
-                                                                    fontSize:
-                                                                        16,
-                                                                  ),
-                                                                ),
-                                                                const SizedBox(
-                                                                    height: 4),
-                                                                if (candidate
-                                                                    .bio
-                                                                    .isNotEmpty)
-                                                                  Text(
-                                                                    candidate
-                                                                        .bio,
-                                                                    maxLines: 1,
-                                                                    overflow:
-                                                                        TextOverflow
-                                                                            .ellipsis,
-                                                                    style:
-                                                                        TextStyle(
-                                                                      color: colorScheme
-                                                                          .onPrimary
-                                                                          .withOpacity(
-                                                                              0.7),
-                                                                    ),
-                                                                  ),
-                                                              ],
+                                                          Text(candidate.name,
+                                                            style: const TextStyle(
+                                                              fontWeight: FontWeight.bold,
+                                                              fontSize: 16,
                                                             ),
                                                           ),
-                                                          const Spacer(),
-                                                          if (widget._user
-                                                                      .walletAddress ==
-                                                                  candidate
-                                                                      .walletAddress &&
-                                                              !ongoing &&
-                                                              !isEnded)
-                                                            IconButton(
-                                                              icon: const Icon(
-                                                                  Icons.edit),
-                                                              color:
-                                                                  Colors.blue,
-                                                              tooltip: AppLocale
-                                                                  .editCandidate
-                                                                  .getString(
-                                                                      context),
-                                                              onPressed: () {
-                                                                Navigator.of(
-                                                                        context)
-                                                                    .pop();
-                                                                NavigationHelper
-                                                                    .navigateToEditCandidatePage(
-                                                                        context,
-                                                                        candidate);
-                                                              },
-                                                            ),
-                                                          if (canVote)
-                                                            IconButton(
-                                                              icon: const Icon(
-                                                                  Icons
-                                                                      .how_to_vote,
-                                                                  size: 20),
-                                                              color: colorScheme
-                                                                  .tertiary,
-                                                              tooltip: AppLocale
-                                                                  .vote
-                                                                  .getString(
-                                                                      context),
-                                                              onPressed: () =>
-                                                                  _vote(
-                                                                      candidate),
+                                                          const SizedBox(height: 4),
+                                                          if (candidate.bio.isNotEmpty)
+                                                            Text(candidate.bio,
+                                                              maxLines: 1,
+                                                              overflow: TextOverflow.ellipsis,
+                                                              style: TextStyle(
+                                                                color: colorScheme.onPrimary.withOpacity(0.7),
+                                                              ),
                                                             ),
                                                         ],
                                                       ),
                                                     ),
+                                                    const Spacer(),
+                                                    if (widget._user.walletAddress == candidate.walletAddress &&
+                                                        !ongoing &&
+                                                        !isEnded)
+                                                      IconButton(
+                                                        icon: const Icon(Icons.edit),
+                                                        color: Colors.blue,
+                                                        tooltip: AppLocale.editCandidate.getString(context),
+                                                        onPressed: () {
+                                                          Navigator.of(context).pop();
+                                                          NavigationHelper.navigateToEditCandidatePage(context,candidate);
+                                                        },
+                                                      ),
+                                                    if (canVote)
+                                                      IconButton(
+                                                        icon: const Icon(Icons.how_to_vote, size: 20),
+                                                        color: colorScheme.tertiary,
+                                                        tooltip: AppLocale.vote.getString(context),
+                                                        onPressed: () => _vote(candidate),
+                                                      ),
                                                   ],
                                                 ),
                                               ),
-                                            ),
-                                          ))
-                                      .toList(),
-                                ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ))
+                                .toList(),
+                          ),
                         ),
 
                         // statistics section
@@ -520,17 +454,10 @@ class _VotingEventPageState extends State<VotingEventPage> {
                                 AspectRatio(
                                   aspectRatio: 16 / 9,
                                   child: CustomBarChart(
-                                    xAxisList: _votingEvent.candidates
-                                        .map((candidate) => candidate.name)
-                                        .toList(),
-                                    yAxisList: _votingEvent.candidates
-                                        .map((candidate) =>
-                                            candidate.votesReceived.toDouble())
-                                        .toList(),
-                                    xAxisName:
-                                        AppLocale.candidate.getString(context),
-                                    yAxisName: AppLocale.votesReceived
-                                        .getString(context),
+                                    xAxisList: _votingEvent.candidates.map((candidate) => candidate.name).toList(),
+                                    yAxisList: _votingEvent.candidates.map((candidate) => candidate.votesReceived.toDouble()).toList(),
+                                    xAxisName: AppLocale.candidate.getString(context),
+                                    yAxisName: AppLocale.votesReceived.getString(context),
                                     interval: 0,
                                   ),
                                 ),
@@ -692,7 +619,7 @@ class _VotingEventPageState extends State<VotingEventPage> {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: colorScheme.primary,
+        color: colorScheme.secondary,
         borderRadius: BorderRadius.circular(15),
         boxShadow: [
           BoxShadow(

@@ -36,7 +36,7 @@ class CenteredContainer extends StatelessWidget {
                 child: Container(
                   width: width ?? double.infinity,
                   decoration: BoxDecoration(
-                    color: colorScheme.primary,
+                    color: colorScheme.secondary.withOpacity(0.5),
                     border: Border.all(
                       color: colorScheme.onPrimary,
                       width: Theme.of(context).brightness == Brightness.dark ? 3.0 : 1.0,

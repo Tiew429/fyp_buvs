@@ -1,5 +1,7 @@
 import 'package:blockchain_university_voting_system/blockchain/smart_contract_service.dart';
 import 'package:blockchain_university_voting_system/blockchain/wallet_connect_service.dart';
+import 'package:blockchain_university_voting_system/database/wallet_shared_preferences.dart';
+import 'package:blockchain_university_voting_system/routes/navigation_keys.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -18,6 +20,7 @@ class WalletConnectInitializer extends StatefulWidget {
 class _WalletConnectInitializerState extends State<WalletConnectInitializer> {
   late final WalletConnectService _walletConnectService;
   late final SmartContractService _smartContractService;
+  WalletSharedPreferences walletSharedPreferences = WalletSharedPreferences();
   bool _isInitializing = true;
   String _statusMessage = "正在初始化区块链连接...";
   bool _hasError = false;
@@ -31,8 +34,13 @@ class _WalletConnectInitializerState extends State<WalletConnectInitializer> {
 
   Future<void> _initializeServices() async {
     try {
-      await _setupWalletService();
-      await _setupSmartContract();
+      bool isInitialized = await walletSharedPreferences.getWalletConnectInitialized() ?? false;
+
+      if (!isInitialized) {
+        await _setupWalletService();
+        await _setupSmartContract();
+        walletSharedPreferences.saveWalletConnectInitialized(!isInitialized);
+      }
       
       // 添加额外的延迟，确保一切都已准备就绪
       await Future.delayed(const Duration(milliseconds: 500));
@@ -62,8 +70,8 @@ class _WalletConnectInitializerState extends State<WalletConnectInitializer> {
     }
     
     debugPrint("WalletConnectInitializer: Setting up wallet service.");
-    _walletConnectService = Provider.of<WalletConnectService>(context, listen: false);
-    await _walletConnectService.initialize();
+    _walletConnectService = Provider.of<WalletConnectService>(rootNavigatorKey.currentContext!, listen: false);
+    await _walletConnectService.initialize(context);
   }
 
   Future<void> _setupSmartContract() async {
@@ -74,13 +82,13 @@ class _WalletConnectInitializerState extends State<WalletConnectInitializer> {
     }
     
     debugPrint("WalletConnectInitializer: Setting up smart contract.");
-    _smartContractService = Provider.of<SmartContractService>(context, listen: false);
-    await _smartContractService.initialize();
+    _smartContractService = Provider.of<SmartContractService>(rootNavigatorKey.currentContext!, listen: false);
+    await _smartContractService.initialize(context);
   }
 
   @override
   void dispose() {
-    _walletConnectService.unsubscribeFromEvents();
+    walletSharedPreferences.saveWalletConnectInitialized(false);
     super.dispose();
   }
 

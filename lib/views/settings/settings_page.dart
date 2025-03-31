@@ -252,7 +252,7 @@ class _SettingsPageState extends State<SettingsPage> {
               ? colorScheme.primary.withOpacity(0.1)
               : isWarning
                   ? Colors.red.withOpacity(0.1)
-                  : colorScheme.surface,
+                  : colorScheme.secondary,
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
@@ -277,7 +277,7 @@ class _SettingsPageState extends State<SettingsPage> {
               child: Icon(
                 icon,
                 size: 20,
-                color: isWarning ? Colors.red : colorScheme.secondary,
+                color: isWarning ? Colors.red : colorScheme.onPrimary,
               ),
             ),
             const SizedBox(width: 16),
@@ -320,7 +320,7 @@ class _SettingsPageState extends State<SettingsPage> {
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         margin: const EdgeInsets.only(bottom: 4),
         decoration: BoxDecoration(
-          color: colorScheme.surface,
+          color: colorScheme.secondary,
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
@@ -341,7 +341,7 @@ class _SettingsPageState extends State<SettingsPage> {
               child: Icon(
                 icon,
                 size: 20,
-                color: colorScheme.secondary,
+                color: colorScheme.onPrimary,
               ),
             ),
             const SizedBox(width: 16),
@@ -382,7 +382,7 @@ class _SettingsPageState extends State<SettingsPage> {
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       margin: const EdgeInsets.only(bottom: 4),
       decoration: BoxDecoration(
-        color: colorScheme.surface,
+        color: colorScheme.secondary,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -403,7 +403,7 @@ class _SettingsPageState extends State<SettingsPage> {
             child: Icon(
               icon,
               size: 20,
-              color: colorScheme.secondary,
+              color: colorScheme.onPrimary,
             ),
           ),
           const SizedBox(width: 16),
@@ -419,7 +419,7 @@ class _SettingsPageState extends State<SettingsPage> {
           ),
           Theme(
             data: Theme.of(context).copyWith(
-              canvasColor: colorScheme.surface,
+              canvasColor: colorScheme.secondary,
             ),
             child: DropdownButton<String>(
               value: value,

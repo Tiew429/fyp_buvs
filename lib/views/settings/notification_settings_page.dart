@@ -174,28 +174,28 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
                         break;
                       case 'system':
                         icon = FontAwesomeIcons.cog;
-                        title = 'System';
-                        description = 'System-related notifications';
+                        title = AppLocale.system.getString(context);
+                        description = AppLocale.systemRelatedNotifications.getString(context);
                         break;
                       case 'general':
                         icon = FontAwesomeIcons.bell;
-                        title = 'General';
-                        description = 'General notifications';
+                        title = AppLocale.general.getString(context);
+                        description = AppLocale.generalNotifications.getString(context);
                         break;
                       case 'announcement':
                         icon = FontAwesomeIcons.bullhorn;
-                        title = 'Announcements';
-                        description = 'Important announcements';
+                        title = AppLocale.announcement.getString(context);
+                        description = AppLocale.importantAnnouncements.getString(context);
                         break;
                       case 'event':
                         icon = FontAwesomeIcons.calendar;
-                        title = 'Events';
-                        description = 'Event notifications';
+                        title = AppLocale.event.getString(context);
+                        description = AppLocale.eventNotifications.getString(context);
                         break;
                       case 'verification':
                         icon = FontAwesomeIcons.check;
-                        title = 'Verification';
-                        description = 'Account verification updates';
+                        title = AppLocale.verification.getString(context);
+                        description = AppLocale.accountVerificationUpdates.getString(context);
                         break;
                       default:
                         icon = FontAwesomeIcons.solidBell;

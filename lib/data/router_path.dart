@@ -20,8 +20,6 @@ enum RouterPath {
   profilepageviewpage,
   userverificationpage,
   reportpage,
-  auditlistpage,
-  votingeventauditlogspage,
   notificationspage,
   sendnotificationpage,
   notificationsettingspage;

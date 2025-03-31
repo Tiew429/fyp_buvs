@@ -8,12 +8,12 @@ class NavigationHelper {
 
   // authentication
   static Future<void> navigateToLoginPage(BuildContext context) async {
+    GoRouter.of(context).refresh(); // force refresh
     await navigateWithPreload(
       context, 
       RouterPath.loginpage.path,
       needsAppKitModal: true,
     );
-    clearNavigationStack(context, RouterPath.loginpage.path);
   }
   static void navigateToRegisterPage(BuildContext context, [bool registerWithMetamask = false]) {
     context.push('/${RouterPath.registerpage.path}',
@@ -58,7 +58,7 @@ class NavigationHelper {
       RouterPath.homepage.path,
       needsAppKitModal: true,
     );
-    clearNavigationStack(context, RouterPath.homepage.path);
+    GoRouter.of(context).refresh(); // force refresh
   }
   static void navigateToEditProfilePage(BuildContext context) {
     context.push('/${RouterPath.editprofilepage.path}');
@@ -116,14 +116,6 @@ class NavigationHelper {
   // report
   static void navigateToReportPage(BuildContext context) {
     context.push('/${RouterPath.reportpage.path}');
-  }
-
-  // audit
-  static void navigateToAuditListPage(BuildContext context) {
-    context.push('/${RouterPath.auditlistpage.path}');
-  }
-  static void navigateToVotingEventAuditLogsPage(BuildContext context) {
-    context.push('/${RouterPath.votingeventauditlogspage.path}');
   }
 
   // notifications

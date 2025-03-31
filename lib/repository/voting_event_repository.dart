@@ -48,6 +48,7 @@ class VotingEventRepository {
           // the votingEvents list does not include all details for the voting event object
           // so we need to retrieve also from firebase for the rest of the details
           String votingEventID = event[0]?.toString() ?? '';
+          print("VotingEvent ID: $votingEventID");
           if (votingEventID.isEmpty) {
             print("Voting_Event_Repository (getVotingEventList): Event has empty ID, skipping.");
             continue;
@@ -117,8 +118,7 @@ class VotingEventRepository {
           final List<dynamic> blockchainVoterAddresses = event[7] ?? [];
 
           // convert ethereum addresses to string
-          final List<String> candidateAddressStrings =
-              blockchainCandidateAddresses.map((address) {
+          final List<String> candidateAddressStrings = blockchainCandidateAddresses.map((address) {
             if (address is EthereumAddress) {
               return address.hex; // get the hex representation
             } else if (address == null) {

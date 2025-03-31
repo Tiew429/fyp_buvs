@@ -159,13 +159,19 @@ class AppLocale {
   static const String pleaseEnterAMessage = 'please enter a message';
   static const String sendTo = 'send to';
   static const String general = 'general';
+  static const String generalNotifications = 'general notifications and updates from the system';
   static const String announcement = 'announcement';
+  static const String importantAnnouncements = 'important announcements from administrators';
   static const String event = 'event';
+  static const String eventNotifications = 'notifications about upcoming and ongoing events';
   static const String alert = 'alert';
   static const String selectHowYouWantToSendThisNotification = 'select how you want to send this notification';
   static const String thisNotificationWillBeSentToAllUsersWhoAreSubscribedTo = 'this notification will be sent to all users who are subscribed to';
   static const String topic = 'topic';
   static const String tapToAddImage = 'tap to add image';
+  static const String system = 'system';
+  static const String systemRelatedNotifications = 'system-related notifications and maintenance updates';
+  static const String accountVerificationUpdates = 'notifications about your account verification status';
 
   // votings
   static const String votingList = 'voting list';
@@ -231,6 +237,7 @@ class AppLocale {
   static const String noStudentsFound = 'no students found';
   static const String errorLoadingStudents = 'error loading students';
   static const String loadingStudents = 'loading students...';
+  static const String hasNoWalletAddress = 'has no wallet address';
 
   // candidate
   static const String candidate = 'candidate';
@@ -264,6 +271,7 @@ class AppLocale {
   static const String registeredAsCandidateSuccess = 'successfully registered as candidate';
   static const String failedToRegisterAsCandidate = 'failed to register as candidate';
   static const String viewDetails = 'view details';
+  static const String areYouSureYouWantToRemoveThisCandidate = 'are you sure you want to remove this candidate?';
 
   // report
   static const String report = 'report';
@@ -313,6 +321,7 @@ class AppLocale {
   static const String walletAddressCopiedToClipboard = 'wallet address copied to clipboard';
   static const String accountHasBeenFrozen = 'account has been frozen';
   static const String walletConnected = 'wallet connected';
+  static const String thisActionCannotBeUndone = 'this action cannot be undone';
 
   // user verification
   static const String userHasNotUploadedDocumentsYet = 'user has not uploaded documents yet';
@@ -384,8 +393,6 @@ class AppLocale {
   static const String studentsSection = 'students';
   static const String searchNotifications = 'search notifications';
   static const String filterByType = 'filter by type';
-
-  // notification page strings
   static const String selectNotificationTopic = 'select notification topic';
   static const String allNotificationTypes = 'all notification types';
 
@@ -594,12 +601,19 @@ class AppLocale {
     pleaseEnterAMessage: 'Please enter a message',
     sendTo: 'Send To',
     general: 'General',
+    generalNotifications: 'General notifications and updates from the system',
     announcement: 'Announcement',
+    importantAnnouncements: 'Important announcements from administrators',
     event: 'Event',
+    eventNotifications: 'Notifications about upcoming and ongoing events',
     alert: 'Alert',
     selectHowYouWantToSendThisNotification: 'Select how you want to send this notification',
     thisNotificationWillBeSentToAllUsersWhoAreSubscribedTo: 'This notification will be sent to all users who are subscribed to',
     topic: 'Topic',
+    tapToAddImage: 'Tap to add image',
+    system: 'System',
+    systemRelatedNotifications: 'System-related notifications and maintenance updates',
+    accountVerificationUpdates: 'Notifications about your account verification status',
 
     // voting
     votingList: 'Voting List',
@@ -665,6 +679,7 @@ class AppLocale {
     noStudentsFound: 'No students found',
     errorLoadingStudents: 'Error loading students',
     loadingStudents: 'Loading students...',
+    hasNoWalletAddress: 'has no wallet address',
 
     // candidate
     candidate: 'Candidate',
@@ -698,6 +713,7 @@ class AppLocale {
     registeredAsCandidateSuccess: 'Successfully registered as candidate',
     failedToRegisterAsCandidate: 'Failed to register as candidate',
     viewDetails: 'View Details',
+    areYouSureYouWantToRemoveThisCandidate: 'Are you sure you want to remove this candidate?',
 
     // report
     report: 'Report',
@@ -747,6 +763,7 @@ class AppLocale {
     walletAddressCopiedToClipboard: 'Wallet address copied to clipboard',
     accountHasBeenFrozen: 'Account has been frozen',
     walletConnected: 'Wallet connected',
+    thisActionCannotBeUndone: 'This action cannot be undone',
 
     // user verification
     userHasNotUploadedDocumentsYet: 'User has not uploaded documents yet',
@@ -981,12 +998,19 @@ class AppLocale {
     pleaseEnterAMessage: 'Sila masukkan pesan',
     sendTo: 'Hantar kepada',
     general: 'Umum',
+    generalNotifications: 'Notifikasi umum dan kemaskini daripada sistem',
     announcement: 'Pengumuman',
+    importantAnnouncements: 'Pengumuman penting daripada pentadbir',
     event: 'Acara',
+    eventNotifications: 'Notifikasi mengenai acara akan datang dan sedang berlangsung',
     alert: 'Peringatan',
     selectHowYouWantToSendThisNotification: 'Pilih cara anda ingin mengirim notifikasi ini',
     thisNotificationWillBeSentToAllUsersWhoAreSubscribedTo: 'Notifikasi ini akan dihantar kepada semua pengguna yang berlangganan',
     topic: 'Topik',
+    tapToAddImage: 'Ketuk untuk menambah imej',
+    system: 'Sistem',
+    systemRelatedNotifications: 'Notifikasi berkaitan sistem dan kemaskini penyelenggaraan',
+    accountVerificationUpdates: 'Notifikasi mengenai status pengesahan akaun anda',
 
     // voting
     votingList: 'Senarai Undian',
@@ -1050,6 +1074,7 @@ class AppLocale {
     noStudentsFound: 'Tiada pelajar ditemui',
     errorLoadingStudents: 'Gagal memuatkan pelajar',
     loadingStudents: 'Memuatkan pelajar...',
+    hasNoWalletAddress: 'tiada alamat wallet',
 
     // candidate
     candidate: 'Calon',
@@ -1131,6 +1156,7 @@ class AppLocale {
     walletAddressCopiedToClipboard: 'Alamat wallet disalin ke papan klip',
     accountHasBeenFrozen: 'Akaun telah dibekukan',
     walletConnected: 'Wallet connected',
+    thisActionCannotBeUndone: 'Aksi ini tidak boleh dibatalkan',
 
     // user verification
     userHasNotUploadedDocumentsYet: 'Pengguna belum memuat naik dokumen',
@@ -1365,13 +1391,19 @@ class AppLocale {
     pleaseEnterAMessage: '请输入消息',
     sendTo: '发送给',
     general: '一般',
+    generalNotifications: '来自系统的一般通知和更新',
     announcement: '公告',
+    importantAnnouncements: '来自管理员的重要公告',
     event: '事件',
+    eventNotifications: '关于即将举行和正在进行的活动的通知',
     alert: '警报',
     selectHowYouWantToSendThisNotification: '选择您想要发送通知的方式',
     thisNotificationWillBeSentToAllUsersWhoAreSubscribedTo: '此通知将发送给所有订阅者',
     topic: '主题',
     tapToAddImage: '点击添加图片',
+    system: '系统',
+    systemRelatedNotifications: '系统相关通知和维护更新',
+    accountVerificationUpdates: '关于您的账户验证状态的通知',
 
     // voting
     votingList: '投票列表',
@@ -1437,6 +1469,7 @@ class AppLocale {
     noStudentsFound: '没有找到学生',
     errorLoadingStudents: '加载学生失败',
     loadingStudents: '加载学生...',
+    hasNoWalletAddress: '没有钱包地址',
 
     // candidate
     candidate: '候选人',
@@ -1470,6 +1503,7 @@ class AppLocale {
     registeredAsCandidateSuccess: '成功注册为候选人',
     failedToRegisterAsCandidate: '注册候选人失败',
     viewDetails: '查看详情',
+    areYouSureYouWantToRemoveThisCandidate: '您确定要删除此候选人吗？',
 
     // report
     report: '报告',
@@ -1519,6 +1553,7 @@ class AppLocale {
     walletAddressCopiedToClipboard: '钱包地址已复制到剪贴板',
     accountHasBeenFrozen: '账户已被冻结',
     walletConnected: '钱包已连接',
+    thisActionCannotBeUndone: '此操作无法撤销',
 
     // user verification
     userHasNotUploadedDocumentsYet: '用户尚未上传文件',

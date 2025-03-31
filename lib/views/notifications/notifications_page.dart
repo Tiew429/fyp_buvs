@@ -163,8 +163,8 @@ class _NotificationsPageState extends State<NotificationsPage> with SingleTicker
                 Tab(text: AppLocale.received.getString(context)),
                 Tab(text: AppLocale.sent.getString(context)),
               ],
-              indicatorColor: colorScheme.onSecondary,
-              labelColor: colorScheme.onSecondary,
+              indicatorColor: colorScheme.onPrimary,
+              labelColor: colorScheme.onPrimary,
             ) 
           : null,
       ),
@@ -188,7 +188,7 @@ class _NotificationsPageState extends State<NotificationsPage> with SingleTicker
                         borderRadius: BorderRadius.circular(10.0),
                       ),
                       filled: true,
-                      fillColor: colorScheme.surface,
+                      fillColor: colorScheme.inversePrimary,
                       contentPadding: const EdgeInsets.symmetric(vertical: 0),
                     ),
                     onChanged: (value) {
@@ -205,7 +205,7 @@ class _NotificationsPageState extends State<NotificationsPage> with SingleTicker
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12.0),
                     decoration: BoxDecoration(
-                      color: colorScheme.surface,
+                      color: colorScheme.inversePrimary,
                       borderRadius: BorderRadius.circular(10.0),
                       border: Border.all(color: Colors.grey.shade400),
                     ),
@@ -361,6 +361,9 @@ class _NotificationsPageState extends State<NotificationsPage> with SingleTicker
             borderRadius: BorderRadius.circular(8),
             child: Container(
               padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: colorScheme.inversePrimary,
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -380,7 +383,7 @@ class _NotificationsPageState extends State<NotificationsPage> with SingleTicker
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 16,
-                                color: colorScheme.onSurface,
+                                color: colorScheme.onPrimary,
                               ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
@@ -390,7 +393,7 @@ class _NotificationsPageState extends State<NotificationsPage> with SingleTicker
                               DateFormatUtil.formatDateTime(notification.createdAt),
                               style: TextStyle(
                                 fontSize: 12,
-                                color: colorScheme.onSurface.withOpacity(0.6),
+                                color: colorScheme.onPrimary.withOpacity(0.6),
                               ),
                             ),
                           ],
@@ -434,7 +437,7 @@ class _NotificationsPageState extends State<NotificationsPage> with SingleTicker
                     notification.message,
                     style: TextStyle(
                       fontSize: 14,
-                      color: colorScheme.onSurface,
+                      color: colorScheme.onPrimary,
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
@@ -484,6 +487,8 @@ class _NotificationsPageState extends State<NotificationsPage> with SingleTicker
   }
 
   void _showNotificationDetailDialog(NotificationModel notification) {
+    ColorScheme colorScheme = Theme.of(context).colorScheme;
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -497,7 +502,7 @@ class _NotificationsPageState extends State<NotificationsPage> with SingleTicker
                 DateFormatUtil.formatDateTime(notification.createdAt),
                 style: TextStyle(
                   fontSize: 12,
-                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                  color: colorScheme.onPrimary.withOpacity(0.6),
                 ),
               ),
               const SizedBox(height: 16),
@@ -551,7 +556,11 @@ class _NotificationsPageState extends State<NotificationsPage> with SingleTicker
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: Text(AppLocale.close.getString(context)),
+            child: Text(AppLocale.close.getString(context), 
+              style: TextStyle(
+                color: colorScheme.onPrimary,
+              ),
+            ),
           ),
         ],
       ),

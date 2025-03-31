@@ -34,7 +34,7 @@ class _PendingVotingEventListPageState extends State<PendingVotingEventListPage>
     _searchController = TextEditingController();
     
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-    _loadVotingEvents();
+      _loadVotingEvents();
     });
   }
 

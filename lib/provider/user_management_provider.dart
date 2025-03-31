@@ -43,7 +43,12 @@ class UserManagementProvider extends ChangeNotifier {
   Future<bool> freezeUser() async {
     try {
       await _userManagementRepository.freezeUser(_selectedUser.userID, _selectedUser.role, _selectedUser.email);
+      int index = _staffList.indexWhere((user) => user.userID == _selectedUser.userID);
+      if (index != -1) {
+        _staffList[index].setFreezed(true);
+      }
       _selectedUser.freezed = true;
+      notifyListeners();
       return true;
     } catch (e) {
       print("Error freezing user (user_management_provider): $e");

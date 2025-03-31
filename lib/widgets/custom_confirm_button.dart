@@ -56,7 +56,7 @@ class _CustomConfirmButtonState extends State<CustomConfirmButton> {
               ? (widget.backgroundColor ?? 
                 colorScheme.tertiary).withOpacity(1.0) // Change background on long press
               : widget.backgroundColor ??
-                colorScheme.secondary,
+                colorScheme.primary,
           // border: Border.all(color: colorScheme.onPrimary),
           borderRadius: BorderRadius.circular(widget.borderRadius ?? 8.0),
         ),

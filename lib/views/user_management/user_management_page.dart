@@ -169,8 +169,8 @@ class _UserManagementPageState extends State<UserManagementPage> with SingleTick
             Tab(text: AppLocale.staff.getString(context)),
             Tab(text: AppLocale.student.getString(context)),
           ],
-          indicatorColor: colorScheme.onSecondary,
-          labelColor: colorScheme.onSecondary,
+          indicatorColor: colorScheme.onPrimary,
+          labelColor: colorScheme.onPrimary,
         ) : null,
       ),
       backgroundColor: colorScheme.tertiary,
@@ -305,6 +305,7 @@ class _UserManagementPageState extends State<UserManagementPage> with SingleTick
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       elevation: 2,
+      color: colorScheme.secondary,
       child: GestureDetector(
         onTap: () => _handleUserAction(userID),
         child: Stack(

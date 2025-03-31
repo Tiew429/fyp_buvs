@@ -97,17 +97,6 @@ class _AdminDashboardState extends State<AdminDashboard> {
           'zh': ['报告', '分析', '统计', '结果']
         }
       },
-      {
-        'text': AppLocale.audit.getString(context),
-        'icon': Icons.security,
-        'description': AppLocale.verify.getString(context),
-        'onTap': () => NavigationHelper.navigateToAuditListPage(context),
-        'searchTerms': {
-          'en': ['audit', 'verification', 'check', 'logs'],
-          'ms': ['audit', 'pengesahan', 'semak', 'log'],
-          'zh': ['审计', '验证', '检查', '日志']
-        }
-      },
     ];
   }
   

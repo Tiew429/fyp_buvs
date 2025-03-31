@@ -269,8 +269,9 @@ class ReportService {
     // create a PDF document
     final pdf = pw.Document();
     
-    // create a PDF theme with default fonts (removing Google Fonts dependency for simplification)
-    // if you want to use Google Fonts, you'll need to add the printing package and PdfGoogleFonts
+    // sort candidates by votes (descending)
+    final sortedCandidates = List<Candidate>.from(votingEvent.candidates)
+      ..sort((a, b) => b.votesReceived.compareTo(a.votesReceived));
     
     // add pages to the PDF
     pdf.addPage(
@@ -320,7 +321,12 @@ class ReportService {
                 'Winning Percentage:', 
                 '${(votingEvent.voters.isNotEmpty ? (winner.votesReceived / votingEvent.voters.length * 100) : 0).toStringAsFixed(2)}%'
               ),
+              pw.SizedBox(height: 20),
             ],
+            
+            // vote statistics bar chart
+            pw.Header(level: 1, text: 'Vote Statistics'),
+            _buildVoteStatisticsChart(sortedCandidates),
             
             // signature and timestamp
             pw.SizedBox(height: 40),
@@ -397,6 +403,49 @@ class ReportService {
         candidate.bio,
         candidate.votesReceived.toString(),
       ]).toList(),
+    );
+  }
+  
+  pw.Widget _buildVoteStatisticsChart(List<Candidate> candidates) {
+    // Generate bar chart data
+    final maxVotes = candidates.isNotEmpty 
+        ? candidates.map((c) => c.votesReceived).reduce((a, b) => a > b ? a : b) 
+        : 0;
+    
+    // Only display top 5 candidates if there are more than 5
+    final chartCandidates = candidates.length > 5 
+        ? candidates.sublist(0, 5) 
+        : candidates;
+    
+    return pw.Container(
+      height: 200,
+      child: pw.Chart(
+        title: pw.Text('Votes by Candidate'),
+        grid: pw.CartesianGrid(
+          xAxis: pw.FixedAxis.fromStrings(
+            chartCandidates.map((c) => c.name).toList(),
+            marginStart: 30,
+            marginEnd: 30,
+            ticks: true,
+          ),
+          yAxis: pw.FixedAxis(
+            [0, maxVotes ~/ 2, maxVotes],
+            format: (v) => v.toInt().toString(),
+            divisions: true,
+          ),
+        ),
+        datasets: [
+          pw.BarDataSet(
+            legend: 'Votes',
+            width: 25,
+            color: PdfColors.blue,
+            data: List.generate(
+              chartCandidates.length,
+              (i) => pw.PointChartValue(i.toDouble(), chartCandidates[i].votesReceived.toDouble()),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
