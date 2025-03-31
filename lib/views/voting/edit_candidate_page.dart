@@ -21,6 +21,22 @@ class EditCandidatePage extends StatefulWidget {
     required this.candidate,
   });
 
+  static EditCandidatePage fromExtra(
+    BuildContext context, 
+    Map<String, dynamic> extra, 
+    {
+      required VotingEventProvider votingEventProvider,
+      required CandidateProvider candidateProvider,
+    }
+  ) {
+    final candidate = extra['candidate'] as Candidate;
+    return EditCandidatePage(
+      votingEventProvider: votingEventProvider,
+      candidateProvider: candidateProvider,
+      candidate: candidate,
+    );
+  }
+
   @override
   State<EditCandidatePage> createState() => _EditCandidatePageState();
 }
@@ -94,7 +110,7 @@ class _EditCandidatePageState extends State<EditCandidatePage> {
             context, 
             AppLocale.candidateUpdatedSuccessfully.getString(context)
           );
-          Navigator.of(context).pop();
+          Navigator.of(context).pop(true);
         }
       } else {
         throw Exception(AppLocale.errorUpdatingCandidate.getString(context));

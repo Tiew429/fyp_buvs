@@ -27,29 +27,47 @@ class _PendingVotingEventListPageState extends State<PendingVotingEventListPage>
   late List<VotingEvent> _pendingAndDeprecatedEvents = [];
   String _searchQuery = '';
   late TextEditingController _searchController;
+  bool _isFirstLoad = true;
+  List<VotingEvent> _filteredEvents = [];
 
   @override
   void initState() {
     super.initState();
     _searchController = TextEditingController();
     
+    // set up a listener to update when the provider changes
+    widget._votingEventProvider.addListener(_updateEventList);
+    
+    // delay initial loading to after first build
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       _loadVotingEvents();
+      _isFirstLoad = false;
     });
   }
 
   @override
   void dispose() {
     _searchController.dispose();
+    widget._votingEventProvider.removeListener(_updateEventList);
     super.dispose();
+  }
+  
+  // update the local event list when the provider's data changes
+  void _updateEventList() {
+    if (!mounted) return;
+    
+    setState(() {
+      _filterPendingEvents();
+      _sortPendingEvents();
+      _applySearchFilter();
+      _isLoading = false;
+    });
   }
 
   Future<void> _loadVotingEvents() async {
     setState(() => _isLoading = true);
     await widget._votingEventProvider.loadVotingEvents();
-    _filterPendingEvents();
-    _sortPendingEvents();
-    setState(() => _isLoading = false);
+    _updateEventList();
   }
 
   void _filterPendingEvents() {
@@ -100,19 +118,20 @@ class _PendingVotingEventListPageState extends State<PendingVotingEventListPage>
     return AppLocale.waitingToStart.getString(context);
   }
 
-  List<VotingEvent> _getFilteredEvents() {
+  void _applySearchFilter() {
     if (_searchQuery.isEmpty) {
-      return _pendingAndDeprecatedEvents;
+      _filteredEvents = _pendingAndDeprecatedEvents;
+      return;
     }
     
-    List<VotingEvent> filtered = _pendingAndDeprecatedEvents.where((event) =>
+    _filteredEvents = _pendingAndDeprecatedEvents.where((event) =>
       event.title.toLowerCase().contains(_searchQuery.toLowerCase()) ||
       event.description.toLowerCase().contains(_searchQuery.toLowerCase()) ||
       event.votingEventID.toLowerCase().contains(_searchQuery.toLowerCase())
     ).toList();
     
     // maintain the same sorting for filtered results
-    filtered.sort((a, b) {
+    _filteredEvents.sort((a, b) {
       String statusA = _getEventStatus(a);
       String statusB = _getEventStatus(b);
       
@@ -123,8 +142,6 @@ class _PendingVotingEventListPageState extends State<PendingVotingEventListPage>
       
       return statusPriority[statusA]!.compareTo(statusPriority[statusB]!);
     });
-    
-    return filtered;
   }
 
   void _showVotingEventDetails(VotingEvent event) {
@@ -136,7 +153,7 @@ class _PendingVotingEventListPageState extends State<PendingVotingEventListPage>
     
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         backgroundColor: colorScheme.surface,
         title: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -215,7 +232,7 @@ class _PendingVotingEventListPageState extends State<PendingVotingEventListPage>
                   width: double.infinity,
                   alignment: Alignment.center,
                   child: CustomAnimatedButton(
-                    onPressed: () => _deprecateEvent(event),
+                    onPressed: () => _showDeprecateConfirmation(event, dialogContext),
                     backgroundColor: Colors.red,
                     text: AppLocale.deprecate.getString(context),
                   ),
@@ -225,7 +242,7 @@ class _PendingVotingEventListPageState extends State<PendingVotingEventListPage>
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: () => Navigator.of(dialogContext).pop(),
             child: Text(
               AppLocale.close.getString(context),
               style: TextStyle(color: colorScheme.onPrimary),
@@ -262,41 +279,54 @@ class _PendingVotingEventListPageState extends State<PendingVotingEventListPage>
     );
   }
 
-  Future<void> _deprecateEvent(VotingEvent event) async {
-    Navigator.of(context).pop(); // close current dialog
-    
-    // show confirmation dialog
+  // show the confirmation dialog and handle the deprecation
+  void _showDeprecateConfirmation(VotingEvent event, BuildContext detailsDialogContext) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      barrierDismissible: false, // prevent dismissing by tapping outside
+      builder: (confirmContext) => AlertDialog(
         title: Text(AppLocale.deprecated.getString(context)),
         content: Text('${AppLocale.areYouSureYouWantToDeprecate.getString(context)} "${event.title}"?'),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: () => Navigator.of(confirmContext).pop(), // just close confirmation
             child: Text(AppLocale.cancel.getString(context)),
           ),
           TextButton(
             onPressed: () async {
-              Navigator.of(context).pop();
+              // first close confirmation dialog
+              Navigator.of(confirmContext).pop();
+              // then close details dialog
+              Navigator.of(detailsDialogContext).pop();
+              
+              // now handle the deprecation in the main screen
               setState(() => _isLoading = true);
               
               try {
-                await widget._votingEventProvider.deprecateVotingEvent(event);
+                bool success = await widget._votingEventProvider.deprecateVotingEvent(event);
+                
                 if (mounted) {
-                  SnackbarUtil.showSnackBar(
-                    context,
-                    AppLocale.votingEventDeprecatedSuccessfully.getString(context)
-                  );
-                  _loadVotingEvents(); // refresh the list
+                  if (success) {
+                    SnackbarUtil.showSnackBar(
+                      context,
+                      AppLocale.votingEventDeprecatedSuccessfully.getString(context)
+                    );
+                  } else {
+                    SnackbarUtil.showSnackBar(
+                      context,
+                      AppLocale.failedToDeprecateVotingEvent.getString(context)
+                    );
+                  }
+                  
+                  await _loadVotingEvents(); // refresh the list
                 }
               } catch (e) {
                 if (mounted) {
-                  setState(() => _isLoading = false);
                   SnackbarUtil.showSnackBar(
                     context,
                     '${AppLocale.failedToDeprecateVotingEvent.getString(context)}: $e'
                   );
+                  setState(() => _isLoading = false);
                 }
               }
             },
@@ -308,6 +338,15 @@ class _PendingVotingEventListPageState extends State<PendingVotingEventListPage>
         ],
       ),
     );
+  }
+  
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // refresh data every time the page is shown/navigated to, but avoid double-loading during initialization
+    if (!_isFirstLoad) {
+      _loadVotingEvents();
+    }
   }
 
   @override
@@ -321,9 +360,9 @@ class _PendingVotingEventListPageState extends State<PendingVotingEventListPage>
         backgroundColor: colorScheme.secondary,
       ),
       backgroundColor: colorScheme.tertiary,
-      body: _isLoading 
-              ? const Center(child: CircularProgressIndicator())
-        : RefreshIndicator(
+      body: Stack(
+        children: [
+          RefreshIndicator(
             onRefresh: _loadVotingEvents,
             child: Column(
               children: [
@@ -334,31 +373,42 @@ class _PendingVotingEventListPageState extends State<PendingVotingEventListPage>
                     onChanged: (value) {
                       setState(() {
                         _searchQuery = value;
+                        _applySearchFilter();
                       });
                     },
                     hintText: AppLocale.searchVotingEventTitle.getString(context)
                   ),
                 ),
                 Expanded(
-                  child: _getFilteredEvents().isEmpty
+                  child: _filteredEvents.isEmpty && !_isLoading
                     ? EmptyStateWidget(
                         message: AppLocale.noPendingStatusVotingEventAvailable.getString(context),
                         icon: Icons.pending_actions,
                       )
                     : ScrollableResponsiveWidget(
                         phone: Column(
-                      children: [
-                            ..._getFilteredEvents().map((votingEvent) => VotingEventBox(
+                          children: [
+                            ..._filteredEvents.map((votingEvent) => VotingEventBox(
                               onTap: () => _showVotingEventDetails(votingEvent),
                               votingEvent: votingEvent,
                             )),
                           ],
                         ),
                         tablet: Container(),
-                          ),
-                        ),
-                      ],
-                    ),
+                      ),
+                ),
+              ],
+            ),
+          ),
+          // loading overlay
+          if (_isLoading)
+            Container(
+              color: Colors.black.withOpacity(0.3),
+              child: const Center(
+                child: CircularProgressIndicator(),
+              ),
+            ),
+        ],
       ),
     );
   }

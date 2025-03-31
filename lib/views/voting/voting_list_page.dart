@@ -31,9 +31,10 @@ class VotingListPage extends StatefulWidget {
 
 class _VotingListPageState extends State<VotingListPage> {
   bool _isLoading = true;
-  late List<VotingEvent> _votingEventList;
+  late List<VotingEvent> _votingEventList = [];
   late TextEditingController _searchController;
   List<VotingEvent> _filteredVotingEventList = [];
+  bool _isFirstLoad = true;
 
   @override
   void initState() {
@@ -47,6 +48,7 @@ class _VotingListPageState extends State<VotingListPage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         _loadVotingEvents();
+        _isFirstLoad = false;
       }
     });
   }
@@ -68,14 +70,34 @@ class _VotingListPageState extends State<VotingListPage> {
           .where((event) => event.status.name != 'deprecated')
           .toList();
       _sortVotingEvents(_votingEventList);
-      _filteredVotingEventList = _votingEventList;
+      _applySearchFilter();
       _isLoading = false;
     });
   }
 
   Future<void> _loadVotingEvents() async {
+    setState(() => _isLoading = true);
     await widget.votingEventProvider.loadVotingEvents();
     _updateEventList();
+  }
+
+  // apply search filter based on current search query
+  void _applySearchFilter() {
+    String searchText = _searchController.text.toLowerCase();
+    if (searchText.isEmpty) {
+      _filteredVotingEventList = _votingEventList;
+      return;
+    }
+
+    _filteredVotingEventList = _votingEventList
+        .where((event) => 
+          event.title.toLowerCase().contains(searchText) ||
+          event.description.toLowerCase().contains(searchText) ||
+          event.votingEventID.toLowerCase().contains(searchText)
+        )
+        .toList();
+    // sort the filtered results
+    _sortVotingEvents(_filteredVotingEventList);
   }
 
   // sort events by status: 1. ongoing, 2. waiting to start, 3. ended
@@ -120,6 +142,15 @@ class _VotingListPageState extends State<VotingListPage> {
     
     // event is ongoing
     return AppLocale.ongoing.getString(context);
+  }
+  
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // refresh data every time the page is shown/navigated to, but avoid double-loading during initialization
+    if (!_isFirstLoad) {
+      _loadVotingEvents();
+    }
   }
 
   @override
@@ -176,22 +207,14 @@ class _VotingListPageState extends State<VotingListPage> {
                         controller: _searchController,
                         onChanged: (value) {
                           setState(() {
-                            _filteredVotingEventList = _votingEventList
-                                .where((event) => 
-                                  event.title.toLowerCase().contains(value.toLowerCase()) ||
-                                  event.description.toLowerCase().contains(value.toLowerCase()) ||
-                                  event.votingEventID.toLowerCase().contains(value.toLowerCase())
-                                )
-                                .toList();
-                            // sort the filtered results
-                            _sortVotingEvents(_filteredVotingEventList);
+                            _applySearchFilter();
                           });
                         },
                         hintText: AppLocale.searchVotingEventTitle.getString(context)
                       ),
                     ),
                     Expanded(
-                      child: _filteredVotingEventList.isEmpty
+                      child: _filteredVotingEventList.isEmpty && !_isLoading
                         ? EmptyStateWidget(
                             message: AppLocale.noVotingEventAvailable.getString(context),
                             icon: Icons.how_to_vote,

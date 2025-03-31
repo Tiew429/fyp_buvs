@@ -154,7 +154,7 @@ class _ProfilePageViewPageState extends State<ProfilePageViewPage> {
   Future<void> _verifyUser() async {
     final result = await NavigationHelper.navigateToUserVerificationPage(context);
     if (result == true) {
-      // pop this page with a result to indicate changes to the list
+      // Pop this page with a result to indicate changes to the list
       Navigator.of(context).pop(true);
     }
   }
@@ -411,12 +411,12 @@ class _ProfilePageViewPageState extends State<ProfilePageViewPage> {
         if (Navigator.canPop(context)) {
           Navigator.of(context, rootNavigator: true).pop();
         }
-        await widget.userManagementProvider.freezeUser();
-        setState(() {
+        setState(() async {
+          await widget.userManagementProvider.freezeUser();
           _isLoading = false;
         });
         SnackbarUtil.showSnackBar(context, (AppLocale.accountHasBeenFrozen.getString(context)));
-        // return true to indicate data was changed
+        // Return true to indicate data was changed
         Navigator.of(context).pop(true);
       }
     });

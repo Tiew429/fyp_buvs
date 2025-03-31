@@ -460,9 +460,12 @@ class _ManageCandidatePageState extends State<ManageCandidatePage> with SingleTi
             ),
           ),
           ElevatedButton.icon(
-            onPressed: () {
+            onPressed: () async {
               Navigator.of(context).pop();
-              NavigationHelper.navigateToEditCandidatePage(context, candidate);
+              final result = await NavigationHelper.navigateToEditCandidatePage(context, candidate);
+              if (result == true) {
+                await _refreshCandidateData();
+              }
             },
             icon: const Icon(Icons.edit, color: Colors.white),
             label: Text(

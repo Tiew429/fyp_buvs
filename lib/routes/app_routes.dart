@@ -574,19 +574,18 @@ List<RouteBase> router(String initialRoute, GlobalKey<NavigatorState> navigatorK
       path: '/${RouterPath.editcandidatepage.path}',
       name: RouterPath.editcandidatepage.path,
       pageBuilder: (context, state) {
-        final Map<String, dynamic> extras = state.extra as Map<String, dynamic>? ?? {
-          'candidate': null,
-        };
+        final candidateProvider = getCandidateProvider();
+        final votingEventProvider = getVotingEventProvider();
         
-        final candidate = extras['candidate'];
-        
-        return buildPageWithAnimation(
-          EditCandidatePage(
-            votingEventProvider: getVotingEventProvider()!,
-            candidateProvider: getCandidateProvider()!,
-            candidate: candidate,
-          ), 
-          state,
+        return MaterialPage(
+          child: votingEventProvider != null && candidateProvider != null
+              ? EditCandidatePage.fromExtra(
+                  context,
+                  state.extra as Map<String, dynamic>,
+                  votingEventProvider: votingEventProvider,
+                  candidateProvider: candidateProvider,
+                )
+              : Container(),
         );
       },
     ),

@@ -410,8 +410,11 @@ class _VotingEventPageState extends State<VotingEventPage> {
                                                               fontWeight: FontWeight.bold,
                                                               fontSize: 16,
                                                             ),
+                                                            softWrap: true,
+                                                            maxLines: 1,
+                                                            overflow: TextOverflow.ellipsis,
                                                           ),
-                                                          const SizedBox(height: 4),
+                                                          const SizedBox(height: 6),
                                                           if (candidate.bio.isNotEmpty)
                                                             Text(candidate.bio,
                                                               maxLines: 1,
@@ -468,7 +471,11 @@ class _VotingEventPageState extends State<VotingEventPage> {
                                 AspectRatio(
                                   aspectRatio: 16 / 9,
                                   child: CustomBarChart(
-                                    xAxisList: _votingEvent.candidates.map((candidate) => candidate.name).toList(),
+                                    xAxisList: _votingEvent.candidates.map((candidate) => 
+                                      candidate.name.length > 10 
+                                      ? '${candidate.name.substring(0, 10)}...' 
+                                      : candidate.name
+                                    ).toList(),
                                     yAxisList: _votingEvent.candidates.map((candidate) => candidate.votesReceived.toDouble()).toList(),
                                     xAxisName: AppLocale.candidate.getString(context),
                                     yAxisName: AppLocale.votesReceived.getString(context),
@@ -811,7 +818,14 @@ class _VotingEventPageState extends State<VotingEventPage> {
             Expanded(
                 child: Text(
               candidate.name,
-              style: TextStyle(color: colorScheme.onPrimary),
+              style: TextStyle(
+                color: colorScheme.onPrimary,
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+              ),
+              softWrap: true,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
             )),
           ],
         ),

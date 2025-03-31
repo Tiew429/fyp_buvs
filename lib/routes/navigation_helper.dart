@@ -90,7 +90,11 @@ class NavigationHelper {
   }
   
   static Future<dynamic> navigateToEditCandidatePage(BuildContext context, Candidate candidate) {
-    return context.push<dynamic>('/${RouterPath.editcandidatepage.path}', extra: candidate);
+    return context.push<dynamic>('/${RouterPath.editcandidatepage.path}', 
+      extra: {
+        'candidate': candidate,
+      },
+    );
   }
 
   // pending VE
