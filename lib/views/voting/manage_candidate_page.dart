@@ -46,6 +46,8 @@ class _ManageCandidatePageState extends State<ManageCandidatePage> with SingleTi
   @override
   void dispose() {
     _tabController.dispose();
+    // Return true to indicate that candidates were managed
+    Navigator.of(context).pop(true);
     super.dispose();
   }
 
@@ -61,7 +63,15 @@ class _ManageCandidatePageState extends State<ManageCandidatePage> with SingleTi
         actions: [
           IconButton(
             icon: const Icon(Icons.add),
-            onPressed: () => NavigationHelper.navigateToAddCandidatePage(context),
+            onPressed: () async {
+              // navigate to add candidate page and wait for result
+              final result = await NavigationHelper.navigateToAddCandidatePage(context);
+              
+              // refresh data if candidates were added
+              if (result == true) {
+                await _refreshCandidateData();
+              }
+            },
             tooltip: AppLocale.addCandidate.getString(context),
           ),
         ],
@@ -87,7 +97,15 @@ class _ManageCandidatePageState extends State<ManageCandidatePage> with SingleTi
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => NavigationHelper.navigateToAddCandidatePage(context),
+        onPressed: () async {
+          // navigate to add candidate page and wait for result
+          final result = await NavigationHelper.navigateToAddCandidatePage(context);
+          
+          // refresh data if candidates were added
+          if (result == true) {
+            await _refreshCandidateData();
+          }
+        },
         backgroundColor: colorScheme.primary,
         icon: const Icon(Icons.add),
         label: Text(AppLocale.addCandidate.getString(context)),
@@ -352,6 +370,7 @@ class _ManageCandidatePageState extends State<ManageCandidatePage> with SingleTi
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
+        backgroundColor: colorScheme.secondary,
         title: Row(
           children: [
             CircleAvatar(
@@ -465,7 +484,7 @@ class _ManageCandidatePageState extends State<ManageCandidatePage> with SingleTi
     
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         title: Text(AppLocale.removeCandidate.getString(context)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -510,7 +529,7 @@ class _ManageCandidatePageState extends State<ManageCandidatePage> with SingleTi
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: () => Navigator.of(dialogContext).pop(),
             style: TextButton.styleFrom(
               backgroundColor: colorScheme.primary,
             ),
@@ -522,9 +541,11 @@ class _ManageCandidatePageState extends State<ManageCandidatePage> with SingleTi
             ),
           ),
           ElevatedButton.icon(
-            onPressed: () {
-              Navigator.of(context).pop();
-              _removeCandidate(candidate);
+            onPressed: () async {
+              Navigator.of(dialogContext).pop(); // close dialog
+              await _removeCandidate(candidate);
+              // after removing the candidate, update UI and notify the previous page
+              Navigator.of(context).pop(true);
             },
             icon: const Icon(Icons.delete, color: Colors.white),
             label: Text(
@@ -656,5 +677,16 @@ class _ManageCandidatePageState extends State<ManageCandidatePage> with SingleTi
         );
       }
     }
+  }
+
+  Future<void> _refreshCandidateData() async {
+    // refresh the voting event data to get the latest candidates
+    await widget._votingEventProvider.loadVotingEvents();
+    
+    setState(() {
+      _votingEvent = widget._votingEventProvider.selectedVotingEvent;
+      _confirmedCandidates = _votingEvent.candidates;
+      _pendingCandidates = _votingEvent.pendingCandidates;
+    });
   }
 }

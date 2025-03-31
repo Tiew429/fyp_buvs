@@ -151,6 +151,14 @@ class _ProfilePageViewPageState extends State<ProfilePageViewPage> {
       widget.userProvider.user?.userID != widget.userManagementProvider.selectedUser?.userID);
   }
   
+  Future<void> _verifyUser() async {
+    final result = await NavigationHelper.navigateToUserVerificationPage(context);
+    if (result == true) {
+      // pop this page with a result to indicate changes to the list
+      Navigator.of(context).pop(true);
+    }
+  }
+  
   Widget _buildActionButtons() {
     ColorScheme colorScheme = Theme.of(context).colorScheme;
 
@@ -158,7 +166,7 @@ class _ProfilePageViewPageState extends State<ProfilePageViewPage> {
       children: [
         // verification button
         ElevatedButton.icon(
-          onPressed: () => NavigationHelper.navigateToUserVerificationPage(context),
+          onPressed: _verifyUser,
           icon: const Icon(Icons.verified_user),
           label: Text(AppLocale.verifyUserInformation.getString(context)),
           style: ElevatedButton.styleFrom(
@@ -403,11 +411,13 @@ class _ProfilePageViewPageState extends State<ProfilePageViewPage> {
         if (Navigator.canPop(context)) {
           Navigator.of(context, rootNavigator: true).pop();
         }
-        setState(() async {
-          await widget.userManagementProvider.freezeUser();
+        await widget.userManagementProvider.freezeUser();
+        setState(() {
           _isLoading = false;
         });
         SnackbarUtil.showSnackBar(context, (AppLocale.accountHasBeenFrozen.getString(context)));
+        // return true to indicate data was changed
+        Navigator.of(context).pop(true);
       }
     });
     return true;

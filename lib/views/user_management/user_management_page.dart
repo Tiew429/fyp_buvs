@@ -149,9 +149,15 @@ class _UserManagementPageState extends State<UserManagementPage> with SingleTick
     }
   }
   
-  void _handleUserAction(String userID) {
+  void _handleUserAction(String userID) async {
     widget.userManagementProvider.selectUser(userID);
-    NavigationHelper.navigateToProfilePageViewPage(context);
+    // navigate and wait for result
+    final result = await NavigationHelper.navigateToProfilePageViewPage(context);
+    
+    // if result is true, reload users
+    if (result == true) {
+      await _loadUsers();
+    }
   }
 
   @override

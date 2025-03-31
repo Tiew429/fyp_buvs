@@ -72,28 +72,25 @@ class NavigationHelper {
       needsAppKitModal: false,
     );
   }
-  static void navigateToVotingEventCreatePage(BuildContext context) {
-    context.push('/${RouterPath.votingeventcreatepage.path}');
+  static Future<dynamic> navigateToVotingEventCreatePage(BuildContext context) {
+    return context.push<dynamic>('/${RouterPath.votingeventcreatepage.path}');
   }
   static void navigateToVotingEventPage(BuildContext context) {
     context.push('/${RouterPath.votingeventpage.path}');
   }
-  static void navigateToEditVotingEventPage(BuildContext context) {
-    context.push('/${RouterPath.editvotingeventpage.path}');
+  static Future<dynamic> navigateToEditVotingEventPage(BuildContext context) {
+    return context.push<dynamic>('/${RouterPath.editvotingeventpage.path}');
   }
-  static void navigateToManageCandidatePage(BuildContext context) {
-    context.push('/${RouterPath.managecandidatepage.path}');
+  static Future<dynamic> navigateToManageCandidatePage(BuildContext context) {
+    return context.push<dynamic>('/${RouterPath.managecandidatepage.path}');
   }
-  static void navigateToAddCandidatePage(BuildContext context) {
-    context.push('/${RouterPath.addcandidatepage.path}');
+  
+  static Future<dynamic> navigateToAddCandidatePage(BuildContext context) {
+    return context.push<dynamic>('/${RouterPath.addcandidatepage.path}');
   }
-
-  static void navigateToEditCandidatePage(BuildContext context, Candidate candidate) {
-    context.push('/${RouterPath.editcandidatepage.path}', 
-      extra: {
-        'candidate': candidate,
-      },
-    );
+  
+  static Future<dynamic> navigateToEditCandidatePage(BuildContext context, Candidate candidate) {
+    return context.push<dynamic>('/${RouterPath.editcandidatepage.path}', extra: candidate);
   }
 
   // pending VE
@@ -105,11 +102,13 @@ class NavigationHelper {
   static void navigateToUserManagementPage(BuildContext context) {
     context.push('/${RouterPath.usermanagementpage.path}');
   }
-  static void navigateToProfilePageViewPage(BuildContext context) {
-    context.push('/${RouterPath.profilepageviewpage.path}');
+  
+  static Future<dynamic> navigateToProfilePageViewPage(BuildContext context) {
+    return context.push<dynamic>('/${RouterPath.profilepageviewpage.path}');
   }
-  static void navigateToUserVerificationPage(BuildContext context) {
-    context.push('/${RouterPath.userverificationpage.path}');
+  
+  static Future<dynamic> navigateToUserVerificationPage(BuildContext context) {
+    return context.push<dynamic>('/${RouterPath.userverificationpage.path}');
   }
   
 

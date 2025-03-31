@@ -84,7 +84,7 @@ class _EditVotingEventPageState extends State<EditVotingEventPage> {
         if (isEndDate) {
           _showStartDateWarning = false;
         } else {
-          // If start date is after end date, update end date
+          // if start date is after end date, update end date
           if (_endDateController.text.isNotEmpty) {
             DateTime endDate = DateTime.parse(_endDateController.text);
             if (picked.isAfter(endDate)) {
@@ -256,16 +256,16 @@ class _EditVotingEventPageState extends State<EditVotingEventPage> {
       
       bool success = await widget._votingEventViewModel.updateVotingEvent(updatedEvent, _votingEvent);
       
-      // Handle image update if the image was changed
+      // handle image update if the image was changed
       if (success && _imageChanged) {
         if (_imageFile != null) {
-          // Upload new image
+          // upload new image
           success = await widget._votingEventViewModel.updateVotingEventImage(_imageFile!);
           if (!success) {
             SnackbarUtil.showSnackBar(context, AppLocale.failedToUpdateVotingEventImage.getString(context));
           }
         } else if (_votingEvent.imageUrl.isNotEmpty) {
-          // Remove existing image
+          // remove existing image
           success = await widget._votingEventViewModel.removeVotingEventImage();
           if (!success) {
             SnackbarUtil.showSnackBar(context, AppLocale.failedToRemoveVotingEventImage.getString(context));
@@ -274,7 +274,7 @@ class _EditVotingEventPageState extends State<EditVotingEventPage> {
       }
       
       if (success) {
-        NavigationHelper.navigateBack(context);
+        Navigator.of(context).pop(true);
         SnackbarUtil.showSnackBar(context, AppLocale.votingEventUpdatedSuccessfully.getString(context));
       } else {
         SnackbarUtil.showSnackBar(context, AppLocale.failedToUpdateVotingEvent.getString(context));

@@ -183,8 +183,22 @@ class _VotingEventPageState extends State<VotingEventPage> {
           if (widget._user.walletAddress == _votingEvent.createdBy ||
               widget._user.role == UserRole.admin)
             IconButton(
-              onPressed: () =>
-                  NavigationHelper.navigateToEditVotingEventPage(context),
+              onPressed: () async {
+                // navigate to edit page and wait for result
+                final result = await NavigationHelper.navigateToEditVotingEventPage(context);
+                
+                // refresh the data if we got a true result (event updated)
+                if (result == true) {
+                  // reload the updated event
+                  _votingEvent = widget._votingEventProvider.selectedVotingEvent;
+                  
+                  setState(() {
+                    // update display data
+                    votingEventDate = "${_votingEvent.startDate!.day}/${_votingEvent.startDate!.month}/${_votingEvent.startDate!.year} - ${_votingEvent.endDate!.day}/${_votingEvent.endDate!.month}/${_votingEvent.endDate!.year}";
+                    votingEventTime = "${_votingEvent.startTime!.hour}:${_votingEvent.startTime!.minute.toString().padLeft(2, '0')} - ${_votingEvent.endTime!.hour}:${_votingEvent.endTime!.minute.toString().padLeft(2, '0')}";
+                  });
+                }
+              },
               icon: const Icon(FontAwesomeIcons.edit),
             ),
         ],
@@ -474,10 +488,22 @@ class _VotingEventPageState extends State<VotingEventPage> {
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.end,
                               children: [
-                                CustomAnimatedButton(
-                                  onPressed: () => NavigationHelper.navigateToManageCandidatePage(context),
-                                  text: AppLocale.manageCandidate.getString(context),
-                                  width: MediaQuery.of(context).size.width * 0.3,
+                                Expanded(
+                                  child: CustomAnimatedButton(
+                                    onPressed: () async {
+                                      // navigate to manage candidate page
+                                      await NavigationHelper.navigateToManageCandidatePage(context);
+                                      
+                                      // always reload the voting event to get updated candidates 
+                                      // regardless of the result
+                                      await widget._votingEventProvider.loadVotingEvents();
+                                      setState(() {
+                                        _votingEvent = widget._votingEventProvider.selectedVotingEvent;
+                                      });
+                                    },
+                                    text: AppLocale.manageCandidate.getString(context),
+                                    width: MediaQuery.of(context).size.width * 0.3,
+                                  ),
                                 ),
                                 const SizedBox(width: 12),
                                 CustomAnimatedButton(

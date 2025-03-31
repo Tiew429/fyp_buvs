@@ -233,7 +233,7 @@ class _VotingEventCreatePageState extends State<VotingEventCreatePage> {
         return;
       }
 
-      //  onvert Date String to DateTime
+      // convert Date String to DateTime
       DateTime startDate = DateTime.parse(_startDateController.text);
       DateTime endDate = DateTime.parse(_endDateController.text);
 
@@ -268,8 +268,8 @@ class _VotingEventCreatePageState extends State<VotingEventCreatePage> {
         // await widget._votingEventProvider.loadVotingEvents();
         
         if (mounted) {
-          // navigate back to voting list page
-          NavigationHelper.navigateBack(context);
+          // navigate back to voting list page with result
+          Navigator.of(context).pop(true);
           SnackbarUtil.showSnackBar(context, AppLocale.votingEventCreatedSuccessfully.getString(context));
         }
       } else {

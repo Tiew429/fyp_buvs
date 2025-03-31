@@ -249,7 +249,8 @@ class _UserVerificationPageState extends State<UserVerificationPage> {
           SnackBar(content: Text(AppLocale.userVerifiedSuccessfully.getString(context))),
         );
         
-        Navigator.of(context).pop(); // Return to previous screen
+        // return true to indicate the data was changed
+        Navigator.of(context).pop(true);
       } else {
         throw Exception('Failed to verify user');
       }
@@ -290,7 +291,8 @@ class _UserVerificationPageState extends State<UserVerificationPage> {
           SnackBar(content: Text(AppLocale.verificationRejected.getString(context))),
         );
         
-        Navigator.of(context).pop(); // Return to previous screen
+        // return true to indicate the data was changed
+        Navigator.of(context).pop(true);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(AppLocale.failedToRejectVerification.getString(context))),

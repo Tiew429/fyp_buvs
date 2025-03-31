@@ -272,6 +272,7 @@ class _AddCandidatePageState extends State<AddCandidatePage> {
             context, 
             AppLocale.candidatesAddedSuccessfully.getString(context)
           );
+          Navigator.of(context).pop(true);
         }
       }
     } catch (e) {

@@ -141,31 +141,31 @@ class _VotingListPageState extends State<VotingListPage> {
         ],
       ),
       backgroundColor: colorScheme.tertiary,
-      body: widget.walletProvider.walletAddress == null || 
-            widget.walletProvider.walletAddress!.isEmpty
-        ? Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.account_balance_wallet_outlined,
-                  size: 64,
-                  color: colorScheme.onTertiary.withOpacity(0.5),
+      body: Stack(
+        children: [
+          widget.walletProvider.walletAddress == null || 
+                widget.walletProvider.walletAddress!.isEmpty
+            ? Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.account_balance_wallet_outlined,
+                      size: 64,
+                      color: colorScheme.onTertiary.withOpacity(0.5),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      AppLocale.pleaseConnectYourWallet.getString(context),
+                      style: TextStyle(
+                        color: colorScheme.onTertiary,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 16),
-                Text(
-                  AppLocale.pleaseConnectYourWallet.getString(context),
-                  style: TextStyle(
-                    color: colorScheme.onTertiary,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-          )
-        : _isLoading 
-            ? const Center(child: CircularProgressIndicator())
+              )
             : RefreshIndicator(
                 onRefresh: _loadVotingEvents,
                 child: Column(
@@ -217,13 +217,31 @@ class _VotingListPageState extends State<VotingListPage> {
                   ],
                 ),
               ),
+          // loading overlay
+          if (_isLoading)
+            Container(
+              color: Colors.black.withOpacity(0.3),
+              child: const Center(
+                child: CircularProgressIndicator(),
+              ),
+            ),
+        ],
+      ),
       floatingActionButton: (
         (widget.userProvider.user!.role == UserRole.admin ||
         widget.userProvider.user!.role == UserRole.staff) &&
         (widget.walletProvider.walletAddress != null &&
         widget.walletProvider.walletAddress!.isNotEmpty)
       ) ? FloatingActionButton.extended(
-        onPressed: () => NavigationHelper.navigateToVotingEventCreatePage(context),
+        onPressed: () async {
+          // navigate to create page and wait for result
+          final result = await NavigationHelper.navigateToVotingEventCreatePage(context);
+          
+          // refresh the list if we got a true result (new event created)
+          if (result == true) {
+            await _loadVotingEvents();
+          }
+        },
         icon: const Icon(Icons.add),
         label: Text(AppLocale.createNew.getString(context)),
         backgroundColor: colorScheme.primary,
