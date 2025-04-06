@@ -1,5 +1,6 @@
 import 'package:blockchain_university_voting_system/blockchain/smart_contract_service.dart';
 import 'package:blockchain_university_voting_system/blockchain/wallet_connect_initializer.dart';
+import 'package:blockchain_university_voting_system/blockchain/wallet_connect_service.dart';
 import 'package:blockchain_university_voting_system/data/router_path.dart';
 import 'package:blockchain_university_voting_system/data/theme_color.dart';
 import 'package:blockchain_university_voting_system/database/shared_preferences.dart';
@@ -21,12 +22,18 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_localization/flutter_localization.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:blockchain_university_voting_system/blockchain/wallet_connect_service.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:timezone/data/latest.dart' as tz;
+import 'package:timezone/timezone.dart' as tz;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  tz.initializeTimeZones();
+  final malaysia = tz.getLocation('Asia/Kuala_Lumpur');
+  final now = tz.TZDateTime.now(malaysia);
+  print('Malaysia time: $now');
 
   await FlutterLocalization.instance.ensureInitialized();
 
@@ -36,6 +43,10 @@ Future<void> main() async {
   await FirebaseService.initializeNotificationSettings();
   
   await dotenv.load(fileName: ".env");
+
+  // 重置区块链服务，确保每次启动应用时服务是干净的
+  WalletConnectService.reset();
+  SmartContractService.reset();
 
   // Determine the initial route
   SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -64,10 +75,18 @@ Future<void> main() async {
           create: (_) => StudentProvider()
         ),
         Provider<WalletConnectService>(
-          create: (_) => WalletConnectService(),
+          create: (_) {
+            // 每次都重置并创建新实例
+            WalletConnectService.reset();
+            return WalletConnectService();
+          },
         ),
         Provider<SmartContractService>(
-          create: (_) => SmartContractService(),
+          create: (_) {
+            // 每次都重置并创建新实例
+            SmartContractService.reset();
+            return SmartContractService();
+          },
         ),
         ChangeNotifierProvider(
           create: (_) => NotificationProvider(),
@@ -132,7 +151,7 @@ class _MainAppState extends State<MainApp> {
   @override
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
-    final userViewModel = Provider.of<UserProvider>(context, listen: false);
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
     
     return widget.user != null
       ? FutureBuilder(
@@ -144,17 +163,17 @@ class _MainAppState extends State<MainApp> {
               return const Text('Error loading user data');
             } else {
               if (snapshot.data != null) {
-                userViewModel.setUser(snapshot.data!);
-                userViewModel.setInitialRoute('/${RouterPath.homepage.path}');
+                userProvider.setUser(snapshot.data!);
+                userProvider.setInitialRoute('/${RouterPath.homepage.path}');
               }
             }
-            return _buildApp(themeProvider, userViewModel);
+            return _buildApp(themeProvider, userProvider);
           },
         )
-      : _buildApp(themeProvider, userViewModel);
+      : _buildApp(themeProvider, userProvider);
   }
 
-  Widget _buildApp(ThemeProvider themeProvider, dynamic userViewModel) {
+  Widget _buildApp(ThemeProvider themeProvider, dynamic userProvider) {
     return MaterialApp.router(
       supportedLocales: _localization.supportedLocales,
       localizationsDelegates: [
@@ -169,7 +188,7 @@ class _MainAppState extends State<MainApp> {
       darkTheme: buildDarkTheme(),
       routerConfig: GoRouter(
         navigatorKey: rootNavigatorKey,
-        initialLocation: userViewModel?.initialRoute ?? '/${RouterPath.loginpage.path}',
+        initialLocation: userProvider?.initialRoute ?? '/${RouterPath.loginpage.path}',
         routes: [
           ShellRoute(
             builder: (context, state, child) {
@@ -177,7 +196,7 @@ class _MainAppState extends State<MainApp> {
                 child: child,
               );
             },
-            routes: router(userViewModel?.initialRoute ?? '/${RouterPath.loginpage.path}', rootNavigatorKey),
+            routes: router(userProvider?.initialRoute ?? '/${RouterPath.loginpage.path}', rootNavigatorKey),
           ),
         ],
       ),

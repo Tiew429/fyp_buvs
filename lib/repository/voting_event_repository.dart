@@ -31,12 +31,12 @@ class VotingEventRepository {
       List<dynamic> votingEvents = await _smartContractService.getVotingEventsFromBlockchain(
         manualRefresh: manualRefresh,
       );
-
+      
       if (votingEvents.isEmpty) {
         print("Voting_Event_Repository (getVotingEventList): No voting events found from blockchain.");
         return [];
       }
-
+      
       // using for-loop to go through every voting event in the list
       for (var event in votingEvents) {
         try {
@@ -44,7 +44,7 @@ class VotingEventRepository {
             print("Voting_Event_Repository (getVotingEventList): Invalid event data format: $event");
             continue;
           }
-
+          
           // the votingEvents list does not include all details for the voting event object
           // so we need to retrieve also from firebase for the rest of the details
           String votingEventID = event[0]?.toString() ?? '';
@@ -55,21 +55,21 @@ class VotingEventRepository {
           }
 
           votingEventSnapshot = await _firestore
-              .collection('votingevents')
-              .where('votingEventID', isEqualTo: votingEventID)
-              .get();
-
+            .collection('votingevents')
+            .where('votingEventID', isEqualTo: votingEventID)
+            .get();
+            
           if (votingEventSnapshot.docs.isEmpty) {
             print("Voting_Event_Repository (getVotingEventList): No matching document found in Firebase for event ID: $votingEventID");
             continue;
           }
-
+          
           final firestoreData = votingEventSnapshot.docs.first;
 
           // convert string representations back to TimeOfDay
           TimeOfDay? startTime;
           TimeOfDay? endTime;
-
+          
           try {
             if (firestoreData['startTime'] != null) {
               // check if it's a string (new format) or BigInt (old format)
@@ -80,7 +80,7 @@ class VotingEventRepository {
                 startTime = ConverterUtil.bigIntToTimeOfDay(firestoreData['startTime']);
               }
             }
-
+            
             if (firestoreData['endTime'] != null) {
               // check if it's a string (new format) or BigInt (old format)
               if (firestoreData['endTime'] is String) {
@@ -103,7 +103,7 @@ class VotingEventRepository {
               ? ConverterUtil.bigIntToDateTime(event[3])
               : DateTime.now().add(const Duration(days: 1));
           final createdBy = event[4]?.toString() ?? '';
-
+          
           // convert BigInt status to int before passing to the converter
           final statusValue = event[5] != null
               ? (event[5] is BigInt
@@ -111,7 +111,7 @@ class VotingEventRepository {
                   : event[5])
               : 0;
           final status = ConverterUtil.intToVotingEventStatus(statusValue);
-
+          
           // handle candidates and voters lists
           // the blockchain returns List<dynamic> but we need to ensure proper type casting
           final List<dynamic> blockchainCandidateAddresses = event[6] ?? [];
@@ -154,25 +154,25 @@ class VotingEventRepository {
               print("Firestore candidates type: ${firestoreData['candidates'].runtimeType}");
               print("Firestore candidates: ${firestoreData['candidates']}");
 
-              final List<Candidate> candidatesInFirestore =
-                  (firestoreData['candidates'] as List<dynamic>)
+          final List<Candidate> candidatesInFirestore = 
+            (firestoreData['candidates'] as List<dynamic>)
                       .map((candidate) => Candidate.fromMap(candidate))
                       .toList();
 
-              for (String addressStr in candidateAddressStrings) {
-                try {
+          for (String addressStr in candidateAddressStrings) {
+            try {
                   // Skip empty addresses
                   if (addressStr.isEmpty) continue;
 
-                  // compare between candidates in blockchain and candidates (array) in firestore
-                  // if the candidate is not found in firestore, ignore it
-                  // if the candidate is found in firestore, add the candidate to the candidates list
-                  for (Candidate candidate in candidatesInFirestore) {
+              // compare between candidates in blockchain and candidates (array) in firestore
+              // if the candidate is not found in firestore, ignore it
+              // if the candidate is found in firestore, add the candidate to the candidates list
+              for (Candidate candidate in candidatesInFirestore) {
                     if (candidate.walletAddress.isNotEmpty &&
                         candidate.walletAddress.toLowerCase() == addressStr.toLowerCase()) {
-                      candidates.add(candidate);
-                      candidatesInFirestore.remove(candidate); // to improve performance
-                      break;
+                  candidates.add(candidate);
+                  candidatesInFirestore.remove(candidate); // to improve performance
+                  break;
                     }
                   }
                 } catch (e) {
@@ -209,7 +209,7 @@ class VotingEventRepository {
                       print("Processing vote result - CandidateId: $candidateId, Votes: $voteCount");
 
                       if (candidateId.isNotEmpty) {
-                        for (Candidate candidate in candidates) {
+                for (Candidate candidate in candidates) {
                           if (candidate.candidateID == candidateId) {
                             candidate.setVotesReceived(voteCount);
                             print("Vote count updated - Candidate: ${candidate.name}, Votes: ${candidate.votesReceived}");
@@ -318,7 +318,7 @@ class VotingEventRepository {
     } catch (e) {
       debugPrint("Voting_Event_Repository (getVotingEventList): $e");
     }
-    // if there has any problems caused the method not return
+    // if there has any problems caused the method not return 
     return [];
   }
 
@@ -352,7 +352,7 @@ class VotingEventRepository {
     // if user only update information such as description, start time and end time,
     // we don't need to update the blockchain (no need to pay for gas)
     if (updateBlockchain) {
-      // blockchain update
+    // blockchain update
       bool success1 = await _smartContractService.updateVotingEventInBlockchain(votingEvent);
       if (!success1) {
         return false;
@@ -499,19 +499,19 @@ class VotingEventRepository {
     print("Voting_Event_Repository: Inserting voting event to firebase.");
 
     try {
-      // convert TimeOfDay to string representation for Firebase
-      final startTimeBigInt = ConverterUtil.timeOfDayToBigInt(votingEvent.startTime!);
-      final endTimeBigInt = ConverterUtil.timeOfDayToBigInt(votingEvent.endTime!);
+    // convert TimeOfDay to string representation for Firebase
+    final startTimeBigInt = ConverterUtil.timeOfDayToBigInt(votingEvent.startTime!);
+    final endTimeBigInt = ConverterUtil.timeOfDayToBigInt(votingEvent.endTime!);
 
-      // firebase insertion
+    // firebase insertion
       await _firestore
           .collection('votingevents')
           .doc(votingEvent.votingEventID)
           .set({
-        'votingEventID': votingEvent.votingEventID,
-        'description': votingEvent.description,
-        'startTime': startTimeBigInt.toString(),
-        'endTime': endTimeBigInt.toString(),
+      'votingEventID': votingEvent.votingEventID,
+      'description': votingEvent.description,
+      'startTime': startTimeBigInt.toString(),
+      'endTime': endTimeBigInt.toString(),
         'candidates': [],
         'voters': [],
         'pendingCandidates': [],
@@ -529,18 +529,18 @@ class VotingEventRepository {
     print("Voting_Event_Repository: Updating voting event in firebase.");
 
     try {
-      // convert TimeOfDay to string representation for Firebase
-      final startTimeBigInt = ConverterUtil.timeOfDayToBigInt(votingEvent.startTime!);
-      final endTimeBigInt = ConverterUtil.timeOfDayToBigInt(votingEvent.endTime!);
+    // convert TimeOfDay to string representation for Firebase
+    final startTimeBigInt = ConverterUtil.timeOfDayToBigInt(votingEvent.startTime!);
+    final endTimeBigInt = ConverterUtil.timeOfDayToBigInt(votingEvent.endTime!);
 
-      // firebase updating
+    // firebase updating
       await _firestore
           .collection('votingevents')
           .doc(votingEvent.votingEventID)
           .update({
-        'description': votingEvent.description,
-        'startTime': startTimeBigInt.toString(),
-        'endTime': endTimeBigInt.toString(),
+      'description': votingEvent.description,
+      'startTime': startTimeBigInt.toString(),
+      'endTime': endTimeBigInt.toString(),
         'candidates': votingEvent.candidates
             .map((candidate) => candidate.toMap())
             .toList(),

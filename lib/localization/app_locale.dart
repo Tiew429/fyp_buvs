@@ -214,6 +214,7 @@ class AppLocale {
   static const String percentageOfVotesCast = 'percentage of votes cast';
   static const String remainingVoters = 'remaining voters';
   static const String timeRemaining = 'time remaining';
+  static const String timeUntilStart = 'time until start';
   static const String results = 'results';
   static const String winner = 'winner';
   static const String votingEventHasAlreadyStarted = 'voting event has already started';
@@ -229,6 +230,8 @@ class AppLocale {
   static const String voteSuccess = 'vote success';
   static const String voteFailed = 'vote failed';
   static const String deletingVotingEvent = 'deleting voting event...';
+  static const String cannotEditStartedVotingEvent = 'cannot edit started voting event';
+  static const String loading = 'loading...';
 
   // student
   static const String notEligibleForVoting = 'not eligible for voting';
@@ -656,6 +659,7 @@ class AppLocale {
     percentageOfVotesCast: 'Percentage of Votes Cast',
     remainingVoters: 'Remaining Voters',
     timeRemaining: 'Time Remaining',
+    timeUntilStart: 'Time Until Start',
     results: 'Results',
     winner: 'Winner',
     votingEventHasAlreadyStarted: 'Voting event has already started',
@@ -671,6 +675,8 @@ class AppLocale {
     voteSuccess: 'Vote success',
     voteFailed: 'Vote failed', 
     deletingVotingEvent: 'Deleting voting event...',
+    cannotEditStartedVotingEvent: 'Cannot edit started voting event',
+    loading: 'loading...',
 
     // student
     notEligibleForVoting: 'Not eligible for voting',
@@ -1053,6 +1059,7 @@ class AppLocale {
     percentageOfVotesCast: 'Peratusan Undian Dibuat',
     remainingVoters: 'Jumlah Pengguna Tidak Undi',
     timeRemaining: 'Masa Tinggal',
+    timeUntilStart: 'Masa Sebelum Mula',
     results: 'Hasil',
     winner: 'Pemenang',
     votingEventHasAlreadyStarted: 'Acara pengundian telah dimulakan',
@@ -1066,6 +1073,8 @@ class AppLocale {
     failedToRemoveVotingEventImage: 'gagal menghapus imej acara pemungutan suara',
     votingInProgress: 'Pengundian sedang berlangsung',
     viewDetails: 'Lihat Maklumat',
+    cannotEditStartedVotingEvent: 'Tidak boleh mengedit acara pengundian yang dimulakan',
+    loading: 'loading...',
 
     // student
     notEligibleForVoting: 'Tidak layak untuk pengundian', 
@@ -1446,6 +1455,7 @@ class AppLocale {
     percentageOfVotesCast: '投票百分比',
     remainingVoters: '剩余投票者',
     timeRemaining: '剩余时间',
+    timeUntilStart: '时间直到开始',
     results: '结果',
     winner: '获胜者',
     votingEventHasAlreadyStarted: '投票活动已开始',
@@ -1461,6 +1471,8 @@ class AppLocale {
     voteSuccess: '投票成功',
     voteFailed: '投票失败',
     deletingVotingEvent: '正在删除投票活动...',
+    cannotEditStartedVotingEvent: '无法编辑已发起的投票事件',
+    loading: 'loading...',
 
     // student
     notEligibleForVoting: '不符合投票资格',

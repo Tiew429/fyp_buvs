@@ -1,4 +1,5 @@
 import 'package:blockchain_university_voting_system/blockchain/wallet_connect_service.dart';
+import 'package:blockchain_university_voting_system/blockchain/smart_contract_service.dart';
 import 'package:blockchain_university_voting_system/localization/app_locale.dart';
 import 'package:blockchain_university_voting_system/provider/theme_provider.dart';
 import 'package:blockchain_university_voting_system/routes/navigation_helper.dart';
@@ -483,8 +484,29 @@ class _SettingsPageState extends State<SettingsPage> {
                   SizedBox(
                     width: screenSize.width * 0.3,
                     child: CustomConfirmButton(
-                      onPressed: () {
+                      onPressed: () async {
                         Navigator.pop(context);
+                        
+                        // 显示正在处理的提示
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('正在应用设置变更...'),
+                            duration: const Duration(seconds: 1),
+                          ),
+                        );
+                        
+                        // 重置区块链服务，避免重新初始化冲突
+                        try {
+                          // 重置服务单例
+                          WalletConnectService.reset();
+                          SmartContractService.reset();
+                          debugPrint("已重置区块链服务，准备应用新的偏好设置");
+                          
+                          // 等待一段时间确保服务完全重置
+                          await Future.delayed(const Duration(seconds: 1));
+                        } catch (e) {
+                          debugPrint("重置区块链服务时出错: $e");
+                        }
                         
                         // apply theme settings
                         themeProvider.toggleTheme(_currentDarkMode);

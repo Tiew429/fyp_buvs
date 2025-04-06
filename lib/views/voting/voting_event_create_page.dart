@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:blockchain_university_voting_system/localization/app_locale.dart';
+import 'package:blockchain_university_voting_system/models/user_model.dart';
 import 'package:blockchain_university_voting_system/provider/user_provider.dart';
 import 'package:blockchain_university_voting_system/provider/wallet_provider.dart';
 import 'package:blockchain_university_voting_system/routes/navigation_helper.dart';
@@ -73,23 +74,24 @@ class _VotingEventCreatePageState extends State<VotingEventCreatePage> {
       return;
     }
 
-    DateTime firstDate = DateTime.now().add(const Duration(days: 1));
+    // 马来西亚时区
+    final now = DateTime.now().toUtc().add(const Duration(hours: 8));
+    DateTime firstDate = widget._userProvider.user!.role != UserRole.admin ? now.add(const Duration(days: 1)) : now;
 
-    // If selecting end date, ensure it is after the selected start date
     if (isEndDate && _startDateController.text.isNotEmpty) {
       firstDate = DateTime.parse(_startDateController.text).add(const Duration(days: 1));
     }
 
     final DateTime? picked = await showDatePicker(
-      context: context, 
+      context: context,
       initialDate: firstDate,
-      firstDate: firstDate, 
-      lastDate: DateTime(DateTime.now().year + 5),
+      firstDate: firstDate,
+      lastDate: DateTime(now.year + 5),
       builder: (context, child) {
         ColorScheme colorScheme = Theme.of(context).colorScheme;
         return Theme(
           data: Theme.of(context).copyWith(
-            colorScheme: Theme.of(context).colorScheme.copyWith(
+            colorScheme: colorScheme.copyWith(
               primary: colorScheme.secondary,
             ),
           ),
@@ -97,32 +99,39 @@ class _VotingEventCreatePageState extends State<VotingEventCreatePage> {
         );
       },
     );
+
     if (picked != null) {
+      final malaysiaPicked = picked.toUtc().add(const Duration(hours: 8));
+
       setState(() {
         if (isEndDate) {
           _showStartDateWarning = false;
         } else {
           if (_endDateController.text.isNotEmpty) {
             DateTime endDate = DateTime.parse(_endDateController.text);
-            if (picked.isAfter(endDate)) {
-              _endDateController.text = "${picked.add(const Duration(days: 1)).toLocal()}".split(' ')[0];
+            if (malaysiaPicked.isAfter(endDate)) {
+              _endDateController.text = "${malaysiaPicked.add(const Duration(days: 1)).toLocal()}".split(' ')[0];
             }
           }
         }
-        controller.text = "${picked.toLocal()}".split(' ')[0];
+        controller.text = "${malaysiaPicked.toLocal()}".split(' ')[0];
       });
     }
   }
 
   Future<void> _selectTime(BuildContext context, TextEditingController controller) async {
+    // 马来西亚时区
+    final now = DateTime.now().toUtc().add(const Duration(hours: 8));
+    final TimeOfDay initialTime = TimeOfDay(hour: now.hour, minute: now.minute);
+
     final TimeOfDay? picked = await showTimePicker(
-      context: context, 
-      initialTime: TimeOfDay.now(),
+      context: context,
+      initialTime: initialTime,
       builder: (context, child) {
         ColorScheme colorScheme = Theme.of(context).colorScheme;
         return Theme(
           data: Theme.of(context).copyWith(
-            colorScheme: Theme.of(context).colorScheme.copyWith(
+            colorScheme: colorScheme.copyWith(
               primary: colorScheme.secondary,
             ),
           ),
@@ -130,6 +139,7 @@ class _VotingEventCreatePageState extends State<VotingEventCreatePage> {
         );
       },
     );
+
     if (picked != null) {
       setState(() {
         controller.text = "${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}:00";
@@ -233,31 +243,37 @@ class _VotingEventCreatePageState extends State<VotingEventCreatePage> {
         return;
       }
 
-      // convert Date String to DateTime
-      DateTime startDate = DateTime.parse(_startDateController.text);
-      DateTime endDate = DateTime.parse(_endDateController.text);
+      // convert Date String to DateTime with Malaysia timezone (UTC +8)
+      DateTime startDate = DateTime.parse(_startDateController.text).toUtc().add(const Duration(hours: 8));
+      DateTime endDate = DateTime.parse(_endDateController.text).toUtc().add(const Duration(hours: 8));
 
       // convert time string to TimeOfDay
       List<String> startTimeParts = _startTimeController.text.split(":");
       List<String> endTimeParts = _endTimeController.text.split(":");
 
       TimeOfDay startTime = TimeOfDay(
-        hour: int.parse(startTimeParts[0]), 
-        minute: int.parse(startTimeParts[1])
+        hour: int.parse(startTimeParts[0]),
+        minute: int.parse(startTimeParts[1]),
       );
 
       TimeOfDay endTime = TimeOfDay(
-        hour: int.parse(endTimeParts[0]), 
-        minute: int.parse(endTimeParts[1])
+        hour: int.parse(endTimeParts[0]),
+        minute: int.parse(endTimeParts[1]),
       );
 
+      print("startDate: $startDate");
+      print("endDate: $endDate");
+      print("startTime: $startTime");
+      print("endTime: $endTime");
+
+      // pass them to the provider with correct date and time
       final success = await widget._votingEventProvider.createVotingEvent(
-        _titleController.text, 
-        _descriptionController.text, 
-        startDate, 
-        endDate, 
-        startTime, 
-        endTime, 
+        _titleController.text,
+        _descriptionController.text,
+        startDate, // DateTime (startDate with Malaysia time)
+        endDate, // DateTime (endDate with Malaysia time)
+        startTime, // TimeOfDay (start time)
+        endTime, // TimeOfDay (end time)
         widget._walletProvider.walletAddress!,
         widget._userProvider.user!.userID,
         imageFile: _imageFile,
@@ -266,7 +282,7 @@ class _VotingEventCreatePageState extends State<VotingEventCreatePage> {
       if (success) {
         // no need to reload from blockchain, the provider already has the new event
         // await widget._votingEventProvider.loadVotingEvents();
-        
+
         if (mounted) {
           // navigate back to voting list page with result
           Navigator.of(context).pop(true);

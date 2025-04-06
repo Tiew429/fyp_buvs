@@ -550,6 +550,7 @@ List<RouteBase> router(String initialRoute, GlobalKey<NavigatorState> navigatorK
       pageBuilder: (context, state) {
         return buildPageWithAnimation(
           ManageCandidatePage(
+            user: getUserProvider()!.user!,
             votingEventProvider: getVotingEventProvider()!,
             candidateProvider: getCandidateProvider()!,
           ), 
@@ -563,6 +564,7 @@ List<RouteBase> router(String initialRoute, GlobalKey<NavigatorState> navigatorK
       pageBuilder: (context, state) {
         return buildPageWithAnimation(
           AddCandidatePage(
+            user: getUserProvider()!.user!,
             votingEventProvider: getVotingEventProvider()!,
             studentProvider: getStudentProvider()!,
           ), 

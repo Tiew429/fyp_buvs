@@ -71,10 +71,10 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
               padding: const EdgeInsets.only(bottom: 30),
               child: Column(
-                children: [
-                  Stack(
-                    alignment: Alignment.center,
-                    children: [
+          children: [
+            Stack(
+              alignment: Alignment.center,
+              children: [
                       Container(
                         margin: const EdgeInsets.only(top: 10, bottom: 10),
                         decoration: BoxDecoration(
@@ -133,13 +133,13 @@ class _ProfilePageState extends State<ProfilePage> {
                                     Icons.person,
                                     size: screenSize.shortestSide * 0.15,
                                     color: colorScheme.onPrimary,
-                                  ),
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
+                ),
+              ],
+            ),
                   Stack(
-                    children: [
+                children: [
                       Column(
                         children: [
                           Text(
@@ -169,7 +169,7 @@ class _ProfilePageState extends State<ProfilePage> {
                               role,
                               style: TextStyle(
                                 fontSize: 14,
-                                fontWeight: FontWeight.bold,
+                              fontWeight: FontWeight.bold,
                                 color: colorScheme.onPrimary,
                               ),
                             ),
@@ -193,9 +193,9 @@ class _ProfilePageState extends State<ProfilePage> {
                                   color: Colors.black.withOpacity(0.2),
                                   blurRadius: 5,
                                   offset: const Offset(0, 2),
-                                ),
-                              ],
-                            ),
+                  ),
+                ],
+              ),
                             child: Icon(
                               Icons.edit,
                               size: 18,

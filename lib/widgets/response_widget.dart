@@ -13,7 +13,7 @@ class ResponseWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    bool isTablet = MediaQuery.of(context).size.shortestSide > 650;
+    bool isTablet = MediaQuery.of(context).size.shortestSide > 800;
 
     return isTablet ? tablet : phone;
   }

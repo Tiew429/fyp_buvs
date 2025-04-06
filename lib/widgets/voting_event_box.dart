@@ -20,28 +20,37 @@ class VotingEventBox extends StatelessWidget {
       return AppLocale.deprecated.getString(context);
     }
     
-    DateTime now = DateTime.now();
-    TimeOfDay nowTime = TimeOfDay.now();
+    // 使用马来西亚时区 (UTC+8)
+    DateTime now = DateTime.now().toUtc().add(const Duration(hours: 8));
     
-    // event hasn't started yet
-    if (now.isBefore(votingEvent.startDate!) || 
-        (now.isAtSameMomentAs(votingEvent.startDate!) && 
-         (nowTime.hour < votingEvent.startTime!.hour || 
-          (nowTime.hour == votingEvent.startTime!.hour && 
-           nowTime.minute < votingEvent.startTime!.minute)))) {
+    // 创建完整的开始和结束DateTime
+    DateTime startDateTime = DateTime(
+      votingEvent.startDate!.year,
+      votingEvent.startDate!.month,
+      votingEvent.startDate!.day,
+      votingEvent.startTime!.hour,
+      votingEvent.startTime!.minute,
+    );
+    
+    DateTime endDateTime = DateTime(
+      votingEvent.endDate!.year,
+      votingEvent.endDate!.month,
+      votingEvent.endDate!.day,
+      votingEvent.endTime!.hour,
+      votingEvent.endTime!.minute,
+    );
+    
+    // 活动未开始
+    if (now.isBefore(startDateTime)) {
       return AppLocale.waitingToStart.getString(context);
     }
     
-    // event has ended
-    if (now.isAfter(votingEvent.endDate!) || 
-        (now.isAtSameMomentAs(votingEvent.endDate!) && 
-         (nowTime.hour > votingEvent.endTime!.hour || 
-          (nowTime.hour == votingEvent.endTime!.hour && 
-           nowTime.minute > votingEvent.endTime!.minute)))) {
+    // 活动已结束
+    if (now.isAfter(endDateTime)) {
       return AppLocale.ended.getString(context);
     }
     
-    // event is ongoing
+    // 活动进行中
     return AppLocale.ongoing.getString(context);
   }
 

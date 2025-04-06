@@ -89,7 +89,7 @@ class _ProfilePageViewPageState extends State<ProfilePageViewPage> {
             child: CenteredContainer(
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
-                child: Column(
+          child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     // avatar section
@@ -238,7 +238,7 @@ class _ProfilePageViewPageState extends State<ProfilePageViewPage> {
               title: Text(AppLocale.freezeAccount.getString(context)),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
-                children: [
+            children: [
                   Text(AppLocale.areYouSureYouWantToFreezeThisAccount.getString(context)),
                   Text(AppLocale.thisWillPreventTheUserFromLoggingIn.getString(context)),
                   const SizedBox(height: 16),

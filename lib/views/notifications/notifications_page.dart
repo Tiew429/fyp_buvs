@@ -328,7 +328,7 @@ class _NotificationsPageState extends State<NotificationsPage> with SingleTicker
       phone: Column(
         children: notifications.map((notification) => _buildNotificationItem(notification, onTap)).toList(),
       ),
-      tablet: Container(),
+        tablet: Container(),
     );
   }
 

@@ -23,7 +23,7 @@ class PendingVotingEventListPage extends StatefulWidget {
 }
 
 class _PendingVotingEventListPageState extends State<PendingVotingEventListPage> {
-  bool _isLoading = true;
+  bool _isLoading = false;
   late List<VotingEvent> _pendingAndDeprecatedEvents = [];
   String _searchQuery = '';
   late TextEditingController _searchController;
@@ -34,6 +34,8 @@ class _PendingVotingEventListPageState extends State<PendingVotingEventListPage>
   void initState() {
     super.initState();
     _searchController = TextEditingController();
+    _pendingAndDeprecatedEvents = [];
+    _filteredEvents = [];
     
     // set up a listener to update when the provider changes
     widget._votingEventProvider.addListener(_updateEventList);
@@ -60,20 +62,31 @@ class _PendingVotingEventListPageState extends State<PendingVotingEventListPage>
       _filterPendingEvents();
       _sortPendingEvents();
       _applySearchFilter();
-      _isLoading = false;
     });
   }
 
   Future<void> _loadVotingEvents() async {
-    setState(() => _isLoading = true);
-    await widget._votingEventProvider.loadVotingEvents();
-    _updateEventList();
+    print("Loading events, current loading state: $_isLoading");
+    if (widget._votingEventProvider.votingEventList.isEmpty) {
+      setState(() => _isLoading = true);
+    }
+    print("Set loading state to: $_isLoading");
+    
+    try {
+      await widget._votingEventProvider.loadVotingEvents();
+      print("Events loaded from provider");
+    } catch (e) {
+      print("Error loading pending voting events: $e");
+    } finally {
+      _updateEventList();
+      setState(() => _isLoading = false);
+    }
   }
 
   void _filterPendingEvents() {
     List<VotingEvent> allEvents = widget._votingEventProvider.votingEventList;
-    DateTime now = DateTime.now();
-    TimeOfDay nowTime = TimeOfDay.now();
+    // 使用马来西亚时区 (UTC+8)
+    DateTime now = DateTime.now().toUtc().add(const Duration(hours: 8));
     
     _pendingAndDeprecatedEvents = allEvents.where((event) {
       // include deprecated events
@@ -81,12 +94,17 @@ class _PendingVotingEventListPageState extends State<PendingVotingEventListPage>
         return true;
       }
       
+      // 创建完整的开始DateTime
+      DateTime startDateTime = DateTime(
+        event.startDate!.year,
+        event.startDate!.month,
+        event.startDate!.day,
+        event.startTime!.hour,
+        event.startTime!.minute,
+      );
+      
       // include events that haven't started yet
-      if (now.isBefore(event.startDate!) || 
-          (now.isAtSameMomentAs(event.startDate!) && 
-           (nowTime.hour < event.startTime!.hour || 
-            (nowTime.hour == event.startTime!.hour && 
-             nowTime.minute < event.startTime!.minute)))) {
+      if (now.isBefore(startDateTime)) {
         return true;
       }
       
@@ -351,7 +369,8 @@ class _PendingVotingEventListPageState extends State<PendingVotingEventListPage>
 
   @override
   Widget build(BuildContext context) {
-    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    ColorScheme colorScheme = Theme.of(context).colorScheme;
+    print("Building pending events UI, isLoading: $_isLoading");
 
     return Scaffold(
       appBar: AppBar(
@@ -360,56 +379,76 @@ class _PendingVotingEventListPageState extends State<PendingVotingEventListPage>
         backgroundColor: colorScheme.secondary,
       ),
       backgroundColor: colorScheme.tertiary,
-      body: Stack(
-        children: [
-          RefreshIndicator(
+      body: _isLoading
+        ? Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                CircularProgressIndicator(
+                  color: colorScheme.primary,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  AppLocale.loading.getString(context),
+                  style: TextStyle(
+                    color: colorScheme.onPrimary,
+                    fontSize: 16,
+                  ),
+                ),
+              ],
+            ),
+          )
+        : RefreshIndicator(
             onRefresh: _loadVotingEvents,
             child: Column(
               children: [
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: CustomSearchBox(
-                    controller: _searchController,
-                    onChanged: (value) {
-                      setState(() {
-                        _searchQuery = value;
-                        _applySearchFilter();
-                      });
-                    },
-                    hintText: AppLocale.searchVotingEventTitle.getString(context)
-                  ),
-                ),
+                _buildSearchBox(),
                 Expanded(
-                  child: _filteredEvents.isEmpty && !_isLoading
+                  child: _filteredEvents.isEmpty
                     ? EmptyStateWidget(
                         message: AppLocale.noPendingStatusVotingEventAvailable.getString(context),
                         icon: Icons.pending_actions,
                       )
-                    : ScrollableResponsiveWidget(
-                        phone: Column(
-                          children: [
-                            ..._filteredEvents.map((votingEvent) => VotingEventBox(
-                              onTap: () => _showVotingEventDetails(votingEvent),
-                              votingEvent: votingEvent,
-                            )),
-                          ],
-                        ),
-                        tablet: Container(),
-                      ),
+                    : _buildEventsList(),
                 ),
               ],
             ),
           ),
-          // loading overlay
-          if (_isLoading)
-            Container(
-              color: Colors.black.withOpacity(0.3),
-              child: const Center(
-                child: CircularProgressIndicator(),
-              ),
-            ),
-        ],
+    );
+  }
+
+  // 创建搜索框
+  Widget _buildSearchBox() {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: CustomSearchBox(
+        controller: _searchController,
+        onChanged: (value) {
+          setState(() {
+            _searchQuery = value;
+            _applySearchFilter();
+          });
+        },
+        hintText: AppLocale.searchVotingEventTitle.getString(context),
       ),
+    );
+  }
+
+  // 创建事件列表
+  Widget _buildEventsList() {
+    return ScrollableResponsiveWidget(
+      phone: Padding(
+        padding: const EdgeInsets.only(bottom: 16.0),
+        child: Column(
+          children: _filteredEvents.map((event) => 
+            VotingEventBox(
+              onTap: () => _showVotingEventDetails(event),
+              votingEvent: event,
+            )
+          ).toList(),
+        ),
+      ),
+      tablet: Container(),
     );
   }
 }

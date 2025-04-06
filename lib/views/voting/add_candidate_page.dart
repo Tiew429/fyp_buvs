@@ -1,6 +1,7 @@
 import 'package:blockchain_university_voting_system/localization/app_locale.dart';
 import 'package:blockchain_university_voting_system/models/candidate_model.dart';
 import 'package:blockchain_university_voting_system/models/student_model.dart';
+import 'package:blockchain_university_voting_system/models/user_model.dart';
 import 'package:blockchain_university_voting_system/models/voting_event_model.dart';
 import 'package:blockchain_university_voting_system/provider/student_provider.dart';
 import 'package:blockchain_university_voting_system/utils/snackbar_util.dart';
@@ -13,11 +14,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localization/flutter_localization.dart';
 
 class AddCandidatePage extends StatefulWidget {
+  final User user;
   final VotingEventProvider votingEventProvider;
   final StudentProvider studentProvider;
 
   const AddCandidatePage({
     super.key, 
+    required this.user,
     required this.votingEventProvider,
     required this.studentProvider,
   });
@@ -202,18 +205,37 @@ class _AddCandidatePageState extends State<AddCandidatePage> {
 
   // add candidates
   Future<void> _addCandidates(List<Student> students) async {
-    if (votingEvent.startDate!.isBefore(DateTime.now()) && votingEvent.startTime!.isBefore(TimeOfDay.fromDateTime(DateTime.now()))) {
-      SnackbarUtil.showSnackBar(
-        context, 
-        AppLocale.votingEventHasAlreadyStarted.getString(context)
-      );
-      return;
-    } else if (votingEvent.endDate!.isBefore(DateTime.now()) && votingEvent.endTime!.isBefore(TimeOfDay.fromDateTime(DateTime.now()))) {
-      SnackbarUtil.showSnackBar(
-        context, 
-        AppLocale.votingEventHasEnded.getString(context)
-      );
-      return;
+    final now = DateTime.now();
+    final startDateTime = DateTime(
+      votingEvent.startDate!.year,
+      votingEvent.startDate!.month,
+      votingEvent.startDate!.day,
+      votingEvent.startTime!.hour,
+      votingEvent.startTime!.minute,
+    );
+    
+    final endDateTime = DateTime(
+      votingEvent.endDate!.year,
+      votingEvent.endDate!.month,
+      votingEvent.endDate!.day,
+      votingEvent.endTime!.hour,
+      votingEvent.endTime!.minute,
+    );
+    
+    if (widget.user.role != UserRole.admin) {
+      if (startDateTime.isBefore(now) || startDateTime.isAtSameMomentAs(now)) {
+        SnackbarUtil.showSnackBar(
+          context, 
+          AppLocale.votingEventHasAlreadyStarted.getString(context)
+        );
+        return;
+      } else if (endDateTime.isBefore(now) || endDateTime.isAtSameMomentAs(now)) {
+        SnackbarUtil.showSnackBar(
+          context, 
+          AppLocale.votingEventHasEnded.getString(context)
+        );
+        return;
+      }
     }
 
     setState(() {

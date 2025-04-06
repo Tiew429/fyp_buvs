@@ -77,9 +77,23 @@ class _EditVotingEventPageState extends State<EditVotingEventPage> {
       context: context, 
       initialDate: firstDate,
       firstDate: firstDate, 
-      lastDate: DateTime(DateTime.now().year + 5),
+      lastDate: DateTime(DateTime.now().toUtc().add(const Duration(hours: 8)).year + 5),
+      builder: (context, child) {
+        ColorScheme colorScheme = Theme.of(context).colorScheme;
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: colorScheme.copyWith(
+              primary: colorScheme.secondary,
+            ),
+          ),
+          child: child!,
+        );
+      },
     );
+    
     if (picked != null) {
+      final malaysiaPicked = picked.toUtc().add(const Duration(hours: 8));
+      
       setState(() {
         if (isEndDate) {
           _showStartDateWarning = false;
@@ -87,21 +101,37 @@ class _EditVotingEventPageState extends State<EditVotingEventPage> {
           // if start date is after end date, update end date
           if (_endDateController.text.isNotEmpty) {
             DateTime endDate = DateTime.parse(_endDateController.text);
-            if (picked.isAfter(endDate)) {
-              _endDateController.text = "${picked.add(const Duration(days: 1)).toLocal()}".split(' ')[0];
+            if (malaysiaPicked.isAfter(endDate)) {
+              _endDateController.text = "${malaysiaPicked.add(const Duration(days: 1)).toLocal()}".split(' ')[0];
             }
           }
         }
-        controller.text = "${picked.toLocal()}".split(' ')[0];
+        controller.text = "${malaysiaPicked.toLocal()}".split(' ')[0];
       });
     }
   }
 
   Future<void> _selectTime(BuildContext context, TextEditingController controller) async {
+    // 马来西亚时区
+    final now = DateTime.now().toUtc().add(const Duration(hours: 8));
+    final TimeOfDay initialTime = TimeOfDay(hour: now.hour, minute: now.minute);
+    
     final TimeOfDay? picked = await showTimePicker(
       context: context, 
-      initialTime: TimeOfDay.now(),
+      initialTime: initialTime,
+      builder: (context, child) {
+        ColorScheme colorScheme = Theme.of(context).colorScheme;
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: colorScheme.copyWith(
+              primary: colorScheme.secondary,
+            ),
+          ),
+          child: child!,
+        );
+      },
     );
+    
     if (picked != null) {
       setState(() {
         controller.text = "${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}:00";
@@ -239,11 +269,15 @@ class _EditVotingEventPageState extends State<EditVotingEventPage> {
     });
 
     try {
+      // 确保日期使用马来西亚时区 (UTC+8)
+      final startDate = DateTime.parse(_startDateController.text).toUtc().add(const Duration(hours: 8));
+      final endDate = DateTime.parse(_endDateController.text).toUtc().add(const Duration(hours: 8));
+      
       final updatedEvent = _votingEvent.copyWith(
         title: _titleController.text,
         description: _descriptionController.text,
-        startDate: DateTime.parse(_startDateController.text),
-        endDate: DateTime.parse(_endDateController.text),
+        startDate: startDate,
+        endDate: endDate,
         startTime: TimeOfDay(
           hour: int.parse(_startTimeController.text.split(':')[0]),
           minute: int.parse(_startTimeController.text.split(':')[1]),

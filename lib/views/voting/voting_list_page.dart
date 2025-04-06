@@ -30,7 +30,7 @@ class VotingListPage extends StatefulWidget {
 }
 
 class _VotingListPageState extends State<VotingListPage> {
-  bool _isLoading = true;
+  bool _isLoading = false;
   late List<VotingEvent> _votingEventList = [];
   late TextEditingController _searchController;
   List<VotingEvent> _filteredVotingEventList = [];
@@ -40,6 +40,8 @@ class _VotingListPageState extends State<VotingListPage> {
   void initState() {
     super.initState();
     _searchController = TextEditingController();
+    _votingEventList = [];
+    _filteredVotingEventList = [];
     
     // set up a listener to update when the provider changes
     widget.votingEventProvider.addListener(_updateEventList);
@@ -64,21 +66,38 @@ class _VotingListPageState extends State<VotingListPage> {
   void _updateEventList() {
     if (!mounted) return;
     
+    // 获取所有非弃用事件
+    List<VotingEvent> events = widget.votingEventProvider.votingEventList
+        .where((event) => event.status.name != 'deprecated')
+        .toList();
+    
     setState(() {
-      // get all non-deprecated events
-      _votingEventList = widget.votingEventProvider.votingEventList
-          .where((event) => event.status.name != 'deprecated')
-          .toList();
-      _sortVotingEvents(_votingEventList);
-      _applySearchFilter();
-      _isLoading = false;
+      _votingEventList = events;
+      if (events.isNotEmpty) {
+        _sortVotingEvents(_votingEventList);
+        _applySearchFilter();
+      } else {
+        _filteredVotingEventList = [];
+      }
     });
   }
 
   Future<void> _loadVotingEvents() async {
-    setState(() => _isLoading = true);
-    await widget.votingEventProvider.loadVotingEvents();
-    _updateEventList();
+    print("Loading voting events, current state: $_isLoading");
+    if (widget.votingEventProvider.votingEventList.isEmpty) {
+      setState(() => _isLoading = true);
+    }
+    print("Set loading state to: $_isLoading");
+    
+    try {
+      await widget.votingEventProvider.loadVotingEvents();
+      print("Voting events loaded from provider");
+    } catch (e) {
+      print("Error loading voting events: $e");
+    } finally {
+      _updateEventList();
+      setState(() => _isLoading = false);
+    }
   }
 
   // apply search filter based on current search query
@@ -119,28 +138,37 @@ class _VotingListPageState extends State<VotingListPage> {
   
   // determine event status for sorting
   String _getEventStatus(VotingEvent event) {
-    DateTime now = DateTime.now();
-    TimeOfDay nowTime = TimeOfDay.now();
+    // 使用马来西亚时区 (UTC+8)
+    DateTime now = DateTime.now().toUtc().add(const Duration(hours: 8));
     
-    // event hasn't started yet
-    if (now.isBefore(event.startDate!) || 
-        (now.isAtSameMomentAs(event.startDate!) && 
-         (nowTime.hour < event.startTime!.hour || 
-          (nowTime.hour == event.startTime!.hour && 
-           nowTime.minute < event.startTime!.minute)))) {
+    // 创建完整的开始和结束DateTime
+    DateTime startDateTime = DateTime(
+      event.startDate!.year,
+      event.startDate!.month,
+      event.startDate!.day,
+      event.startTime!.hour,
+      event.startTime!.minute,
+    );
+    
+    DateTime endDateTime = DateTime(
+      event.endDate!.year,
+      event.endDate!.month,
+      event.endDate!.day,
+      event.endTime!.hour,
+      event.endTime!.minute,
+    );
+    
+    // 活动未开始
+    if (now.isBefore(startDateTime)) {
       return AppLocale.waitingToStart.getString(context);
     }
     
-    // event has ended
-    if (now.isAfter(event.endDate!) || 
-        (now.isAtSameMomentAs(event.endDate!) && 
-         (nowTime.hour > event.endTime!.hour || 
-          (nowTime.hour == event.endTime!.hour && 
-           nowTime.minute > event.endTime!.minute)))) {
+    // 活动已结束
+    if (now.isAfter(endDateTime)) {
       return AppLocale.ended.getString(context);
     }
     
-    // event is ongoing
+    // 活动进行中
     return AppLocale.ongoing.getString(context);
   }
   
@@ -156,106 +184,142 @@ class _VotingListPageState extends State<VotingListPage> {
   @override
   Widget build(BuildContext context) {
     ColorScheme colorScheme = Theme.of(context).colorScheme;
+    print("Building UI, isLoading: $_isLoading");
 
+    // 钱包未连接的UI
+    if (widget.walletProvider.walletAddress == null || 
+        widget.walletProvider.walletAddress!.isEmpty) {
+      return Scaffold(
+        appBar: _buildAppBar(colorScheme),
+        backgroundColor: colorScheme.tertiary,
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.account_balance_wallet_outlined,
+                size: 64,
+                color: colorScheme.onTertiary.withOpacity(0.5),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                AppLocale.pleaseConnectYourWallet.getString(context),
+                style: TextStyle(
+                  color: colorScheme.onTertiary,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    // 主UI（包含加载状态和内容）
     return Scaffold(
-      appBar: AppBar(
-        title: Text(AppLocale.votingList.getString(context)),
-        centerTitle: true,
-        backgroundColor: colorScheme.secondary,
-        actions: [
-          if (widget.userProvider.user!.role == UserRole.admin || widget.userProvider.user!.role == UserRole.staff)
-            IconButton(
-              icon: const Icon(Icons.pending_actions),
-              tooltip: AppLocale.pendingVotingEvent.getString(context),
-              onPressed: () => NavigationHelper.navigateToPendingVotingEventListPage(context),
-            ),
-        ],
-      ),
+      appBar: _buildAppBar(colorScheme),
       backgroundColor: colorScheme.tertiary,
-      body: Stack(
-        children: [
-          widget.walletProvider.walletAddress == null || 
-                widget.walletProvider.walletAddress!.isEmpty
-            ? Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.account_balance_wallet_outlined,
-                      size: 64,
-                      color: colorScheme.onTertiary.withOpacity(0.5),
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      AppLocale.pleaseConnectYourWallet.getString(context),
-                      style: TextStyle(
-                        color: colorScheme.onTertiary,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
+      body: _isLoading 
+        ? Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                CircularProgressIndicator(
+                  color: colorScheme.primary,
                 ),
-              )
-            : RefreshIndicator(
-                onRefresh: _loadVotingEvents,
-                child: Column(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: CustomSearchBox(
-                        controller: _searchController,
-                        onChanged: (value) {
-                          setState(() {
-                            _applySearchFilter();
-                          });
-                        },
-                        hintText: AppLocale.searchVotingEventTitle.getString(context)
-                      ),
-                    ),
-                    Expanded(
-                      child: _filteredVotingEventList.isEmpty && !_isLoading
-                        ? EmptyStateWidget(
-                            message: AppLocale.noVotingEventAvailable.getString(context),
-                            icon: Icons.how_to_vote,
-                          )
-                        : ScrollableResponsiveWidget(
-                            phone: Padding(
-                              padding: const EdgeInsets.only(bottom: 80),
-                              child: Column(
-                                children: [
-                                  ..._filteredVotingEventList.map((votingEvent) => VotingEventBox(
-                                    onTap: () {
-                                      widget.votingEventProvider.selectVotingEvent(votingEvent);
-                                      NavigationHelper.navigateToVotingEventPage(context);
-                                    },
-                                    votingEvent: votingEvent,
-                                  )),
-                                ],
-                              ),
-                            ),
-                            tablet: Container(),
-                          ),
-                    ),
-                  ],
+                const SizedBox(height: 16),
+                Text(
+                  AppLocale.loading.getString(context),
+                  style: TextStyle(
+                    color: colorScheme.onPrimary,
+                    fontSize: 16,
+                  ),
                 ),
-              ),
-          // loading overlay
-          if (_isLoading)
-            Container(
-              color: Colors.black.withOpacity(0.3),
-              child: const Center(
-                child: CircularProgressIndicator(),
-              ),
+              ],
             ),
-        ],
+          )
+        : RefreshIndicator(
+            onRefresh: _loadVotingEvents,
+            child: Column(
+              children: [
+                _buildSearchBox(),
+                Expanded(
+                  child: _filteredVotingEventList.isEmpty
+                    ? EmptyStateWidget(
+                        message: AppLocale.noVotingEventAvailable.getString(context),
+                        icon: Icons.how_to_vote,
+                      )
+                    : _buildEventsList(),
+                ),
+              ],
+            ),
+          ),
+      floatingActionButton: _buildFloatingActionButton(colorScheme),
+    );
+  }
+
+  // 创建AppBar
+  AppBar _buildAppBar(ColorScheme colorScheme) {
+    return AppBar(
+      title: Text(AppLocale.votingList.getString(context)),
+      centerTitle: true,
+      backgroundColor: colorScheme.secondary,
+      actions: [
+        if (widget.userProvider.user!.role == UserRole.admin || widget.userProvider.user!.role == UserRole.staff)
+          IconButton(
+            icon: const Icon(Icons.pending_actions),
+            tooltip: AppLocale.pendingVotingEvent.getString(context),
+            onPressed: () => NavigationHelper.navigateToPendingVotingEventListPage(context),
+          ),
+      ],
+    );
+  }
+
+  // 创建搜索框
+  Widget _buildSearchBox() {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: CustomSearchBox(
+        controller: _searchController,
+        onChanged: (value) {
+          setState(() {
+            _applySearchFilter();
+          });
+        },
+        hintText: AppLocale.searchVotingEventTitle.getString(context)
       ),
-      floatingActionButton: (
-        (widget.userProvider.user!.role == UserRole.admin ||
+    );
+  }
+
+  // 创建事件列表
+  Widget _buildEventsList() {
+    return ScrollableResponsiveWidget(
+      phone: Padding(
+        padding: const EdgeInsets.only(bottom: 80),
+        child: Column(
+          children: [
+            ..._filteredVotingEventList.map((votingEvent) => VotingEventBox(
+              onTap: () {
+                widget.votingEventProvider.selectVotingEvent(votingEvent);
+                NavigationHelper.navigateToVotingEventPage(context);
+              },
+              votingEvent: votingEvent,
+            )),
+          ],
+        ),
+      ),
+      tablet: Container(),
+    );
+  }
+
+  // 创建浮动按钮
+  Widget? _buildFloatingActionButton(ColorScheme colorScheme) {
+    if ((widget.userProvider.user!.role == UserRole.admin ||
         widget.userProvider.user!.role == UserRole.staff) &&
         (widget.walletProvider.walletAddress != null &&
-        widget.walletProvider.walletAddress!.isNotEmpty)
-      ) ? FloatingActionButton.extended(
+        widget.walletProvider.walletAddress!.isNotEmpty)) {
+      return FloatingActionButton.extended(
         onPressed: () async {
           // navigate to create page and wait for result
           final result = await NavigationHelper.navigateToVotingEventCreatePage(context);
@@ -268,7 +332,8 @@ class _VotingListPageState extends State<VotingListPage> {
         icon: const Icon(Icons.add),
         label: Text(AppLocale.createNew.getString(context)),
         backgroundColor: colorScheme.primary,
-      ) : null,
-    );
+      );
+    }
+    return null;
   }
 }

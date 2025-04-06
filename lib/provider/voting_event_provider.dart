@@ -50,7 +50,7 @@ class VotingEventProvider extends ChangeNotifier {
       _forceRefreshVotingEvents();
     });
 
-    polling = true;
+      polling = true;
   }
 
   void stopPolling() {
@@ -117,13 +117,13 @@ class VotingEventProvider extends ChangeNotifier {
   }
 
   Future<bool> createVotingEvent(
-      String title,
-      String description,
-      DateTime? startDate,
-      DateTime? endDate,
-      TimeOfDay? startTime,
-      TimeOfDay? endTime,
-      String walletAddress,
+    String title,
+    String description,
+    DateTime? startDate,
+    DateTime? endDate,
+    TimeOfDay? startTime,
+    TimeOfDay? endTime,
+    String walletAddress,
       String userID,
       {File? imageFile}) async {
     print("Voting_Event_Provider: Creating VotingEvent object.");
@@ -162,7 +162,7 @@ class VotingEventProvider extends ChangeNotifier {
         await _votingEventRepository.deleteVotingEventImage(imageUrl);
       }
     }
-
+    
     return success;
   }
 
@@ -186,7 +186,7 @@ class VotingEventProvider extends ChangeNotifier {
       } else {
         print("Voting_Event_Provider: updateBlockchain: $updateBlockchain");
       }
-
+      
       bool success = await _votingEventRepository.updateVotingEvent(votingEvent, updateBlockchain);
       _forceRefreshVotingEvents();
       return success;
@@ -231,7 +231,7 @@ class VotingEventProvider extends ChangeNotifier {
     VotingEvent cloneEvent = _selectedVotingEvent.copyWith(
       candidates: newCandidates,
     );
-
+    
     bool success =
         await _votingEventRepository.addCandidatesToVotingEvent(cloneEvent);
 

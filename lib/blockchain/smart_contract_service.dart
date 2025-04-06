@@ -12,39 +12,131 @@ import 'package:provider/provider.dart';
 import 'package:reown_appkit/reown_appkit.dart';
 
 class SmartContractService {
-  late final DeployedContract contract;
+  // 修改contract声明，避免late final限制
+  DeployedContract? contract;
   final String contractAddress = dotenv.env['CONTRACT_ADDRESS'] ?? "";
   bool contractLoaded = false;
-  final ReownAppKitModal _appKitModal = Provider.of<WalletConnectService>(
-      rootNavigatorKey.currentContext!,
-      listen: false,
-    ).getAppKitModal(rootNavigatorKey.currentContext!);
+  ReownAppKitModal? _appKitModal;
+  
+  // 单例模式，允许重置
+  static SmartContractService? _instance;
+  
+  factory SmartContractService() {
+    _instance ??= SmartContractService._internal();
+    return _instance!;
+  }
+  
+  SmartContractService._internal();
+  
+  // 重置方法，用于应用重启时清理实例
+  static void reset() {
+    if (_instance != null) {
+      _instance!._reset();
+      _instance = null;
+    }
+  }
+  
+  void _reset() {
+    try {
+      // 清理现有资源
+      contractLoaded = false;
+      // 清理_appKitModal
+      _appKitModal = null;
+      debugPrint("SmartContractService: Reset completed, _appKitModal cleared");
+    } catch (e) {
+      debugPrint("SmartContractService: Error during reset: $e");
+    }
+  }
   
   Future<void> initialize(BuildContext context) async {
+    debugPrint("Smart_Contract_Service (initialize): Starting initialization");
+    
+    // 确保_appKitModal为空，避免重复初始化错误
+    _appKitModal = null;
+    
+    // 确保WalletConnectService已经正确初始化
+    final walletService = Provider.of<WalletConnectService>(
+      context,
+      listen: false
+    );
+    
+    if (!walletService.isInitialized) {
+      debugPrint("Smart_Contract_Service (initialize): WalletConnectService not initialized, initializing now");
+      try {
+        await walletService.initialize(context);
+      } catch (e) {
+        debugPrint("Smart_Contract_Service (initialize): Failed to initialize WalletConnectService: $e");
+        throw Exception("Failed to initialize wallet service: $e");
+      }
+    }
+    
+    // 确保AppKitModal可以获取到
+    try {
+      _appKitModal = walletService.getAppKitModal(rootNavigatorKey.currentContext!);
+      debugPrint("Smart_Contract_Service (initialize): Got AppKitModal successfully");
+    } catch (e) {
+      debugPrint("Smart_Contract_Service (initialize): Failed to get AppKitModal: $e");
+      
+      // 尝试异步获取
+      try {
+        debugPrint("Smart_Contract_Service (initialize): Trying async method to get AppKitModal");
+        _appKitModal = await walletService.getAppKitModalAsync(rootNavigatorKey.currentContext!);
+        debugPrint("Smart_Contract_Service (initialize): Got AppKitModal successfully with async method");
+      } catch (asyncError) {
+        debugPrint("Smart_Contract_Service (initialize): Failed with async method too: $asyncError");
+        throw Exception("Failed to get wallet connection: $e");
+      }
+    }
+    
+    // 加载合约
     await _loadContract();
+    debugPrint("Smart_Contract_Service (initialize): Initialization completed");
   }
 
   // called when initializing the SmartContractService
   Future<void> _loadContract() async {
+    debugPrint("Smart_Contract_Service (_loadContract): Starting contract loading...");
+    
     if (contractAddress.isEmpty) {
+      debugPrint("Smart_Contract_Service (_loadContract): Contract address is empty in .env file");
       throw Exception("Smart_Contract_Service: Contract address not found in .env file.");
     }
+    
+    debugPrint("Smart_Contract_Service (_loadContract): Contract address from .env: $contractAddress");
 
-    if (contractLoaded) {
+    if (contractLoaded && contract != null) {
       // to avoid it keeps loading contract
+      debugPrint("Smart_Contract_Service (_loadContract): Contract already loaded, skipping");
       return;
     }
 
-    final abiString = await rootBundle.loadString('assets/contracts/contractAbi.json');
-    final abiJson = jsonDecode(abiString);
-    final contractAbi = ContractAbi.fromJson(jsonEncode(abiJson), 'Voting');
-    final ethAddress = EthereumAddress.fromHex(contractAddress);
-    print("Smart_Contract_Service (loadContract): Contract address: $ethAddress");
     try {
+      // 确保contract为null，避免重复初始化
+      contract = null;
+      
+      debugPrint("Smart_Contract_Service (_loadContract): Loading ABI file");
+      final abiString = await rootBundle.loadString('assets/contracts/contractAbi.json');
+      debugPrint("Smart_Contract_Service (_loadContract): ABI file loaded successfully");
+      
+      final abiJson = jsonDecode(abiString);
+      debugPrint("Smart_Contract_Service (_loadContract): ABI JSON decoded");
+      
+      final contractAbi = ContractAbi.fromJson(jsonEncode(abiJson), 'Voting');
+      debugPrint("Smart_Contract_Service (_loadContract): ContractAbi created");
+      
+      final ethAddress = EthereumAddress.fromHex(contractAddress);
+      debugPrint("Smart_Contract_Service (_loadContract): Contract address: $ethAddress");
+      
       contract = DeployedContract(contractAbi, ethAddress);
+      debugPrint("Smart_Contract_Service (_loadContract): DeployedContract instance created");
+      
       contractLoaded = true;
+      debugPrint("Smart_Contract_Service (_loadContract): Contract loaded successfully");
     } catch (e) {
-      print("Smart_Contract_Service (loadContract): $e");
+      debugPrint("Smart_Contract_Service (_loadContract): Error loading contract: $e");
+      contractLoaded = false;
+      contract = null;
+      throw Exception("Failed to load smart contract: $e");
     }
   }
 
@@ -434,10 +526,10 @@ class SmartContractService {
     print("Smart_Contract_Service: Processing request read contract.");
 
     try {
-      final result = await _appKitModal.requestReadContract(
-        topic: _appKitModal.session!.topic,
-        chainId: _appKitModal.selectedChain!.chainId,
-        deployedContract: contract,
+      final result = await _appKitModal!.requestReadContract(
+        topic: _appKitModal!.session!.topic,
+        chainId: _appKitModal!.selectedChain!.chainId,
+        deployedContract: contract!,
         functionName: functionName,
         parameters: parameters ?? [],
       );
@@ -456,16 +548,16 @@ class SmartContractService {
     print("Smart_Contract_Service: Processing request write contract.");
 
     try {
-      await _appKitModal.requestWriteContract(
-        topic: _appKitModal.session!.topic,
-        chainId: _appKitModal.selectedChain!.chainId,
-        deployedContract: contract,
+      await _appKitModal!.requestWriteContract(
+        topic: _appKitModal!.session!.topic,
+        chainId: _appKitModal!.selectedChain!.chainId,
+        deployedContract: contract!,
         functionName: functionName,
         transaction: Transaction(
           from: EthereumAddress.fromHex(
-            _appKitModal.session!.getAddress(
+            _appKitModal!.session!.getAddress(
               ReownAppKitModalNetworks.getNamespaceForChainId(
-                _appKitModal.selectedChain!.chainId
+                _appKitModal!.selectedChain!.chainId
               ),
             )!
           ),
@@ -490,13 +582,13 @@ class SmartContractService {
   }
 
   void checkAvailable() {
-    if (!_appKitModal.isConnected) {
+    if (_appKitModal == null || !_appKitModal!.isConnected) {
       throw Exception("Smart_Contract_Service: AppKitModal is not initialized correctly.");
     }
-    if (_appKitModal.session == null || _appKitModal.selectedChain == null) {
+    if (_appKitModal!.session == null || _appKitModal!.selectedChain == null) {
       throw Exception("Smart_Contract_Service: Session or selectedChain is null");
     }
-    if (!contractLoaded) {
+    if (!contractLoaded || contract == null) {
       throw Exception("Smart_Contract_Service: Contract is not initialized correctly.");
     }
   }

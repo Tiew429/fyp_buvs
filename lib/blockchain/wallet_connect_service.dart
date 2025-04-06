@@ -15,18 +15,62 @@ class WalletConnectService {
   AuthService authService = AuthService();
   bool isInitialized = false;
   bool _isInitializing = false;
+  static BuildContext? _lastContext;
 
+  // 使用单例模式，但允许重置实例
+  static WalletConnectService? _instance;
+  
+  factory WalletConnectService() {
+    _instance ??= WalletConnectService._internal();
+    return _instance!;
+  }
+  
+  // 重置方法，用于应用重启时清理实例
+  static void reset() {
+    if (_instance != null) {
+      _instance!._reset();
+      _instance = null;
+    }
+  }
+  
+  void _reset() {
+    try {
+      // 尝试清理现有资源
+      if (_appkitModal != null) {
+        debugPrint("WalletConnectService: Unsubscribing events before reset");
+        unsubscribeFromEvents();
+        _appkitModal = null;
+      }
+      isInitialized = false;
+      _isInitializing = false;
+      _lastContext = null;
+      debugPrint("WalletConnectService: Reset completed");
+    } catch (e) {
+      debugPrint("WalletConnectService: Error during reset: $e");
+    }
+  }
+  
   WalletConnectService._internal();
-  static final WalletConnectService _instance = WalletConnectService._internal();
-  factory WalletConnectService() => _instance;
 
   Future<void> initialize(BuildContext context) async {
+    // 检查上下文是否相同，如果不同则强制重置
+    if (_lastContext != null && _lastContext != context) {
+      debugPrint("WalletConnectService: Context changed, forcing reset");
+      _reset();
+    }
+    
+    // 保存当前上下文
+    _lastContext = context;
     
     if (isInitialized) {
+      debugPrint("WalletConnectService: Already initialized, skipping.");
       return;
     }
 
     if (_isInitializing) {
+      debugPrint("WalletConnectService: Initialization already in progress, skipping.");
+      // 如果初始化正在进行，等待一段时间后返回
+      await Future.delayed(const Duration(seconds: 1));
       return;
     }
 
@@ -35,9 +79,59 @@ class WalletConnectService {
     try {
       debugPrint("WalletConnectService: Starting initialization...");
       
-      _appkitModal = ReownAppKitModal(
+      // 确保项目ID是有效的
+      const projectId = '07508ae6495c6f3d32155cb5d27048f8';
+      debugPrint("WalletConnectService: Using project ID: $projectId");
+      
+      // 强制等待一小段时间，确保上一个实例完全清理
+      await Future.delayed(const Duration(milliseconds: 500));
+      
+      // 使用隔离的builder函数创建实例，减少冲突风险
+      _appkitModal = await _buildAppKitModal(context, projectId);
+      
+      debugPrint("WalletConnectService: ReownAppKitModal instance created");
+      
+      // 延迟以确保上下文已准备好
+      await Future.delayed(const Duration(seconds: 1));
+      
+      debugPrint("WalletConnectService: Initializing AppKitModal...");
+      await _appkitModal!.init();
+      debugPrint("WalletConnectService: AppKitModal initialized");
+      
+      // update wallet address in wallet provider
+      debugPrint("WalletConnectService: Updating wallet address");
+      try {
+        updateWalletAddress(context);
+        debugPrint("WalletConnectService: Wallet address updated successfully");
+      } catch (e) {
+        debugPrint("WalletConnectService: Error updating wallet address: $e");
+        // 不要中断初始化流程，继续订阅事件
+      }
+
+      debugPrint("WalletConnectService: Subscribing to events");
+      await subscribeToEvents(context);
+      debugPrint("WalletConnectService: Events subscribed successfully");
+      
+      isInitialized = true;
+      
+      debugPrint("WalletConnectService: Initialization completed successfully");
+       
+    } catch (e) {
+      debugPrint("WalletConnectService: Error initializing WalletConnectService: $e");
+      _appkitModal = null;
+      isInitialized = false;
+      throw Exception("Failed to initialize wallet connect service: $e");
+    } finally {
+      _isInitializing = false;
+    }
+  }
+
+  // 使用隔离的函数创建AppKitModal实例，避免冲突
+  Future<ReownAppKitModal> _buildAppKitModal(BuildContext context, String projectId) async {
+    try {
+      return ReownAppKitModal(
         context: rootNavigatorKey.currentContext!,
-        projectId: '07508ae6495c6f3d32155cb5d27048f8',
+        projectId: projectId,
         metadata: const PairingMetadata(
           name: 'University Blockchain Voting',
           description: 'App description',
@@ -50,24 +144,9 @@ class WalletConnectService {
           ),
         ),
       );
-      
-      await Future.delayed(const Duration(seconds: 1));
-      
-      await _appkitModal!.init();
-      // update wallet address in wallet provider
-      updateWalletAddress(context);
-
-      await subscribeToEvents(rootNavigatorKey.currentContext!);
-      isInitialized = true;
-      
-      debugPrint("WalletConnectService: Initialization completed successfully");
-       
     } catch (e) {
-      debugPrint("Error initializing WalletConnectService: $e");
-      _appkitModal = null;
-      isInitialized = false;
-    } finally {
-      _isInitializing = false;
+      debugPrint("WalletConnectService: Error creating ReownAppKitModal: $e");
+      throw Exception("Failed to create ReownAppKitModal: $e");
     }
   }
 

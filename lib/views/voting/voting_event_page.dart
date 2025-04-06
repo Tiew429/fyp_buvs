@@ -1,3 +1,4 @@
+import 'package:blockchain_university_voting_system/data/voting_event_status.dart';
 import 'package:blockchain_university_voting_system/localization/app_locale.dart';
 import 'package:blockchain_university_voting_system/models/candidate_model.dart';
 import 'package:blockchain_university_voting_system/models/student_model.dart';
@@ -31,7 +32,7 @@ class VotingEventPage extends StatefulWidget {
   })  : _user = user,
         _votingEventProvider = votingEventProvider,
         _candidateProvider = candidateProvider,
-        _isEligibleToVote = isEligibleToVote;
+      _isEligibleToVote = isEligibleToVote;
 
   @override
   State<VotingEventPage> createState() => _VotingEventPageState();
@@ -39,11 +40,16 @@ class VotingEventPage extends StatefulWidget {
 
 class _VotingEventPageState extends State<VotingEventPage> {
   late VotingEvent _votingEvent;
-  late String votingEventDate, votingEventTime;
+  late String votingEventTitle, votingEventDescription, votingEventDate, votingEventTime;
+  late List<Candidate> candidateList;
+  late List<Student> voterList;
+  late VotingEventStatus status;
   late bool ongoing, canVote, isEnded, hasVoted;
   bool isLoading = false;
   late String loadingText;
   late Duration timeRemaining;
+  late Duration timeUntilStart;
+  bool hasStarted = false;
   Candidate? winner;
 
   final ReportService _reportService = ReportService();
@@ -52,14 +58,35 @@ class _VotingEventPageState extends State<VotingEventPage> {
   void initState() {
     super.initState();
     _votingEvent = widget._votingEventProvider.selectedVotingEvent;
-
+    votingEventTitle = _votingEvent.title;
+    votingEventDescription = _votingEvent.description;
     votingEventDate =
         "${_votingEvent.startDate!.day}/${_votingEvent.startDate!.month}/${_votingEvent.startDate!.year} - ${_votingEvent.endDate!.day}/${_votingEvent.endDate!.month}/${_votingEvent.endDate!.year}";
     votingEventTime =
         "${_votingEvent.startTime!.hour}:${_votingEvent.startTime!.minute.toString().padLeft(2, '0')} - ${_votingEvent.endTime!.hour}:${_votingEvent.endTime!.minute.toString().padLeft(2, '0')}";
+    candidateList = _votingEvent.candidates;
+    voterList = _votingEvent.voters;
+    status = _votingEvent.status;
 
-    DateTime now = DateTime.now();
-    TimeOfDay nowTime = TimeOfDay.now();
+    // 使用马来西亚时区 (UTC+8)
+    DateTime now = DateTime.now().toUtc().add(const Duration(hours: 8));
+    
+    // 创建完整的开始和结束DateTime
+    DateTime startDateTime = DateTime(
+      _votingEvent.startDate!.year,
+      _votingEvent.startDate!.month,
+      _votingEvent.startDate!.day,
+      _votingEvent.startTime!.hour,
+      _votingEvent.startTime!.minute,
+    );
+    
+    DateTime endDateTime = DateTime(
+      _votingEvent.endDate!.year,
+      _votingEvent.endDate!.month,
+      _votingEvent.endDate!.day,
+      _votingEvent.endTime!.hour,
+      _votingEvent.endTime!.minute,
+    );
 
     bool isVotingCreator = _votingEvent.createdBy == widget._user.walletAddress;
     
@@ -67,46 +94,48 @@ class _VotingEventPageState extends State<VotingEventPage> {
       print("voter id: ${voter.userID}");
     }
 
-    hasVoted = _votingEvent.voters.any((voter) => voter.userID == widget._user.userID);
+    hasVoted = voterList.any((voter) => voter.userID == widget._user.userID);
 
-    // check if today is within the voting date range
-    if (now.isAfter(_votingEvent.startDate!) &&
-        now.isBefore(_votingEvent.endDate!)) {
-      // if today is within date range, check if current time is after start time
-      ongoing = nowTime.hour > _votingEvent.startTime!.hour ||
-          (nowTime.hour == _votingEvent.startTime!.hour &&
-              nowTime.minute >= _votingEvent.startTime!.minute);
-    } else if (now.isAtSameMomentAs(_votingEvent.startDate!)) {
-      // if today is the start date, check if current time is after or equal to start time
-      ongoing = nowTime.hour > _votingEvent.startTime!.hour ||
-          (nowTime.hour == _votingEvent.startTime!.hour &&
-              nowTime.minute >= _votingEvent.startTime!.minute);
-    } else if (now.isAtSameMomentAs(_votingEvent.endDate!)) {
-      // if today is the end date, check if current time is before or equal to end time
-      ongoing = nowTime.hour < _votingEvent.endTime!.hour ||
-          (nowTime.hour == _votingEvent.endTime!.hour &&
-              nowTime.minute <= _votingEvent.endTime!.minute);
+    // 计算活动是否已经开始和结束
+    hasStarted = now.isAfter(startDateTime) || now.isAtSameMomentAs(startDateTime);
+    ongoing = hasStarted && (now.isBefore(endDateTime) || now.isAtSameMomentAs(endDateTime));
+    isEnded = now.isAfter(endDateTime);
+    
+    // 计算距离活动开始的时间
+    if (!hasStarted) {
+      timeUntilStart = startDateTime.difference(now);
     } else {
-      // if today is outside the date range, voting is not ongoing
-      ongoing = false;
+      timeUntilStart = Duration.zero;
+    }
+    
+    // 计算活动剩余时间
+    if (ongoing) {
+      timeRemaining = endDateTime.difference(now);
+    } else {
+      timeRemaining = Duration.zero;
     }
 
     canVote = ongoing && widget._user.role == UserRole.student && widget._isEligibleToVote && !hasVoted && !isVotingCreator;
-    isEnded = now.isAfter(_votingEvent.endDate!) || (now == _votingEvent.endDate! && nowTime.isAfter(_votingEvent.endTime!));
 
-    timeRemaining = Duration(
-      days: _votingEvent.endDate!.difference(now).inDays,
-      hours: _votingEvent.endTime!.hour - nowTime.hour,
-      minutes: _votingEvent.endTime!.minute - nowTime.minute,
-    );
-
-    if (isEnded) {
+    if (isEnded && candidateList.isNotEmpty) {
       winner = _votingEvent.candidates.reduce((a, b) => a.votesReceived > b.votesReceived ? a : b);
     }
+
+    // if the candidates is empty, and the voting is started, make it not ongoing and is ended and no winner and can't export to report
+    if ((ongoing && candidateList.isEmpty) || (isEnded && candidateList.isEmpty)) {
+      ongoing = false;
+      isEnded = false;
+      winner = null;
+      status = VotingEventStatus.deprecated;
+    }
+
+    print("hasStarted: $hasStarted");
     print("ongoing: $ongoing");
     print("hasVoted: $hasVoted");
     print("canVote: $canVote");
     print("isEnded: $isEnded");
+    print("timeUntilStart: ${timeUntilStart.inHours}h ${timeUntilStart.inMinutes % 60}m");
+    print("timeRemaining: ${timeRemaining.inHours}h ${timeRemaining.inMinutes % 60}m");
     print("user role: ${widget._user.role.stringValue}");
     print("isEligibleForVoting: ${widget._isEligibleToVote}");
     print("isAlreadyCandidate: ${_isAlreadyCandidate()}");
@@ -122,6 +151,11 @@ class _VotingEventPageState extends State<VotingEventPage> {
       setState(() {
         if (success) {
           hasVoted = true;
+          // reload the updated event
+          _votingEvent = widget._votingEventProvider.selectedVotingEvent;
+          setState(() {
+            voterList = _votingEvent.voters;
+          });
           SnackbarUtil.showSnackBar(context, AppLocale.voteSuccess.getString(context));
         } else {
           SnackbarUtil.showSnackBar(context, AppLocale.voteFailed.getString(context));
@@ -134,6 +168,10 @@ class _VotingEventPageState extends State<VotingEventPage> {
   }
 
   Future<void> _delete() async {
+    if ((ongoing || isEnded) && widget._user.role != UserRole.admin) {
+      SnackbarUtil.showSnackBar(context, AppLocale.votingEventHasAlreadyStarted.getString(context));
+    }
+
     setState(() {
       isLoading = true;
       loadingText = AppLocale.deletingVotingEvent.getString(context);
@@ -154,13 +192,13 @@ class _VotingEventPageState extends State<VotingEventPage> {
 
   Future<void> _exportToReport() async {
     await _reportService.exportVotingReport(
-      context: context,
-      votingEvent: _votingEvent,
-      votingEventDate: votingEventDate,
-      votingEventTime: votingEventTime,
-      isEnded: isEnded,
-      winner: winner,
-      generatedBy: widget._user.name,
+      context: context, 
+      votingEvent: _votingEvent, 
+      votingEventDate: votingEventDate, 
+      votingEventTime: votingEventTime, 
+      isEnded: isEnded, 
+      winner: winner, 
+      generatedBy: widget._user.name, 
       updateLoadingState: (isLoading, message) {
         setState(() {
           this.isLoading = isLoading;
@@ -177,35 +215,37 @@ class _VotingEventPageState extends State<VotingEventPage> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: colorScheme.secondary,
-        title: Text(_votingEvent.title),
+        title: Text(votingEventTitle),
         centerTitle: true,
         actions: [
           if (widget._user.walletAddress == _votingEvent.createdBy ||
               widget._user.role == UserRole.admin)
-            IconButton(
-              onPressed: () async {
-                // navigate to edit page and wait for result
-                final result = await NavigationHelper.navigateToEditVotingEventPage(context);
-                
-                // refresh the data if we got a true result (event updated)
-                if (result == true) {
-                  // reload the updated event
-                  _votingEvent = widget._votingEventProvider.selectedVotingEvent;
+                IconButton(
+                onPressed: () async {
+                  // navigate to edit page and wait for result
+                  final result = await NavigationHelper.navigateToEditVotingEventPage(context);
                   
-                  setState(() {
-                    // update display data
-                    votingEventDate = "${_votingEvent.startDate!.day}/${_votingEvent.startDate!.month}/${_votingEvent.startDate!.year} - ${_votingEvent.endDate!.day}/${_votingEvent.endDate!.month}/${_votingEvent.endDate!.year}";
-                    votingEventTime = "${_votingEvent.startTime!.hour}:${_votingEvent.startTime!.minute.toString().padLeft(2, '0')} - ${_votingEvent.endTime!.hour}:${_votingEvent.endTime!.minute.toString().padLeft(2, '0')}";
-                  });
-                }
-              },
-              icon: const Icon(FontAwesomeIcons.edit),
-            ),
+                  // refresh the data if we got a true result (event updated)
+                  if (result == true) {
+                    // reload the updated event
+                    _votingEvent = widget._votingEventProvider.selectedVotingEvent;
+                    
+                    setState(() {
+                      // update display data
+                      votingEventTitle = _votingEvent.title;
+                      votingEventDescription = _votingEvent.description;
+                      votingEventDate = "${_votingEvent.startDate!.day}/${_votingEvent.startDate!.month}/${_votingEvent.startDate!.year} - ${_votingEvent.endDate!.day}/${_votingEvent.endDate!.month}/${_votingEvent.endDate!.year}";
+                      votingEventTime = "${_votingEvent.startTime!.hour}:${_votingEvent.startTime!.minute.toString().padLeft(2, '0')} - ${_votingEvent.endTime!.hour}:${_votingEvent.endTime!.minute.toString().padLeft(2, '0')}";
+                    });
+                  }
+                },
+                icon: const Icon(FontAwesomeIcons.edit),
+              ),
         ],
       ),
       backgroundColor: colorScheme.tertiary,
       body: Stack(
-        children: [
+          children: [
           ScrollableResponsiveWidget(
             phone: Column(
               children: [
@@ -261,7 +301,7 @@ class _VotingEventPageState extends State<VotingEventPage> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(_votingEvent.title,
+                              Text(votingEventTitle,
                                 style: const TextStyle(
                                   fontSize: 20,
                                   fontWeight: FontWeight.bold,
@@ -270,7 +310,7 @@ class _VotingEventPageState extends State<VotingEventPage> {
                               _buildStatusBadge(context),
                               const SizedBox(height: 8),
                               Text(
-                                _votingEvent.description,
+                                votingEventDescription,
                                 style: TextStyle(
                                   color: colorScheme.onPrimary.withOpacity(0.8),
                                   fontSize: 16,
@@ -299,13 +339,14 @@ class _VotingEventPageState extends State<VotingEventPage> {
                                       ? AppLocale.available.getString(context)
                                       : AppLocale.deprecated
                                           .getString(context)),
+                              if (!hasStarted && !isEnded) _buildCountdownToStart(),
                               if (ongoing) _buildTimeRemaining(),
                             ],
                           ),
                         ),
 
                         // results section for ended events
-                        if (isEnded)
+                        if (isEnded && winner != null)
                           _buildSectionCard(
                             context,
                             AppLocale.results.getString(context),
@@ -356,58 +397,58 @@ class _VotingEventPageState extends State<VotingEventPage> {
 
                         // candidates section
                         _buildSectionCard(context, AppLocale.candidateParticipated.getString(context), 
-                          _votingEvent.candidates.isEmpty
-                              ? Center(
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(16.0),
-                                    child: Text(
-                                      AppLocale.noCandidateFound
-                                          .getString(context),
-                                      style: TextStyle(
-                                        color: colorScheme.onPrimary
-                                            .withOpacity(0.7),
-                                        fontSize: 16,
-                                      ),
+                          candidateList.isEmpty 
+                            ? Center(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(16.0),
+                                  child: Text(
+                                                AppLocale.noCandidateFound
+                                                    .getString(context),
+                                    style: TextStyle(
+                                                  color: colorScheme.onPrimary
+                                                      .withOpacity(0.7),
+                                                  fontSize: 16,
                                     ),
                                   ),
-                                )
-                              : Column(
-                                  children: _votingEvent.candidates.map((candidate) => Padding(
-                                      padding: const EdgeInsets.only(bottom: 8.0),
-                                      child: Card(
-                                        elevation: 2,
-                                        child: InkWell(
-                                          onTap: () => _showCandidateDetails(candidate),
-                                          child: Stack(
+                                ),
+                              )
+                            : Column(
+                              children: candidateList.map((candidate) => Padding(
+                                padding: const EdgeInsets.only(bottom: 8.0),
+                                child: Card(
+                                  elevation: 2,
+                                  child: InkWell(
+                                    onTap: () => _showCandidateDetails(candidate),
+                                    child: Stack(
+                                      children: [
+                                        Padding(
+                                          padding:const EdgeInsets.all(12.0),
+                                          child: Row(
                                             children: [
-                                              Padding(
-                                                padding:const EdgeInsets.all(12.0),
-                                                child: Row(
+                                              CircleAvatar(
+                                                backgroundColor:colorScheme.secondary,
+                                                backgroundImage: candidate.avatarUrl != '' &&
+                                                        candidate.avatarUrl.isNotEmpty
+                                                    ? widget._candidateProvider.getCandidateAvatar(candidate)
+                                                    : null,
+                                                child: candidate.avatarUrl != '' &&
+                                                        candidate.avatarUrl.isNotEmpty
+                                                    ? null
+                                                    : Text(candidate.name.isNotEmpty
+                                                            ? candidate.name[0].toUpperCase()
+                                                            : '?',
+                                                        style: TextStyle(
+                                                            color: colorScheme.onPrimary),
+                                                      ),
+                                              ),
+                                              const SizedBox(width: 16),
+                                              Expanded(
+                                                child: Column(
+                                                  crossAxisAlignment: CrossAxisAlignment.start,
                                                   children: [
-                                                    CircleAvatar(
-                                                      backgroundColor:colorScheme.secondary,
-                                                      backgroundImage: candidate.avatarUrl != '' &&
-                                                              candidate.avatarUrl.isNotEmpty
-                                                          ? widget._candidateProvider.getCandidateAvatar(candidate)
-                                                          : null,
-                                                      child: candidate.avatarUrl != '' &&
-                                                              candidate.avatarUrl.isNotEmpty
-                                                          ? null
-                                                          : Text(candidate.name.isNotEmpty
-                                                                  ? candidate.name[0].toUpperCase()
-                                                                  : '?',
-                                                              style: TextStyle(
-                                                                  color: colorScheme.onPrimary),
-                                                            ),
-                                                    ),
-                                                    const SizedBox(width: 16),
-                                                    Expanded(
-                                                      child: Column(
-                                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                                        children: [
-                                                          Text(candidate.name,
-                                                            style: const TextStyle(
-                                                              fontWeight: FontWeight.bold,
+                                                    Text(candidate.name,
+                                                      style: const TextStyle(
+                                                        fontWeight: FontWeight.bold,
                                                               fontSize: 16,
                                                             ),
                                                             softWrap: true,
@@ -467,29 +508,63 @@ class _VotingEventPageState extends State<VotingEventPage> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 const SizedBox(height: 16),
+                                // scrolling indicator when needed
+                                if (_votingEvent.candidates.length > 3)
+                                  Padding(
+                                    padding: const EdgeInsets.only(bottom: 8.0),
+                                    child: Row(
+                                      children: [
+                                        Icon(
+                                          Icons.swipe, 
+                                          size: 16, 
+                                          color: colorScheme.onPrimary.withOpacity(0.7),
+                                        ),
+                                        const SizedBox(width: 4),
+                                        Text(
+                                          "Scroll to see all candidates",
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            fontStyle: FontStyle.italic,
+                                            color: colorScheme.onPrimary.withOpacity(0.7),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
                                 // bar chart
-                                AspectRatio(
-                                  aspectRatio: 16 / 9,
-                                  child: CustomBarChart(
-                                    xAxisList: _votingEvent.candidates.map((candidate) => 
-                                      candidate.name.length > 10 
-                                      ? '${candidate.name.substring(0, 10)}...' 
-                                      : candidate.name
-                                    ).toList(),
-                                    yAxisList: _votingEvent.candidates.map((candidate) => candidate.votesReceived.toDouble()).toList(),
-                                    xAxisName: AppLocale.candidate.getString(context),
-                                    yAxisName: AppLocale.votesReceived.getString(context),
-                                    interval: 0,
+                                SingleChildScrollView(
+                                  scrollDirection: Axis.horizontal,
+                                  child: SizedBox(
+                                    // calculate width based on number of candidates - minimum width for <= 3 candidates
+                                    width: _votingEvent.candidates.length <= 3 
+                                      ? MediaQuery.of(context).size.width - 64 // default width with padding
+                                      : (_votingEvent.candidates.length * 100.0), // 100 pixels per candidate
+                                    child: AspectRatio(
+                                      aspectRatio: 16 / 9,
+                                      child: CustomBarChart(
+                                        xAxisList: _votingEvent.candidates.map((candidate) => 
+                                          candidate.name.length > 10 
+                                          ? '${candidate.name.substring(0, 10)}...' 
+                                          : candidate.name
+                                        ).toList(),
+                                        yAxisList: _votingEvent.candidates.map((candidate) => candidate.votesReceived.toDouble()).toList(), 
+                                        xAxisName: AppLocale.candidate.getString(context), 
+                                        yAxisName: AppLocale.votesReceived.getString(context), 
+                                        interval: 0,
+                                      ),
+                                    ),
                                   ),
                                 ),
                               ],
                             ),
                           ),
 
-                        // action buttons for admin/staff before event starts
-                        if (!ongoing &&
+                        // action buttons for admin/staff before event starts (admin can still view it)
+                        if (((!ongoing &&
                             !isEnded &&
-                            (widget._user.role == UserRole.admin || widget._user.walletAddress == _votingEvent.createdBy))
+                            (widget._user.walletAddress == _votingEvent.createdBy)) || widget._user.role == UserRole.admin) &&
+                              status != VotingEventStatus.deprecated
+                            )
                           Padding(
                             padding: const EdgeInsets.only(top: 16.0),
                             child: Row(
@@ -499,14 +574,15 @@ class _VotingEventPageState extends State<VotingEventPage> {
                                   child: CustomAnimatedButton(
                                     onPressed: () async {
                                       // navigate to manage candidate page
-                                      await NavigationHelper.navigateToManageCandidatePage(context);
+                                      bool results = await NavigationHelper.navigateToManageCandidatePage(context);
                                       
-                                      // always reload the voting event to get updated candidates 
-                                      // regardless of the result
-                                      await widget._votingEventProvider.loadVotingEvents();
-                                      setState(() {
+                                      if (results == true) {
+                                        await widget._votingEventProvider.loadVotingEvents();
                                         _votingEvent = widget._votingEventProvider.selectedVotingEvent;
-                                      });
+                                        setState(() {
+                                          candidateList = _votingEvent.candidates;
+                                        });
+                                      }
                                     },
                                     text: AppLocale.manageCandidate.getString(context),
                                     width: MediaQuery.of(context).size.width * 0.3,
@@ -514,10 +590,10 @@ class _VotingEventPageState extends State<VotingEventPage> {
                                 ),
                                 const SizedBox(width: 12),
                                 CustomAnimatedButton(
-                                  onPressed: () => _delete(),
+                                  onPressed: () => _delete(), 
                                   backgroundColor: Colors.red,
                                   text: AppLocale.delete.getString(context),
-                                  width: MediaQuery.of(context).size.width * 0.3,
+                                        width: MediaQuery.of(context).size.width * 0.3,
                                 ),
                               ],
                             ),
@@ -531,7 +607,7 @@ class _VotingEventPageState extends State<VotingEventPage> {
                               mainAxisAlignment: MainAxisAlignment.end,
                               children: [
                                 CustomAnimatedButton(
-                                  onPressed: () => _exportToReport(),
+                                  onPressed: () => _exportToReport(), 
                                   backgroundColor: Colors.indigo,
                                   text: AppLocale.exportToReport.getString(context),
                                 ),
@@ -558,7 +634,6 @@ class _VotingEventPageState extends State<VotingEventPage> {
                               ],
                             ),
                           ),
-
                         const SizedBox(height: 24),
                       ],
                     ),
@@ -567,14 +642,14 @@ class _VotingEventPageState extends State<VotingEventPage> {
               ],
             ),
             tablet: Container(),
-          ),
-          if (isLoading)
-            ProgressCircular(
-              isLoading: isLoading,
-              message: loadingText,
             ),
-        ],
-      ),
+            if (isLoading)
+              ProgressCircular(
+                isLoading: isLoading,
+                message: loadingText,
+              ),
+          ],
+        ),
     );
   }
 
@@ -589,30 +664,38 @@ class _VotingEventPageState extends State<VotingEventPage> {
       statusText = AppLocale.deprecated.getString(context);
       statusIcon = Icons.not_interested;
     } else {
-      DateTime now = DateTime.now();
-      TimeOfDay nowTime = TimeOfDay.now();
+      // 创建完整的开始和结束DateTime
+      DateTime now = DateTime.now().toUtc().add(const Duration(hours: 8));
+      
+      DateTime startDateTime = DateTime(
+        _votingEvent.startDate!.year,
+        _votingEvent.startDate!.month,
+        _votingEvent.startDate!.day,
+        _votingEvent.startTime!.hour,
+        _votingEvent.startTime!.minute,
+      );
+      
+      DateTime endDateTime = DateTime(
+        _votingEvent.endDate!.year,
+        _votingEvent.endDate!.month,
+        _votingEvent.endDate!.day,
+        _votingEvent.endTime!.hour,
+        _votingEvent.endTime!.minute,
+      );
 
-      // event hasn't started yet
-      if (now.isBefore(_votingEvent.startDate!) ||
-          (now.isAtSameMomentAs(_votingEvent.startDate!) &&
-              (nowTime.hour < _votingEvent.startTime!.hour ||
-                  (nowTime.hour == _votingEvent.startTime!.hour &&
-                      nowTime.minute < _votingEvent.startTime!.minute)))) {
+      // 活动未开始
+      if (now.isBefore(startDateTime)) {
         badgeColor = Colors.blue;
         statusText = AppLocale.waitingToStart.getString(context);
         statusIcon = Icons.schedule;
       }
-      // event has ended
-      else if (now.isAfter(_votingEvent.endDate!) ||
-          (now.isAtSameMomentAs(_votingEvent.endDate!) &&
-              (nowTime.hour > _votingEvent.endTime!.hour ||
-                  (nowTime.hour == _votingEvent.endTime!.hour &&
-                      nowTime.minute > _votingEvent.endTime!.minute)))) {
+      // 活动已结束
+      else if (now.isAfter(endDateTime)) {
         badgeColor = Colors.orange;
         statusText = AppLocale.ended.getString(context);
         statusIcon = Icons.done_all;
       }
-      // event is ongoing
+      // 活动进行中
       else {
         badgeColor = Colors.green;
         statusText = AppLocale.ongoing.getString(context);
@@ -732,13 +815,36 @@ class _VotingEventPageState extends State<VotingEventPage> {
   // helper method to build time remaining indicator
   Widget _buildTimeRemaining() {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    final int totalMinutes = timeRemaining.inMinutes;
-    final int totalDurationMinutes = (_votingEvent.endDate!.difference(_votingEvent.startDate!).inDays * 24 * 60) +
-        (_votingEvent.endTime!.hour * 60 + _votingEvent.endTime!.minute) -
-        (_votingEvent.startTime!.hour * 60 + _votingEvent.startTime!.minute);
-
-    // calculate percentage of time elapsed
-    final double progress = 1 - (totalMinutes / totalDurationMinutes);
+    
+    if (!ongoing) {
+      return Container(); // 如果不是进行中，不显示剩余时间
+    }
+    
+    // 计算总时长（从开始时间到结束时间的总分钟数）
+    final startDateTime = DateTime(
+      _votingEvent.startDate!.year,
+      _votingEvent.startDate!.month,
+      _votingEvent.startDate!.day,
+      _votingEvent.startTime!.hour,
+      _votingEvent.startTime!.minute,
+    );
+    
+    final endDateTime = DateTime(
+      _votingEvent.endDate!.year,
+      _votingEvent.endDate!.month,
+      _votingEvent.endDate!.day,
+      _votingEvent.endTime!.hour,
+      _votingEvent.endTime!.minute,
+    );
+    
+    final totalDurationMinutes = endDateTime.difference(startDateTime).inMinutes;
+    final remainingMinutes = timeRemaining.inMinutes;
+    
+    // 计算时间进度比例
+    final double progress = 1 - (remainingMinutes / totalDurationMinutes);
+    final days = timeRemaining.inDays;
+    final hours = timeRemaining.inHours % 24;
+    final minutes = timeRemaining.inMinutes % 60;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -761,7 +867,7 @@ class _VotingEventPageState extends State<VotingEventPage> {
             ),
             const SizedBox(width: 8),
             Text(
-              "${timeRemaining.inDays}d ${timeRemaining.inHours % 24}h ${timeRemaining.inMinutes % 60}m",
+              "${days}d ${hours}h ${minutes}m",
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 color: colorScheme.onPrimary,
@@ -773,7 +879,7 @@ class _VotingEventPageState extends State<VotingEventPage> {
         ClipRRect(
           borderRadius: BorderRadius.circular(8),
           child: LinearProgressIndicator(
-            value: progress,
+            value: progress.isNaN || progress.isInfinite ? 0.0 : progress.clamp(0.0, 1.0),
             backgroundColor: colorScheme.primary.withOpacity(0.2),
             valueColor: AlwaysStoppedAnimation<Color>(progress < 0.25
                 ? Colors.red
@@ -804,8 +910,8 @@ class _VotingEventPageState extends State<VotingEventPage> {
                   candidate.avatarUrl != '' && candidate.avatarUrl.isNotEmpty
                       ? widget._candidateProvider.getCandidateAvatar(candidate)
                       : null,
-              radius: 18,
-              child: candidate.avatarUrl != '' && candidate.avatarUrl.isNotEmpty
+                  radius: 18,
+                  child: candidate.avatarUrl != '' && candidate.avatarUrl.isNotEmpty
                   ? null
                   : Text(
                       candidate.name.isNotEmpty
@@ -1024,5 +1130,60 @@ class _VotingEventPageState extends State<VotingEventPage> {
   bool _isAlreadyCandidate() {
     return _votingEvent.candidates.any((c) => c.walletAddress == widget._user.walletAddress) ||
         _votingEvent.pendingCandidates.any((c) => c.walletAddress == widget._user.walletAddress);
+  }
+
+  // 添加一个新的方法来构建时间线倒计时组件
+  Widget _buildCountdownToStart() {
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    
+    if (hasStarted) {
+      return Container(); // 如果已经开始，不显示倒计时
+    }
+
+    final days = timeUntilStart.inDays;
+    final hours = timeUntilStart.inHours % 24;
+    final minutes = timeUntilStart.inMinutes % 60;
+    
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 16),
+        Text(
+          "${AppLocale.timeUntilStart.getString(context)}:",
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: colorScheme.onPrimary,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            Icon(
+              Icons.schedule,
+              color: colorScheme.onPrimary,
+              size: 18,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              "${days}d ${hours}h ${minutes}m",
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Colors.blue,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(8),
+          child: LinearProgressIndicator(
+            value: 0.0, // 活动还未开始，所以进度为0
+            backgroundColor: Colors.blue.withOpacity(0.2),
+            valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
+            minHeight: 8,
+          ),
+        ),
+      ],
+    );
   }
 }

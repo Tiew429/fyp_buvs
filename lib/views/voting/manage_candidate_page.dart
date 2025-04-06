@@ -1,5 +1,6 @@
 import 'package:blockchain_university_voting_system/localization/app_locale.dart';
 import 'package:blockchain_university_voting_system/models/candidate_model.dart';
+import 'package:blockchain_university_voting_system/models/user_model.dart';
 import 'package:blockchain_university_voting_system/models/voting_event_model.dart';
 import 'package:blockchain_university_voting_system/provider/candidate_provider.dart';
 import 'package:blockchain_university_voting_system/routes/navigation_helper.dart';
@@ -11,14 +12,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localization/flutter_localization.dart';
 
 class ManageCandidatePage extends StatefulWidget {
+  final User _user;
   final VotingEventProvider _votingEventProvider;
   final CandidateProvider _candidateProvider;
 
   const ManageCandidatePage({
     super.key,
+    required User user,
     required VotingEventProvider votingEventProvider,
     required CandidateProvider candidateProvider,
-  }) :_votingEventProvider = votingEventProvider, 
+  }) :_user = user,
+      _votingEventProvider = votingEventProvider, 
       _candidateProvider = candidateProvider;
 
   @override
@@ -393,7 +397,7 @@ class _ManageCandidatePageState extends State<ManageCandidatePage> with SingleTi
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+              children: [
             if (candidate.bio.isNotEmpty) ...[
               Text(
                 "${AppLocale.bio.getString(context)}:",
@@ -566,6 +570,40 @@ class _ManageCandidatePageState extends State<ManageCandidatePage> with SingleTi
 
   // remove candidate from voting event
   Future<void> _removeCandidate(Candidate candidate) async {
+    final now = DateTime.now();
+    final votingEvent  = widget._votingEventProvider.selectedVotingEvent;
+    final startDateTime = DateTime(
+      votingEvent.startDate!.year,
+      votingEvent.startDate!.month,
+      votingEvent.startDate!.day,
+      votingEvent.startTime!.hour,
+      votingEvent.startTime!.minute,
+    );
+    
+    final endDateTime = DateTime(
+      votingEvent.endDate!.year,
+      votingEvent.endDate!.month,
+      votingEvent.endDate!.day,
+      votingEvent.endTime!.hour,
+      votingEvent.endTime!.minute,
+    );
+    
+    if (widget._user.role != UserRole.admin) {
+      if (startDateTime.isBefore(now) || startDateTime.isAtSameMomentAs(now)) {
+        SnackbarUtil.showSnackBar(
+          context, 
+          AppLocale.votingEventHasAlreadyStarted.getString(context)
+        );
+        return;
+      } else if (endDateTime.isBefore(now) || endDateTime.isAtSameMomentAs(now)) {
+        SnackbarUtil.showSnackBar(
+          context, 
+          AppLocale.votingEventHasEnded.getString(context)
+        );
+        return;
+      }
+    }
+
     setState(() {
       _isLoading = true;
     });
