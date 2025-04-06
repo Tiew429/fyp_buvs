@@ -210,7 +210,7 @@ contract Voting {
 
         require(votingEvent.eventID != bytes32(0), "Voting event does not exist");
         require(msg.sender == votingEvent.createdBy || msg.sender == admin, "Only event creator can update");
-        require(block.timestamp < votingEvent.startDate, "Event already started, cannot update");
+        require(block.timestamp < votingEvent.startDate || msg.sender == admin, "Event already started, cannot update");
 
         // update event details
         votingEvent.title = _title;
@@ -229,7 +229,7 @@ contract Voting {
 
         require(votingEvent.eventID != bytes32(0), "Voting event does not exist");
         require(msg.sender == votingEvent.createdBy || msg.sender == admin, "Only event creator can remove");
-        require(block.timestamp < votingEvent.startDate, "Event already started, cannot remove");
+        require(block.timestamp < votingEvent.startDate || msg.sender == admin, "Event already started, cannot remove");
 
         // change voting event status to deprecated (1)
         votingEvents[_eventID].status = 1;
@@ -294,7 +294,7 @@ contract Voting {
 
         require(votingEvent.eventID != bytes32(0), "Voting event does not exist");
         require(msg.sender == votingEvent.createdBy || msg.sender == admin, "Only event creator can add candidate");
-        require(block.timestamp < votingEvent.startDate, "Event already started, cannot add candidate");
+        require(block.timestamp < votingEvent.startDate || msg.sender == admin, "Event already started, cannot add candidate");
         require(_candidateIDStrs.length == _walletAddresses.length, "Candidate IDs and wallet addresses count mismatch");
         require(_candidateIDStrs.length > 0, "No candidates provided");
 
@@ -330,7 +330,7 @@ contract Voting {
 
         require(votingEvent.eventID != bytes32(0), "Voting event does not exist");
         require(msg.sender == votingEvent.createdBy || msg.sender == admin, "Only event creator can remove candidate");
-        require(block.timestamp < votingEvent.startDate, "Event already started, cannot remove candidate");
+        require(block.timestamp < votingEvent.startDate || msg.sender == admin, "Event already started, cannot remove candidate");
 
         bool found = false;
         for (uint256 i = 0; i < votingEvent.candidates.length; i++) {
