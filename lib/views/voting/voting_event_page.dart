@@ -7,6 +7,7 @@ import 'package:blockchain_university_voting_system/models/voting_event_model.da
 import 'package:blockchain_university_voting_system/provider/candidate_provider.dart';
 import 'package:blockchain_university_voting_system/routes/navigation_helper.dart';
 import 'package:blockchain_university_voting_system/services/report_service.dart';
+import 'package:blockchain_university_voting_system/utils/converter_util.dart';
 import 'package:blockchain_university_voting_system/utils/snackbar_util.dart';
 import 'package:blockchain_university_voting_system/provider/voting_event_provider.dart';
 import 'package:blockchain_university_voting_system/widgets/custom_animated_button.dart';
@@ -60,18 +61,31 @@ class _VotingEventPageState extends State<VotingEventPage> {
     _votingEvent = widget._votingEventProvider.selectedVotingEvent;
     votingEventTitle = _votingEvent.title;
     votingEventDescription = _votingEvent.description;
-    votingEventDate =
-        "${_votingEvent.startDate!.day}/${_votingEvent.startDate!.month}/${_votingEvent.startDate!.year} - ${_votingEvent.endDate!.day}/${_votingEvent.endDate!.month}/${_votingEvent.endDate!.year}";
-    votingEventTime =
-        "${_votingEvent.startTime!.hour}:${_votingEvent.startTime!.minute.toString().padLeft(2, '0')} - ${_votingEvent.endTime!.hour}:${_votingEvent.endTime!.minute.toString().padLeft(2, '0')}";
+    
+    // Use our new formatting methods for consistent Malaysia timezone display
+    votingEventDate = ConverterUtil.formatMalaysiaDateRange(
+      _votingEvent.startDate!, 
+      _votingEvent.endDate!
+    );
+
+    print("formatted voting event date: $votingEventDate");
+    print("voting event start date: ${_votingEvent.startDate!}");
+    print("voting event end date: ${_votingEvent.endDate!}");
+    
+    votingEventTime = ConverterUtil.formatTimeRange(
+      _votingEvent.startTime!, 
+      _votingEvent.endTime!
+    );
+    
     candidateList = _votingEvent.candidates;
     voterList = _votingEvent.voters;
     status = _votingEvent.status;
 
-    // 使用马来西亚时区 (UTC+8)
-    DateTime now = DateTime.now().toUtc().add(const Duration(hours: 8));
+    // Get current Malaysia time
+    DateTime now = ConverterUtil.getMalaysiaDateTime();
     
-    // 创建完整的开始和结束DateTime
+    // Create complete DateTime objects for start and end times in local time (not UTC)
+    // Use regular DateTime constructor, not DateTime.utc
     DateTime startDateTime = DateTime(
       _votingEvent.startDate!.year,
       _votingEvent.startDate!.month,
@@ -96,33 +110,34 @@ class _VotingEventPageState extends State<VotingEventPage> {
 
     hasVoted = voterList.any((voter) => voter.userID == widget._user.userID);
 
-    // 计算活动是否已经开始和结束
+    // Calculate event status (has started, ongoing, ended)
     hasStarted = now.isAfter(startDateTime) || now.isAtSameMomentAs(startDateTime);
     ongoing = hasStarted && (now.isBefore(endDateTime) || now.isAtSameMomentAs(endDateTime));
     isEnded = now.isAfter(endDateTime);
     
-    // 计算距离活动开始的时间
+    // Calculate time until event starts
     if (!hasStarted) {
-      timeUntilStart = startDateTime.difference(now);
+      timeUntilStart = startDateTime.subtract(const Duration(hours: 8)).difference(now);
     } else {
       timeUntilStart = Duration.zero;
     }
     
-    // 计算活动剩余时间
+    // Calculate remaining time for ongoing events
     if (ongoing) {
-      timeRemaining = endDateTime.difference(now);
+      timeRemaining = endDateTime.subtract(const Duration(hours: 8)).difference(now);
     } else {
       timeRemaining = Duration.zero;
     }
 
     canVote = ongoing && widget._user.role == UserRole.student && widget._isEligibleToVote && !hasVoted && !isVotingCreator;
 
+    // Calculate the votes and determine the winner (if event has ended)
     if (isEnded && candidateList.isNotEmpty) {
       winner = _votingEvent.candidates.reduce((a, b) => a.votesReceived > b.votesReceived ? a : b);
     }
 
     // if the candidates is empty, and the voting is started, make it not ongoing and is ended and no winner and can't export to report
-    if ((ongoing && candidateList.isEmpty) || (isEnded && candidateList.isEmpty)) {
+    if ((ongoing && candidateList.length < 2) || (isEnded && candidateList.length < 2)) {
       ongoing = false;
       isEnded = false;
       winner = null;
@@ -143,11 +158,31 @@ class _VotingEventPageState extends State<VotingEventPage> {
 
   Future<void> _vote(Candidate candidate) async {
     try {
+      // Verify voting is still ongoing using Malaysia time before submitting vote
+      final now = ConverterUtil.getMalaysiaDateTime();
+      
+      // Create the end date time without double timezone adjustment
+      final endDateTime = DateTime(
+        _votingEvent.endDate!.year,
+        _votingEvent.endDate!.month,
+        _votingEvent.endDate!.day,
+        _votingEvent.endTime!.hour,
+        _votingEvent.endTime!.minute,
+      );
+      
+      // Don't allow voting if event has ended
+      if (now.isAfter(endDateTime)) {
+        SnackbarUtil.showSnackBar(context, AppLocale.votingEventHasEnded.getString(context));
+        return;
+      }
+      
       setState(() {
         isLoading = true;
         loadingText = AppLocale.votingInProgress.getString(context);
       });
+      
       bool success = await widget._votingEventProvider.vote(candidate, widget._user);
+      
       setState(() {
         if (success) {
           hasVoted = true;
@@ -155,6 +190,8 @@ class _VotingEventPageState extends State<VotingEventPage> {
           _votingEvent = widget._votingEventProvider.selectedVotingEvent;
           setState(() {
             voterList = _votingEvent.voters;
+            canVote = false;
+            hasVoted = true;
           });
           SnackbarUtil.showSnackBar(context, AppLocale.voteSuccess.getString(context));
         } else {
@@ -164,6 +201,12 @@ class _VotingEventPageState extends State<VotingEventPage> {
       });
     } catch (e) {
       print("Error voting: $e");
+      setState(() {
+        isLoading = false;
+      });
+      if (mounted) {
+        SnackbarUtil.showSnackBar(context, "Error: ${e.toString()}");
+      }
     }
   }
 
@@ -234,8 +277,17 @@ class _VotingEventPageState extends State<VotingEventPage> {
                       // update display data
                       votingEventTitle = _votingEvent.title;
                       votingEventDescription = _votingEvent.description;
-                      votingEventDate = "${_votingEvent.startDate!.day}/${_votingEvent.startDate!.month}/${_votingEvent.startDate!.year} - ${_votingEvent.endDate!.day}/${_votingEvent.endDate!.month}/${_votingEvent.endDate!.year}";
-                      votingEventTime = "${_votingEvent.startTime!.hour}:${_votingEvent.startTime!.minute.toString().padLeft(2, '0')} - ${_votingEvent.endTime!.hour}:${_votingEvent.endTime!.minute.toString().padLeft(2, '0')}";
+                      
+                      // Use ConverterUtil to ensure consistent Malaysia timezone display
+                      votingEventDate = ConverterUtil.formatMalaysiaDateRange(
+                        _votingEvent.startDate!, 
+                        _votingEvent.endDate!
+                      );
+                      
+                      votingEventTime = ConverterUtil.formatTimeRange(
+                        _votingEvent.startTime!, 
+                        _votingEvent.endTime!
+                      );
                     });
                   }
                 },
@@ -483,9 +535,9 @@ class _VotingEventPageState extends State<VotingEventPage> {
                                                     if (canVote)
                                                       IconButton(
                                                         icon: const Icon(Icons.how_to_vote, size: 20),
-                                                        color: colorScheme.tertiary,
+                                                        color: colorScheme.onPrimary,
                                                         tooltip: AppLocale.vote.getString(context),
-                                                        onPressed: () => _vote(candidate),
+                                                        onPressed: () async => await _vote(candidate),
                                                       ),
                                                   ],
                                                 ),
@@ -562,8 +614,8 @@ class _VotingEventPageState extends State<VotingEventPage> {
                         // action buttons for admin/staff before event starts (admin can still view it)
                         if (((!ongoing &&
                             !isEnded &&
-                            (widget._user.walletAddress == _votingEvent.createdBy)) || widget._user.role == UserRole.admin) &&
-                              status != VotingEventStatus.deprecated
+                            (widget._user.walletAddress == _votingEvent.createdBy)) || (widget._user.role == UserRole.admin) &&
+                              status != VotingEventStatus.deprecated)
                             )
                           Padding(
                             padding: const EdgeInsets.only(top: 16.0),
@@ -653,7 +705,7 @@ class _VotingEventPageState extends State<VotingEventPage> {
     );
   }
 
-  // helper method to build status badge
+  // Helper method to build status badge
   Widget _buildStatusBadge(BuildContext context) {
     Color badgeColor;
     String statusText;
@@ -664,9 +716,10 @@ class _VotingEventPageState extends State<VotingEventPage> {
       statusText = AppLocale.deprecated.getString(context);
       statusIcon = Icons.not_interested;
     } else {
-      // 创建完整的开始和结束DateTime
-      DateTime now = DateTime.now().toUtc().add(const Duration(hours: 8));
+      // Get current Malaysia time
+      DateTime now = ConverterUtil.getMalaysiaDateTime();
       
+      // Create DateTime objects without timezone double adjustment
       DateTime startDateTime = DateTime(
         _votingEvent.startDate!.year,
         _votingEvent.startDate!.month,
@@ -683,44 +736,47 @@ class _VotingEventPageState extends State<VotingEventPage> {
         _votingEvent.endTime!.minute,
       );
 
-      // 活动未开始
       if (now.isBefore(startDateTime)) {
+        // Upcoming event
         badgeColor = Colors.blue;
         statusText = AppLocale.waitingToStart.getString(context);
         statusIcon = Icons.schedule;
-      }
-      // 活动已结束
-      else if (now.isAfter(endDateTime)) {
-        badgeColor = Colors.orange;
+      } else if (now.isAfter(endDateTime)) {
+        // Ended event
+        badgeColor = Colors.red;
         statusText = AppLocale.ended.getString(context);
-        statusIcon = Icons.done_all;
-      }
-      // 活动进行中
-      else {
+        statusIcon = Icons.event_busy;
+      } else {
+        // Ongoing event
         badgeColor = Colors.green;
         statusText = AppLocale.ongoing.getString(context);
-        statusIcon = Icons.how_to_vote;
+        statusIcon = Icons.event_available;
       }
     }
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      margin: const EdgeInsets.only(top: 8.0, bottom: 16.0),
+      padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 6.0),
       decoration: BoxDecoration(
         color: badgeColor.withOpacity(0.2),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: badgeColor, width: 1),
+        borderRadius: BorderRadius.circular(20.0),
+        border: Border.all(color: badgeColor),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(statusIcon, size: 14, color: badgeColor),
+          Icon(
+            statusIcon,
+            size: 16,
+            color: badgeColor,
+          ),
           const SizedBox(width: 4),
           Text(
             statusText,
             style: TextStyle(
               color: badgeColor,
               fontWeight: FontWeight.bold,
-              fontSize: 12,
+              fontSize: 14,
             ),
           ),
         ],
@@ -817,11 +873,12 @@ class _VotingEventPageState extends State<VotingEventPage> {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     
     if (!ongoing) {
-      return Container(); // 如果不是进行中，不显示剩余时间
+      return Container(); // if not ongoing, don't show remaining time
     }
     
-    // 计算总时长（从开始时间到结束时间的总分钟数）
-    final startDateTime = DateTime(
+    // Calculate total duration (total minutes from start to end)
+    // Make sure we're using the proper Malaysia time that includes the UTC+8 offset
+    final startDateTime = DateTime.utc(
       _votingEvent.startDate!.year,
       _votingEvent.startDate!.month,
       _votingEvent.startDate!.day,
@@ -829,7 +886,7 @@ class _VotingEventPageState extends State<VotingEventPage> {
       _votingEvent.startTime!.minute,
     );
     
-    final endDateTime = DateTime(
+    final endDateTime = DateTime.utc(
       _votingEvent.endDate!.year,
       _votingEvent.endDate!.month,
       _votingEvent.endDate!.day,
@@ -837,14 +894,18 @@ class _VotingEventPageState extends State<VotingEventPage> {
       _votingEvent.endTime!.minute,
     );
     
-    final totalDurationMinutes = endDateTime.difference(startDateTime).inMinutes;
-    final remainingMinutes = timeRemaining.inMinutes;
+    // Recalculate time remaining using current Malaysia time
+    final now = ConverterUtil.getMalaysiaDateTime();
+    final updatedTimeRemaining = endDateTime.subtract(const Duration(hours: 8)).difference(now);
     
-    // 计算时间进度比例
+    final totalDurationMinutes = endDateTime.difference(startDateTime).inMinutes;
+    final remainingMinutes = updatedTimeRemaining.inMinutes;
+    
+    // Calculate time progress proportion
     final double progress = 1 - (remainingMinutes / totalDurationMinutes);
-    final days = timeRemaining.inDays;
-    final hours = timeRemaining.inHours % 24;
-    final minutes = timeRemaining.inMinutes % 60;
+    final days = updatedTimeRemaining.inDays;
+    final hours = updatedTimeRemaining.inHours % 24;
+    final minutes = updatedTimeRemaining.inMinutes % 60;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -981,7 +1042,7 @@ class _VotingEventPageState extends State<VotingEventPage> {
             child: Text(
               AppLocale.close.getString(context),
               style: TextStyle(
-                color: colorScheme.onSecondary,
+                color: colorScheme.onPrimary,
               ),
             ),
           ),
@@ -1005,14 +1066,14 @@ class _VotingEventPageState extends State<VotingEventPage> {
             ),
           if (canVote)
             ElevatedButton.icon(
-              onPressed: () {
+              onPressed: () async {
                 Navigator.of(context).pop();
-                _vote(candidate);
+                await _vote(candidate);
               },
               icon: const Icon(Icons.how_to_vote),
               label: Text(AppLocale.vote.getString(context)),
               style: ElevatedButton.styleFrom(
-                backgroundColor: colorScheme.tertiary,
+                backgroundColor: colorScheme.onPrimary,
                 foregroundColor: colorScheme.onPrimary,
               ),
             ),
@@ -1081,7 +1142,7 @@ class _VotingEventPageState extends State<VotingEventPage> {
           ElevatedButton(
             onPressed: () {
               Navigator.of(context).pop();
-              _registerAsCandidate(bioController.text);
+              _registerAsCandidate();
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: colorScheme.tertiary,
@@ -1095,33 +1156,53 @@ class _VotingEventPageState extends State<VotingEventPage> {
   }
 
   // register as a candidate
-  Future<void> _registerAsCandidate(String bio) async {
-    setState(() {
-      isLoading = true;
-      loadingText = AppLocale.registeringAsCandidate.getString(context);
-    });
-
+  Future<void> _registerAsCandidate() async {
     try {
+      // Verify registration period is still open using Malaysia time
+      final now = ConverterUtil.getMalaysiaDateTime();
+      
+      // Create the start date time without double timezone adjustment
+      final startDateTime = DateTime(
+        _votingEvent.startDate!.year,
+        _votingEvent.startDate!.month,
+        _votingEvent.startDate!.day,
+        _votingEvent.startTime!.hour,
+        _votingEvent.startTime!.minute,
+      );
+      
+      // Don't allow registration if voting event has already started
+      if (now.isAfter(startDateTime)) {
+        SnackbarUtil.showSnackBar(context, AppLocale.votingEventHasAlreadyStarted.getString(context));
+        return;
+      }
+      
+      setState(() {
+        isLoading = true;
+        loadingText = AppLocale.registeringAsCandidate.getString(context);
+      });
+      
+      String bio = "";
       bool success = await widget._votingEventProvider.addPendingCandidate(widget._user, bio);
-
+      
       setState(() {
         isLoading = false;
       });
 
       if (success) {
-        if (mounted) {
-          SnackbarUtil.showSnackBar(context, AppLocale.registeredAsCandidateSuccess.getString(context));
-        }
+        if (!mounted) return;
+        SnackbarUtil.showSnackBar(context, AppLocale.registeredAsCandidateSuccess.getString(context));
+        NavigationHelper.navigateBack(context);
       } else {
-        throw Exception(AppLocale.failedToRegisterAsCandidate.getString(context));
+        if (!mounted) return;
+        SnackbarUtil.showSnackBar(context, AppLocale.failedToRegisterAsCandidate.getString(context));
       }
     } catch (e) {
+      print("Error registering as candidate: $e");
       setState(() {
         isLoading = false;
       });
-
       if (mounted) {
-        SnackbarUtil.showSnackBar(context, e.toString());
+        SnackbarUtil.showSnackBar(context, "Error: ${e.toString()}");
       }
     }
   }
@@ -1132,18 +1213,30 @@ class _VotingEventPageState extends State<VotingEventPage> {
         _votingEvent.pendingCandidates.any((c) => c.walletAddress == widget._user.walletAddress);
   }
 
-  // 添加一个新的方法来构建时间线倒计时组件
+  // helper method to build countdown to start
   Widget _buildCountdownToStart() {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     
     if (hasStarted) {
-      return Container(); // 如果已经开始，不显示倒计时
+      return Container(); // if already started, don't show countdown
     }
-
-    final days = timeUntilStart.inDays;
-    final hours = timeUntilStart.inHours % 24;
-    final minutes = timeUntilStart.inMinutes % 60;
     
+    // Recalculate time until start using current Malaysia time
+    final now = ConverterUtil.getMalaysiaDateTime();
+    final startDateTime = DateTime.utc(
+      _votingEvent.startDate!.year,
+      _votingEvent.startDate!.month,
+      _votingEvent.startDate!.day,
+      _votingEvent.startTime!.hour,
+      _votingEvent.startTime!.minute,
+    ).subtract(const Duration(hours: 8));
+    
+    final updatedTimeUntilStart = startDateTime.difference(now);
+    
+    final days = updatedTimeUntilStart.inDays;
+    final hours = updatedTimeUntilStart.inHours % 24;
+    final minutes = updatedTimeUntilStart.inMinutes % 60;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1166,7 +1259,7 @@ class _VotingEventPageState extends State<VotingEventPage> {
             const SizedBox(width: 8),
             Text(
               "${days}d ${hours}h ${minutes}m",
-              style: TextStyle(
+              style: const TextStyle(
                 fontWeight: FontWeight.bold,
                 color: Colors.blue,
               ),
@@ -1179,7 +1272,7 @@ class _VotingEventPageState extends State<VotingEventPage> {
           child: LinearProgressIndicator(
             value: 0.0, // 活动还未开始，所以进度为0
             backgroundColor: Colors.blue.withOpacity(0.2),
-            valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
+            valueColor: const AlwaysStoppedAnimation<Color>(Colors.blue),
             minHeight: 8,
           ),
         ),

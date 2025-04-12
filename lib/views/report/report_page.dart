@@ -7,6 +7,7 @@ import 'package:blockchain_university_voting_system/provider/wallet_provider.dar
 import 'package:blockchain_university_voting_system/provider/voting_event_provider.dart';
 import 'package:blockchain_university_voting_system/routes/navigation_helper.dart';
 import 'package:blockchain_university_voting_system/services/report_service.dart';
+import 'package:blockchain_university_voting_system/utils/converter_util.dart';
 import 'package:blockchain_university_voting_system/utils/snackbar_util.dart';
 import 'package:blockchain_university_voting_system/widgets/custom_search_box.dart';
 import 'package:blockchain_university_voting_system/widgets/empty_state_widget.dart';
@@ -96,30 +97,39 @@ class _ReportPageState extends State<ReportPage> {
     events.sort((a, b) => b.endDate!.compareTo(a.endDate!));
   }
   
-  // determine event status
+  // determine event status for sorting
   String _getEventStatus(VotingEvent event) {
-    DateTime now = DateTime.now();
-    TimeOfDay nowTime = TimeOfDay.now();
+    // Use Malaysia time (UTC+8)
+    DateTime now = ConverterUtil.getMalaysiaDateTime();
     
-    // event hasn't started yet
-    if (now.isBefore(event.startDate!) || 
-        (now.isAtSameMomentAs(event.startDate!) && 
-         (nowTime.hour < event.startTime!.hour || 
-          (nowTime.hour == event.startTime!.hour && 
-           nowTime.minute < event.startTime!.minute)))) {
+    // Create complete DateTime objects without timezone double adjustment
+    DateTime startDateTime = DateTime(
+      event.startDate!.year,
+      event.startDate!.month,
+      event.startDate!.day,
+      event.startTime!.hour,
+      event.startTime!.minute,
+    );
+    
+    DateTime endDateTime = DateTime(
+      event.endDate!.year,
+      event.endDate!.month,
+      event.endDate!.day,
+      event.endTime!.hour,
+      event.endTime!.minute,
+    );
+    
+    // Event hasn't started yet
+    if (now.isBefore(startDateTime)) {
       return AppLocale.waitingToStart.getString(context);
     }
     
-    // event has ended
-    if (now.isAfter(event.endDate!) || 
-        (now.isAtSameMomentAs(event.endDate!) && 
-         (nowTime.hour > event.endTime!.hour || 
-          (nowTime.hour == event.endTime!.hour && 
-           nowTime.minute > event.endTime!.minute)))) {
+    // Event has ended
+    if (now.isAfter(endDateTime)) {
       return AppLocale.ended.getString(context);
     }
     
-    // event is ongoing
+    // Event is ongoing
     return AppLocale.ongoing.getString(context);
   }
 

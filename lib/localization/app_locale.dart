@@ -676,7 +676,7 @@ class AppLocale {
     voteFailed: 'Vote failed', 
     deletingVotingEvent: 'Deleting voting event...',
     cannotEditStartedVotingEvent: 'Cannot edit started voting event',
-    loading: 'loading...',
+    loading: 'Loading...',
 
     // student
     notEligibleForVoting: 'Not eligible for voting',
@@ -1074,7 +1074,7 @@ class AppLocale {
     votingInProgress: 'Pengundian sedang berlangsung',
     viewDetails: 'Lihat Maklumat',
     cannotEditStartedVotingEvent: 'Tidak boleh mengedit acara pengundian yang dimulakan',
-    loading: 'loading...',
+    loading: 'Memuatkan...',
 
     // student
     notEligibleForVoting: 'Tidak layak untuk pengundian', 
@@ -1472,7 +1472,7 @@ class AppLocale {
     voteFailed: '投票失败',
     deletingVotingEvent: '正在删除投票活动...',
     cannotEditStartedVotingEvent: '无法编辑已发起的投票事件',
-    loading: 'loading...',
+    loading: '加载中...',
 
     // student
     notEligibleForVoting: '不符合投票资格',

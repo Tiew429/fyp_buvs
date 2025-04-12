@@ -165,6 +165,15 @@ class _MainAppState extends State<MainApp> {
               if (snapshot.data != null) {
                 userProvider.setUser(snapshot.data!);
                 userProvider.setInitialRoute('/${RouterPath.homepage.path}');
+                
+                // 加载用户的部门和投票资格状态
+                getIsEligibleForVoting().then((isEligible) {
+                  userProvider.setIsEligibleForVoting(isEligible);
+                });
+                
+                getDepartment().then((department) {
+                  userProvider.setDepartment(department);
+                });
               }
             }
             return _buildApp(themeProvider, userProvider);

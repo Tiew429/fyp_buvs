@@ -154,7 +154,24 @@ class AuthService {
       final userProvider = Provider.of<UserProvider>(context, listen: false);
       userProvider.setUser(user);
       userProvider.setInitialRoute('/${RouterPath.homepage.path}');
-      await saveLoginStatus(true, user);
+      
+      // 获取用户的投票资格和部门信息
+      String department = '';
+      bool isEligibleForVoting = false;
+      
+      if (user.role == model_user.UserRole.staff) {
+        department = userProvider.department;
+      } else if (user.role == model_user.UserRole.student) {
+        isEligibleForVoting = userProvider.isEligibleForVoting;
+      }
+      
+      // 保存登录信息和额外的用户数据
+      await saveLoginStatus(
+        true, 
+        user,
+        department: department,
+        isEligibleForVoting: isEligibleForVoting
+      );
       
       // save FCM token
       try {
@@ -372,7 +389,7 @@ class AuthService {
 
     // 2. send reset password email
     await _auth.sendPasswordResetEmail(email: emailReset);
-    SnackbarUtil.showSnackBar(context, 'Reset password email sent');
+    SnackbarUtil.showSnackBar(context, 'Reset password email sent to $emailReset');
 
     // 3. if yes, navigate to reset password page, else toast error
     NavigationHelper.navigateToLoginPage(context);

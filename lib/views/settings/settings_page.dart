@@ -220,7 +220,6 @@ class _SettingsPageState extends State<SettingsPage> {
                     showArrow: false,
                     isWarning: true,
                   ),
-                  
                   const SizedBox(height: 20),
                 ],
               ),
@@ -489,24 +488,24 @@ class _SettingsPageState extends State<SettingsPage> {
                         
                         // 显示正在处理的提示
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('正在应用设置变更...'),
-                            duration: const Duration(seconds: 1),
+                          const SnackBar(
+                            content: Text('\\...(0-v-0).../'),
+                            duration: Duration(seconds: 1),
                           ),
                         );
                         
                         // 重置区块链服务，避免重新初始化冲突
-                        try {
-                          // 重置服务单例
-                          WalletConnectService.reset();
-                          SmartContractService.reset();
-                          debugPrint("已重置区块链服务，准备应用新的偏好设置");
+                        // try {
+                        //   // 重置服务单例
+                        //   WalletConnectService.reset();
+                        //   SmartContractService.reset();
+                        //   debugPrint("已重置区块链服务，准备应用新的偏好设置");
                           
-                          // 等待一段时间确保服务完全重置
-                          await Future.delayed(const Duration(seconds: 1));
-                        } catch (e) {
-                          debugPrint("重置区块链服务时出错: $e");
-                        }
+                        //   // 等待一段时间确保服务完全重置
+                        //   await Future.delayed(const Duration(seconds: 1));
+                        // } catch (e) {
+                        //   debugPrint("重置区块链服务时出错: $e");
+                        // }
                         
                         // apply theme settings
                         themeProvider.toggleTheme(_currentDarkMode);

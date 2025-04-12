@@ -4,6 +4,7 @@ import 'package:blockchain_university_voting_system/models/voting_event_model.da
 import 'package:blockchain_university_voting_system/provider/user_provider.dart';
 import 'package:blockchain_university_voting_system/provider/wallet_provider.dart';
 import 'package:blockchain_university_voting_system/routes/navigation_helper.dart';
+import 'package:blockchain_university_voting_system/utils/converter_util.dart';
 import 'package:blockchain_university_voting_system/provider/voting_event_provider.dart';
 import 'package:blockchain_university_voting_system/widgets/custom_search_box.dart';
 import 'package:blockchain_university_voting_system/widgets/empty_state_widget.dart';
@@ -138,10 +139,10 @@ class _VotingListPageState extends State<VotingListPage> {
   
   // determine event status for sorting
   String _getEventStatus(VotingEvent event) {
-    // 使用马来西亚时区 (UTC+8)
-    DateTime now = DateTime.now().toUtc().add(const Duration(hours: 8));
+    // Use Malaysia time (UTC+8)
+    DateTime now = ConverterUtil.getMalaysiaDateTime();
     
-    // 创建完整的开始和结束DateTime
+    // Create complete DateTime objects without timezone double adjustment
     DateTime startDateTime = DateTime(
       event.startDate!.year,
       event.startDate!.month,
@@ -158,17 +159,17 @@ class _VotingListPageState extends State<VotingListPage> {
       event.endTime!.minute,
     );
     
-    // 活动未开始
+    // Event hasn't started yet
     if (now.isBefore(startDateTime)) {
       return AppLocale.waitingToStart.getString(context);
     }
     
-    // 活动已结束
+    // Event has ended
     if (now.isAfter(endDateTime)) {
       return AppLocale.ended.getString(context);
     }
     
-    // 活动进行中
+    // Event is ongoing
     return AppLocale.ongoing.getString(context);
   }
   
@@ -199,13 +200,13 @@ class _VotingListPageState extends State<VotingListPage> {
               Icon(
                 Icons.account_balance_wallet_outlined,
                 size: 64,
-                color: colorScheme.onTertiary.withOpacity(0.5),
+                color: colorScheme.onPrimary.withOpacity(0.5),
               ),
               const SizedBox(height: 16),
               Text(
                 AppLocale.pleaseConnectYourWallet.getString(context),
                 style: TextStyle(
-                  color: colorScheme.onTertiary,
+                  color: colorScheme.onPrimary,
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),

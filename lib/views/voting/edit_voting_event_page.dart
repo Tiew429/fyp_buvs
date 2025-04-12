@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:blockchain_university_voting_system/localization/app_locale.dart';
 import 'package:blockchain_university_voting_system/models/voting_event_model.dart';
 import 'package:blockchain_university_voting_system/routes/navigation_helper.dart';
+import 'package:blockchain_university_voting_system/utils/converter_util.dart';
 import 'package:blockchain_university_voting_system/utils/snackbar_util.dart';
 import 'package:blockchain_university_voting_system/provider/voting_event_provider.dart';
 import 'package:blockchain_university_voting_system/widgets/custom_cancel_button.dart';
@@ -35,17 +36,35 @@ class _EditVotingEventPageState extends State<EditVotingEventPage> {
   File? _imageFile;
   final _imagePicker = ImagePicker();
   bool _imageChanged = false;
+  String votingEventDate = '';
+  String votingEventTime = '';
 
   @override
   void initState() {
     super.initState();
     _votingEvent = widget._votingEventViewModel.selectedVotingEvent;
+    
+    // Add 8 hours to the start and end dates to convert from UTC to Malaysia time
+    DateTime adjustedStartDate = _votingEvent.startDate!.add(const Duration(hours: 8));
+    DateTime adjustedEndDate = _votingEvent.endDate!.add(const Duration(hours: 8));
+    
     _titleController = TextEditingController(text: _votingEvent.title);
     _descriptionController = TextEditingController(text: _votingEvent.description);
-    _startDateController = TextEditingController(text: _votingEvent.startDate.toString().split(' ')[0]);
-    _endDateController = TextEditingController(text: _votingEvent.endDate.toString().split(' ')[0]);
+    _startDateController = TextEditingController(text: adjustedStartDate.toString().split(' ')[0]);
+    _endDateController = TextEditingController(text: adjustedEndDate.toString().split(' ')[0]);
     _startTimeController = TextEditingController(text: "${_votingEvent.startTime!.hour.toString().padLeft(2, '0')}:${_votingEvent.startTime!.minute.toString().padLeft(2, '0')}:00");
     _endTimeController = TextEditingController(text: "${_votingEvent.endTime!.hour.toString().padLeft(2, '0')}:${_votingEvent.endTime!.minute.toString().padLeft(2, '0')}:00");
+    
+    // Use our new formatting methods
+    votingEventDate = ConverterUtil.formatMalaysiaDateRange(
+      _votingEvent.startDate!, 
+      _votingEvent.endDate!
+    );
+    
+    votingEventTime = ConverterUtil.formatTimeRange(
+      _votingEvent.startTime!, 
+      _votingEvent.endTime!
+    );
   }
 
   @override
@@ -77,7 +96,7 @@ class _EditVotingEventPageState extends State<EditVotingEventPage> {
       context: context, 
       initialDate: firstDate,
       firstDate: firstDate, 
-      lastDate: DateTime(DateTime.now().toUtc().add(const Duration(hours: 8)).year + 5),
+      lastDate: DateTime(ConverterUtil.getMalaysiaDateTime().year + 5),
       builder: (context, child) {
         ColorScheme colorScheme = Theme.of(context).colorScheme;
         return Theme(
@@ -92,8 +111,6 @@ class _EditVotingEventPageState extends State<EditVotingEventPage> {
     );
     
     if (picked != null) {
-      final malaysiaPicked = picked.toUtc().add(const Duration(hours: 8));
-      
       setState(() {
         if (isEndDate) {
           _showStartDateWarning = false;
@@ -101,20 +118,19 @@ class _EditVotingEventPageState extends State<EditVotingEventPage> {
           // if start date is after end date, update end date
           if (_endDateController.text.isNotEmpty) {
             DateTime endDate = DateTime.parse(_endDateController.text);
-            if (malaysiaPicked.isAfter(endDate)) {
-              _endDateController.text = "${malaysiaPicked.add(const Duration(days: 1)).toLocal()}".split(' ')[0];
+            if (picked.isAfter(endDate)) {
+              _endDateController.text = "${picked.add(const Duration(days: 1))}".split(' ')[0];
             }
           }
         }
-        controller.text = "${malaysiaPicked.toLocal()}".split(' ')[0];
+        controller.text = "${picked}".split(' ')[0];
       });
     }
   }
 
   Future<void> _selectTime(BuildContext context, TextEditingController controller) async {
-    // 马来西亚时区
-    final now = DateTime.now().toUtc().add(const Duration(hours: 8));
-    final TimeOfDay initialTime = TimeOfDay(hour: now.hour, minute: now.minute);
+    // Use Malaysia time directly
+    final initialTime = ConverterUtil.getMalaysiaTimeOfDay();
     
     final TimeOfDay? picked = await showTimePicker(
       context: context, 
@@ -269,9 +285,10 @@ class _EditVotingEventPageState extends State<EditVotingEventPage> {
     });
 
     try {
-      // 确保日期使用马来西亚时区 (UTC+8)
-      final startDate = DateTime.parse(_startDateController.text).toUtc().add(const Duration(hours: 8));
-      final endDate = DateTime.parse(_endDateController.text).toUtc().add(const Duration(hours: 8));
+      // Parse dates correctly
+      // Since we added 8 hours in initState, we need to subtract 8 hours before saving to get back to UTC
+      DateTime startDate = DateTime.parse(_startDateController.text).subtract(const Duration(hours: 8));
+      DateTime endDate = DateTime.parse(_endDateController.text).subtract(const Duration(hours: 8));
       
       final updatedEvent = _votingEvent.copyWith(
         title: _titleController.text,

@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:blockchain_university_voting_system/blockchain/wallet_connect_service.dart';
 import 'package:blockchain_university_voting_system/models/candidate_model.dart';
 import 'package:blockchain_university_voting_system/models/voting_event_model.dart';
-import 'package:blockchain_university_voting_system/routes/navigation_keys.dart';
 import 'package:blockchain_university_voting_system/utils/converter_util.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -72,7 +71,7 @@ class SmartContractService {
     
     // 确保AppKitModal可以获取到
     try {
-      _appKitModal = walletService.getAppKitModal(rootNavigatorKey.currentContext!);
+      _appKitModal = walletService.getAppKitModal(context);
       debugPrint("Smart_Contract_Service (initialize): Got AppKitModal successfully");
     } catch (e) {
       debugPrint("Smart_Contract_Service (initialize): Failed to get AppKitModal: $e");
@@ -80,7 +79,7 @@ class SmartContractService {
       // 尝试异步获取
       try {
         debugPrint("Smart_Contract_Service (initialize): Trying async method to get AppKitModal");
-        _appKitModal = await walletService.getAppKitModalAsync(rootNavigatorKey.currentContext!);
+        _appKitModal = await walletService.getAppKitModalAsync(context);
         debugPrint("Smart_Contract_Service (initialize): Got AppKitModal successfully with async method");
       } catch (asyncError) {
         debugPrint("Smart_Contract_Service (initialize): Failed with async method too: $asyncError");

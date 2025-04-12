@@ -2,6 +2,7 @@ import 'package:blockchain_university_voting_system/localization/app_locale.dart
 import 'package:blockchain_university_voting_system/models/user_model.dart';
 import 'package:blockchain_university_voting_system/provider/user_provider.dart';
 import 'package:blockchain_university_voting_system/routes/navigation_helper.dart';
+import 'package:blockchain_university_voting_system/routes/navigation_keys.dart';
 import 'package:blockchain_university_voting_system/widgets/scrollable_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localization/flutter_localization.dart';
@@ -252,7 +253,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   ),
                   const SizedBox(height: 20),
                   _buildActionCard(
-                    context: context,
+                    context: rootNavigatorKey.currentContext!,
                     title: widget.appKitModal.isConnected
                         ? AppLocale.cryptocurrencyWalletAccountConnected.getString(context)
                         : AppLocale.connectWithCryptoWallet.getString(context),

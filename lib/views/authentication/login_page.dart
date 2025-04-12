@@ -1,5 +1,6 @@
 import 'package:blockchain_university_voting_system/localization/app_locale.dart';
 import 'package:blockchain_university_voting_system/routes/navigation_helper.dart';
+import 'package:blockchain_university_voting_system/routes/navigation_keys.dart';
 import 'package:blockchain_university_voting_system/services/auth_service.dart';
 import 'package:blockchain_university_voting_system/utils/snackbar_util.dart';
 import 'package:blockchain_university_voting_system/utils/validator_util.dart';
@@ -185,7 +186,7 @@ class _LoginPageState extends State<LoginPage> {
                     children: [
                       AppKitModalConnectButton(
                         appKit: widget._appKitModal,
-                        context: context,
+                        context: rootNavigatorKey.currentContext!,
                         custom: GestureDetector(
                           onTap: () {
                             widget._appKitModal.openModalView();

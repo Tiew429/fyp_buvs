@@ -368,7 +368,7 @@ class _AddCandidatePageState extends State<AddCandidatePage> {
                   Text(
                     AppLocale.loadingStudents.getString(context),
                     style: TextStyle(
-                      color: colorScheme.onTertiary,
+                      color: colorScheme.onPrimary,
                     ),
                   ),
                 ],

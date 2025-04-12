@@ -1,6 +1,7 @@
 import 'package:blockchain_university_voting_system/localization/app_locale.dart';
 import 'package:blockchain_university_voting_system/models/voting_event_model.dart';
 import 'package:blockchain_university_voting_system/provider/voting_event_provider.dart';
+import 'package:blockchain_university_voting_system/utils/converter_util.dart';
 import 'package:blockchain_university_voting_system/utils/snackbar_util.dart';
 import 'package:blockchain_university_voting_system/widgets/custom_animated_button.dart';
 import 'package:blockchain_university_voting_system/widgets/custom_search_box.dart';
@@ -85,8 +86,8 @@ class _PendingVotingEventListPageState extends State<PendingVotingEventListPage>
 
   void _filterPendingEvents() {
     List<VotingEvent> allEvents = widget._votingEventProvider.votingEventList;
-    // 使用马来西亚时区 (UTC+8)
-    DateTime now = DateTime.now().toUtc().add(const Duration(hours: 8));
+    // Use Malaysia time (UTC+8)
+    DateTime now = ConverterUtil.getMalaysiaDateTime();
     
     _pendingAndDeprecatedEvents = allEvents.where((event) {
       // include deprecated events
@@ -94,7 +95,7 @@ class _PendingVotingEventListPageState extends State<PendingVotingEventListPage>
         return true;
       }
       
-      // 创建完整的开始DateTime
+      // Create complete DateTime object without timezone double adjustment
       DateTime startDateTime = DateTime(
         event.startDate!.year,
         event.startDate!.month,

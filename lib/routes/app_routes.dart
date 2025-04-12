@@ -7,6 +7,7 @@ import 'package:blockchain_university_voting_system/provider/user_management_pro
 import 'package:blockchain_university_voting_system/provider/wallet_provider.dart';
 import 'package:blockchain_university_voting_system/provider/user_provider.dart';
 import 'package:blockchain_university_voting_system/provider/voting_event_provider.dart';
+import 'package:blockchain_university_voting_system/routes/navigation_keys.dart';
 import 'package:blockchain_university_voting_system/views/authentication/login_page.dart';
 import 'package:blockchain_university_voting_system/views/authentication/register_page.dart';
 import 'package:blockchain_university_voting_system/views/authentication/staff_register_page.dart';
@@ -51,7 +52,7 @@ Future<ReownAppKitModal?> preloadAppKitModal(BuildContext context, WalletConnect
   }
   
   try {
-    _cachedAppKitModal = await service.getAppKitModalAsync(context);
+    _cachedAppKitModal = await service.getAppKitModalAsync(rootNavigatorKey.currentContext!);
     return _cachedAppKitModal;
   } catch (e) {
     debugPrint('Error preloading AppKitModal: $e');
@@ -242,7 +243,7 @@ List<RouteBase> router(String initialRoute, GlobalKey<NavigatorState> navigatorK
       barrierColor: colorScheme.tertiary,
       transitionDuration: const Duration(milliseconds: 300),
       child: FutureBuilder<ReownAppKitModal>(
-        future: getWalletConnectService()?.getAppKitModalAsync(context),
+        future: getWalletConnectService()?.getAppKitModalAsync(rootNavigatorKey.currentContext!),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Scaffold(

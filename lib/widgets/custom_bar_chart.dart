@@ -41,8 +41,16 @@ class _CustomBarChartState extends State<CustomBarChart> {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
+    // Find maximum value in the y-axis data
+    double maxY = yAxisList.isEmpty ? 1.0 : yAxisList.reduce((a, b) => a > b ? a : b);
+    
+    // Set minimum max value to 3 to ensure small values like 1 are visible
+    maxY = maxY < 3 ? 3.0 : maxY;
+
     return BarChart(
       BarChartData(
+        maxY: maxY,
+        minY: 0,
         titlesData: FlTitlesData(
           show: true,
           rightTitles: const AxisTitles(
@@ -70,7 +78,7 @@ class _CustomBarChartState extends State<CustomBarChart> {
             sideTitles: SideTitles(
               showTitles: true,
               reservedSize: 50,
-              // interval: interval,
+              interval: 1, // Set interval to 1 for small values
               getTitlesWidget: (value, meta) => leftTitles(value, meta, context),
             ),
           ),
@@ -90,9 +98,17 @@ class _CustomBarChartState extends State<CustomBarChart> {
             x: index,
             barRods: [
               BarChartRodData(
-                toY: yAxisList[index],
-                width: 50,
+                toY: yAxisList[index] > 0 ? yAxisList[index] : 0.2,
+                width: xAxisList.length <= 3 ? 60 : 50,
                 color: colorScheme.secondary,
+                gradient: LinearGradient(
+                  colors: [
+                    colorScheme.primary.withOpacity(0.7),
+                    colorScheme.secondary,
+                  ],
+                  begin: Alignment.bottomCenter,
+                  end: Alignment.topCenter,
+                ),
                 borderRadius: const BorderRadius.only(
                   topRight: Radius.circular(10),
                   topLeft: Radius.circular(10),

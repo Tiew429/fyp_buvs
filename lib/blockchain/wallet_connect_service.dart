@@ -84,10 +84,10 @@ class WalletConnectService {
       debugPrint("WalletConnectService: Using project ID: $projectId");
       
       // 强制等待一小段时间，确保上一个实例完全清理
-      await Future.delayed(const Duration(milliseconds: 500));
+      await Future.delayed(const Duration(milliseconds: 100));
       
       // 使用隔离的builder函数创建实例，减少冲突风险
-      _appkitModal = await _buildAppKitModal(context, projectId);
+      _appkitModal = await _buildAppKitModal(rootNavigatorKey.currentContext!, projectId);
       
       debugPrint("WalletConnectService: ReownAppKitModal instance created");
       
@@ -101,7 +101,7 @@ class WalletConnectService {
       // update wallet address in wallet provider
       debugPrint("WalletConnectService: Updating wallet address");
       try {
-        updateWalletAddress(context);
+        updateWalletAddress(rootNavigatorKey.currentContext!);
         debugPrint("WalletConnectService: Wallet address updated successfully");
       } catch (e) {
         debugPrint("WalletConnectService: Error updating wallet address: $e");
@@ -109,7 +109,7 @@ class WalletConnectService {
       }
 
       debugPrint("WalletConnectService: Subscribing to events");
-      await subscribeToEvents(context);
+      await subscribeToEvents(rootNavigatorKey.currentContext!);
       debugPrint("WalletConnectService: Events subscribed successfully");
       
       isInitialized = true;
@@ -153,7 +153,7 @@ class WalletConnectService {
   Future<ReownAppKitModal> getAppKitModalAsync(BuildContext context) async {
     if (!isInitialized || _appkitModal == null) {
       debugPrint("WalletConnectService: AppKitModal not initialized, initializing now...");
-      await initialize(context);
+      await initialize(rootNavigatorKey.currentContext!);
     }
     
     if (_appkitModal == null) {
@@ -167,7 +167,7 @@ class WalletConnectService {
     if (!isInitialized || _appkitModal == null) {
       debugPrint("WalletConnectService: AppKitModal not initialized, scheduling initialization");
       WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-        initialize(context);
+        initialize(rootNavigatorKey.currentContext!);
       });
       throw Exception('WalletConnectService not initialized. Please call initialize() first or use getAppKitModalAsync().');
     }
@@ -183,7 +183,7 @@ class WalletConnectService {
     debugPrint("WalletConnectService: Subscribing to events");
     
     _appkitModal!.onModalConnect.subscribe((ModalConnect? event) async {
-      final userProvider = Provider.of<UserProvider>(context, listen: false);
+      final userProvider = Provider.of<UserProvider>(rootNavigatorKey.currentContext!, listen: false);
       final user = userProvider.user;
 
       // userviewmodel got user, means user is logged in
@@ -258,7 +258,7 @@ class WalletConnectService {
   }
 
   Future<void> handleDisconnect(BuildContext context, [bool logout = true]) async {
-    final walletProvider = Provider.of<WalletProvider>(context, listen: false);
+    final walletProvider = Provider.of<WalletProvider>(rootNavigatorKey.currentContext!, listen: false);
     
     try {
       if ((_appkitModal?.isConnected ?? false)) {
@@ -279,6 +279,7 @@ class WalletConnectService {
   void updateWalletAddress(BuildContext context) {
     final walletProvider = Provider.of<WalletProvider>(context, listen: false);
     String address = getWalletAddress(context);
+    debugPrint("Wallet address gained: $address");
 
     if (address.startsWith('0x') && address.length == 42) {
         walletProvider.updateAddress(address);

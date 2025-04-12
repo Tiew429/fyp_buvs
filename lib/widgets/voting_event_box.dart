@@ -1,5 +1,6 @@
 import 'package:blockchain_university_voting_system/localization/app_locale.dart';
 import 'package:blockchain_university_voting_system/models/voting_event_model.dart';
+import 'package:blockchain_university_voting_system/utils/converter_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localization/flutter_localization.dart';
 
@@ -20,8 +21,8 @@ class VotingEventBox extends StatelessWidget {
       return AppLocale.deprecated.getString(context);
     }
     
-    // 使用马来西亚时区 (UTC+8)
-    DateTime now = DateTime.now().toUtc().add(const Duration(hours: 8));
+    // Use Malaysia time (UTC+8)
+    DateTime now = ConverterUtil.getMalaysiaDateTime();
     
     // 创建完整的开始和结束DateTime
     DateTime startDateTime = DateTime(

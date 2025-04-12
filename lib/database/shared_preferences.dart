@@ -6,15 +6,23 @@ import 'package:shared_preferences/shared_preferences.dart';
 Future<void> saveLoginStatus(
   bool isLoggedIn,
   User userDetails,
+  {String department = '', bool isEligibleForVoting = false}
 ) async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   // save login status
   await prefs.setBool('isLoggedIn', isLoggedIn);
+  
   // save user details as a JSON string
   String userDetailsJson = jsonEncode(userDetails.toJson());
   await prefs.setString('userDetails', userDetailsJson);
+  
+  // save department and eligibility status
+  await prefs.setString(_departmentKey, department);
+  await prefs.setBool(_isEligibleForVotingKey, isEligibleForVoting);
 
   print("save login status (freeze account?): ${userDetails.freezed}");
+  print("save eligibility status: $isEligibleForVoting");
+  print("save department: $department");
 }
 
 Future<User?> loadUserLoginStatus() async {
@@ -76,4 +84,39 @@ Future<int?> getLastPageIndex() async {
 Future<void> saveLastPageIndex(int pageIndex) async {
   final prefs = await SharedPreferences.getInstance();
   await prefs.setInt('lastPageIndex', pageIndex);
+}
+
+// 学生资格和部门相关
+const String _isEligibleForVotingKey = 'is_eligible_for_voting';
+const String _departmentKey = 'department';
+
+// 保存投票资格状态
+Future<void> saveIsEligibleForVoting(bool isEligible) async {
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.setBool(_isEligibleForVotingKey, isEligible);
+}
+
+// 获取投票资格状态
+Future<bool> getIsEligibleForVoting() async {
+  final prefs = await SharedPreferences.getInstance();
+  return prefs.getBool(_isEligibleForVotingKey) ?? false;
+}
+
+// 保存部门信息
+Future<void> saveDepartment(String department) async {
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.setString(_departmentKey, department);
+}
+
+// 获取部门信息
+Future<String> getDepartment() async {
+  final prefs = await SharedPreferences.getInstance();
+  return prefs.getString(_departmentKey) ?? '';
+}
+
+// 清除投票资格和部门信息
+Future<void> clearUserExtraInfo() async {
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.remove(_isEligibleForVotingKey);
+  await prefs.remove(_departmentKey);
 }

@@ -5,6 +5,7 @@ import 'package:blockchain_university_voting_system/models/user_model.dart';
 import 'package:blockchain_university_voting_system/provider/user_provider.dart';
 import 'package:blockchain_university_voting_system/provider/wallet_provider.dart';
 import 'package:blockchain_university_voting_system/routes/navigation_helper.dart';
+import 'package:blockchain_university_voting_system/utils/converter_util.dart';
 import 'package:blockchain_university_voting_system/utils/snackbar_util.dart';
 import 'package:blockchain_university_voting_system/provider/voting_event_provider.dart';
 import 'package:blockchain_university_voting_system/utils/validator_util.dart';
@@ -74,8 +75,8 @@ class _VotingEventCreatePageState extends State<VotingEventCreatePage> {
       return;
     }
 
-    // 马来西亚时区
-    final now = DateTime.now().toUtc().add(const Duration(hours: 8));
+    // Use Malaysia time
+    final now = ConverterUtil.getMalaysiaDateTime();
     DateTime firstDate = widget._userProvider.user!.role != UserRole.admin ? now.add(const Duration(days: 1)) : now;
 
     if (isEndDate && _startDateController.text.isNotEmpty) {
@@ -101,28 +102,25 @@ class _VotingEventCreatePageState extends State<VotingEventCreatePage> {
     );
 
     if (picked != null) {
-      final malaysiaPicked = picked.toUtc().add(const Duration(hours: 8));
-
       setState(() {
         if (isEndDate) {
           _showStartDateWarning = false;
         } else {
           if (_endDateController.text.isNotEmpty) {
             DateTime endDate = DateTime.parse(_endDateController.text);
-            if (malaysiaPicked.isAfter(endDate)) {
-              _endDateController.text = "${malaysiaPicked.add(const Duration(days: 1)).toLocal()}".split(' ')[0];
+            if (picked.isAfter(endDate)) {
+              _endDateController.text = "${picked.add(const Duration(days: 1))}".split(' ')[0];
             }
           }
         }
-        controller.text = "${malaysiaPicked.toLocal()}".split(' ')[0];
+        controller.text = "$picked".split(' ')[0];
       });
     }
   }
 
   Future<void> _selectTime(BuildContext context, TextEditingController controller) async {
-    // 马来西亚时区
-    final now = DateTime.now().toUtc().add(const Duration(hours: 8));
-    final TimeOfDay initialTime = TimeOfDay(hour: now.hour, minute: now.minute);
+    // Use Malaysia time directly
+    final initialTime = ConverterUtil.getMalaysiaTimeOfDay();
 
     final TimeOfDay? picked = await showTimePicker(
       context: context,
@@ -243,9 +241,9 @@ class _VotingEventCreatePageState extends State<VotingEventCreatePage> {
         return;
       }
 
-      // convert Date String to DateTime with Malaysia timezone (UTC +8)
-      DateTime startDate = DateTime.parse(_startDateController.text).toUtc().add(const Duration(hours: 8));
-      DateTime endDate = DateTime.parse(_endDateController.text).toUtc().add(const Duration(hours: 8));
+      // Parse dates and subtract 8 hours to convert from Malaysia time to UTC time
+      DateTime startDate = DateTime.parse(_startDateController.text);
+      DateTime endDate = DateTime.parse(_endDateController.text);
 
       // convert time string to TimeOfDay
       List<String> startTimeParts = _startTimeController.text.split(":");
@@ -261,19 +259,19 @@ class _VotingEventCreatePageState extends State<VotingEventCreatePage> {
         minute: int.parse(endTimeParts[1]),
       );
 
-      print("startDate: $startDate");
-      print("endDate: $endDate");
-      print("startTime: $startTime");
-      print("endTime: $endTime");
+      debugPrint("startDate: $startDate");
+      debugPrint("endDate: $endDate");
+      debugPrint("startTime: $startTime");
+      debugPrint("endTime: $endTime");
 
       // pass them to the provider with correct date and time
       final success = await widget._votingEventProvider.createVotingEvent(
         _titleController.text,
         _descriptionController.text,
-        startDate, // DateTime (startDate with Malaysia time)
-        endDate, // DateTime (endDate with Malaysia time)
-        startTime, // TimeOfDay (start time)
-        endTime, // TimeOfDay (end time)
+        startDate,
+        endDate,
+        startTime,
+        endTime,
         widget._walletProvider.walletAddress!,
         widget._userProvider.user!.userID,
         imageFile: _imageFile,

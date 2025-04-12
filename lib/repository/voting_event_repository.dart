@@ -97,10 +97,10 @@ class VotingEventRepository {
           // convert datas from blockchain to the correct type
           final title = event[1]?.toString() ?? 'Untitled Event';
           final startDate = event[2] != null
-              ? ConverterUtil.bigIntToDateTime(event[2])
+              ? ConverterUtil.bigIntToDateTime(event[2]).add(const Duration(hours: 8))
               : DateTime.now();
           final endDate = event[3] != null
-              ? ConverterUtil.bigIntToDateTime(event[3])
+              ? ConverterUtil.bigIntToDateTime(event[3]).add(const Duration(hours: 8))
               : DateTime.now().add(const Duration(days: 1));
           final createdBy = event[4]?.toString() ?? '';
           

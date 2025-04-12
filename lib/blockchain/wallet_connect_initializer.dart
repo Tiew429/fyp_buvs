@@ -36,17 +36,15 @@ class _WalletConnectInitializerState extends State<WalletConnectInitializer> {
     try {
       debugPrint("WalletConnectInitializer: Starting services initialization");
       
-      // 在每次初始化前，先尝试重置服务
-      try {
-        debugPrint("WalletConnectInitializer: Trying to reset services before initialization");
-        WalletConnectService.reset();
-        SmartContractService.reset();
-      } catch (e) {
-        debugPrint("WalletConnectInitializer: Error during service reset: $e");
-        // 继续初始化，不中断流程
-      }
-      
-      bool isInitialized = await walletSharedPreferences.getWalletConnectInitialized() ?? false;
+      // // 在每次初始化前，先尝试重置服务
+      // try {
+      //   debugPrint("WalletConnectInitializer: Trying to reset services before initialization");
+      //   WalletConnectService.reset();
+      //   SmartContractService.reset();
+      // } catch (e) {
+      //   debugPrint("WalletConnectInitializer: Error during service reset: $e");
+      //   // 继续初始化，不中断流程
+      // }
 
       // 无论之前是否初始化，都尝试重新初始化
       // 这样可以确保每次启动应用时都能正确连接区块链
@@ -65,7 +63,7 @@ class _WalletConnectInitializerState extends State<WalletConnectInitializer> {
       _walletConnectService = Provider.of<WalletConnectService>(rootNavigatorKey.currentContext!, listen: false);
       
       try {
-        await _walletConnectService!.initialize(context);
+        await _walletConnectService!.initialize(rootNavigatorKey.currentContext!);
         debugPrint("WalletConnectInitializer: Wallet service initialized successfully");
       } catch (e) {
         debugPrint("WalletConnectInitializer: Failed to initialize wallet service: $e");
@@ -87,15 +85,12 @@ class _WalletConnectInitializerState extends State<WalletConnectInitializer> {
       _smartContractService = Provider.of<SmartContractService>(rootNavigatorKey.currentContext!, listen: false);
       
       try {
-        await _smartContractService!.initialize(context);
+        await _smartContractService!.initialize(rootNavigatorKey.currentContext!);
         debugPrint("WalletConnectInitializer: Smart contract initialized successfully");
       } catch (e) {
         debugPrint("WalletConnectInitializer: Failed to initialize smart contract: $e");
         throw Exception("智能合约初始化失败: $e");
       }
-      
-      // 保存初始化状态
-      await walletSharedPreferences.saveWalletConnectInitialized(true);
       
       if (mounted) {
         setState(() {

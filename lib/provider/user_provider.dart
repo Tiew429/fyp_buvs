@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:blockchain_university_voting_system/data/router_path.dart';
+import 'package:blockchain_university_voting_system/database/shared_preferences.dart' as shared_prefs;
 import 'package:blockchain_university_voting_system/models/user_model.dart';
 import 'package:blockchain_university_voting_system/repository/user_repository.dart';
 import 'package:flutter/material.dart';
@@ -28,12 +29,18 @@ class UserProvider extends ChangeNotifier {
   ImageProvider? get cachedAvatarImage => _cachedAvatarImage;
 
   // setter
-  void setUser(dynamic user) {
+  void setUser(dynamic user) async {
     _user = user;
     
     if (_user != null && _user!.avatarUrl.isNotEmpty) {
       cacheAvatarImage(_user!.avatarUrl);
       _setupRefreshTimer();
+    }
+
+    // 从SharedPreferences加载额外的用户信息
+    if (_user != null) {
+      _isEligibleForVoting = await shared_prefs.getIsEligibleForVoting();
+      _department = await shared_prefs.getDepartment();
     }
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -53,20 +60,30 @@ class UserProvider extends ChangeNotifier {
     });
   }
 
-  void setDepartment(String department) {
+  void setDepartment(String department) async {
     _department = department;
+    // 保存到SharedPreferences
+    await shared_prefs.saveDepartment(department);
     notifyListeners();
   }
 
-  void setIsEligibleForVoting(bool isEligibleForVoting) {
+  void setIsEligibleForVoting(bool isEligibleForVoting) async {
     _isEligibleForVoting = isEligibleForVoting;
+    // 保存到SharedPreferences
+    await shared_prefs.saveIsEligibleForVoting(isEligibleForVoting);
     notifyListeners();
   }
 
-  void clearUser() {
+  void clearUser() async {
     _user = null;
     _cachedAvatarImage = null;
     _cancelRefreshTimer();
+    
+    // 清除用户额外信息
+    await shared_prefs.clearUserExtraInfo();
+    _department = '';
+    _isEligibleForVoting = false;
+    
     notifyListeners();
   }
 
