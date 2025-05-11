@@ -1,0 +1,242 @@
+# BLOCKCHAIN UNIVERSITY VOTING SYSTEM (BUVS) TECHNICAL REPORT
+
+## 1. Smart Contract Integration
+
+The BUVS application integrates Ethereum smart contracts to ensure secure, transparent, and immutable voting operations. Key aspects include:
+
+### Implementation Details:
+
+- **Contract Loading Mechanism**: 
+  - The `_loadContract()` method in `SmartContractService` loads contract ABIs from JSON files in the assets/contracts directory.
+  - `contractLoaded` boolean flag tracks whether the contract has been successfully loaded.
+  - The system uses the `DeployedContract` class from the ReOWN AppKit to represent the loaded contract.
+
+- **Contract Function Execution**: 
+  - `executeFunction(String functionName, List<dynamic> params)` method handles all contract interactions.
+  - Contract functions including `registerCandidate()`, `vote()`, `getCandidateVotes()`, and `hasVoted()` are exposed through dedicated methods.
+  - Each function call is wrapped in try-catch blocks for error handling.
+
+- **Transaction Management**: 
+  - `sendTransaction(Function transaction)` method handles the transaction submission process.
+  - The `_credentials` variable stores the user's cryptographic credentials for signing transactions.
+  - Transaction receipts are monitored through `waitForTransaction()` to confirm on-chain completion.
+
+- **State Verification Mechanisms**: 
+  - `checkAvailable()` method verifies if the contract is loaded and ready for interaction.
+  - `initialize()` method ensures proper initialization with null checks for `_appKitModal`.
+  - Contract state is verified through custom methods like `verifyVotingPeriod()` and `verifyUserHasNotVoted()`.
+
+- **Nullability Handling**: 
+  - The `contract` variable is defined as `DeployedContract?` (nullable) to prevent errors during reinitialization.
+  - `_reset()` method properly clears resources before reinitialization.
+  - Debug prints are strategically placed to track initialization and error states.
+
+## 2. Blockchain Integration
+
+The blockchain integration provides the foundation for the decentralized aspects of the voting system:
+
+### Implementation Details:
+
+- **ReOWN AppKit Integration**: 
+  - The system initializes AppKit via `AppKitModal.init()` with custom configuration parameters.
+  - `BlockchainService` class oversees blockchain connectivity through the `_appKitModal` instance.
+  - `getAppKit()` method provides access to the AppKit instance with proper null checking.
+
+- **Provider Management**: 
+  - Multiple RPC providers are configured in the `.env` file and loaded via `flutter_dotenv`.
+  - The system implements fallback logic in `_getProvider()` to switch between providers if connectivity issues occur.
+  - Provider status is monitored through `isConnected()` method that checks network availability.
+
+- **Stateful Initialization**: 
+  - `BlockchainService.initialize()` ensures proper setup of blockchain connections.
+  - The `_initialized` flag prevents duplicate initializations.
+  - Service reset is handled by `_reset()` which properly disposes of resources.
+
+- **Transaction Verification**: 
+  - Each transaction receipt is verified with `verifyTransactionSuccess(receipt)` to check for failure states.
+  - Block confirmations are tracked through `waitForConfirmations(hash, confirmations)`.
+  - Transaction events are monitored through `listenForEvent(eventName)` that returns a Stream of events.
+
+## 3. Wallet Connection
+
+The wallet connection module enables users to authenticate and interact with the blockchain:
+
+### Implementation Details:
+
+- **MetaMask Integration**: 
+  - `connectWallet()` method in `WalletService` initiates the connection to MetaMask.
+  - The system uses `appKit.requestAccounts()` to prompt users for wallet connection.
+  - `walletConnected` boolean tracks the current connection status.
+
+- **Address Management**: 
+  - User Ethereum addresses are stored in `userWalletAddress` variable and persisted in `SharedPreferences`.
+  - `getWalletAddress()` retrieves the current wallet address with proper null checking.
+  - `validateAddress(address)` ensures address format correctness using regex validation.
+
+- **Connection Persistence**: 
+  - `saveWalletConnection(address)` stores the connection in persistent storage.
+  - Connections are restored on app restart through `restoreWalletConnection()` that checks saved credentials.
+  - The `WalletConnectionProvider` maintains connection state across the app.
+
+- **Reconnection Logic**: 
+  - `_attemptReconnection()` tries to reconnect to previously connected wallets after app restarts.
+  - After theme/language changes, `handleAppRestart()` ensures wallet services are properly reinitialized.
+  - Reconnection attempts are limited by `_maxReconnectAttempts` to prevent excessive failures.
+
+- **Transaction Signing**: 
+  - `signTransaction(transaction)` requests the user's signature through the wallet.
+  - `signMessage(message)` allows signing arbitrary messages for authentication.
+  - Transaction parameters are built using `buildTransactionParams()` with appropriate gas limits and prices.
+
+- **Error Handling**: 
+  - `WalletException` class with specialized subclasses handles different error scenarios.
+  - Timeout management is implemented via `Future.timeout()` on wallet operations.
+  - User-friendly error messages are stored in `_errorMessages` map for different error types.
+
+## 4. Firebase Integration
+
+Firebase services form the backbone of the application's server-side functionality:
+
+### Implementation Details:
+
+- **User Authentication**: 
+  - `AuthService` class handles login via `loginWithCredentials(email, password)` and `loginWithMetamask(address, signature)`.
+  - Registration is managed through `registerWithCredentials(email, password, name, role)`.
+  - `_verifyUserInFirestore(User user)` checks user existence and retrieves additional profile data.
+
+- **Firestore Database**: 
+  - `FirestoreService` handles data operations through collections like `users`, `votingEvents`, and `candidates`.
+  - CRUD operations are implemented in methods like `getUser(uid)`, `updateUser(userData)`, `getVotingEvents()`, and `addCandidate(candidateData)`.
+  - Data models like `UserModel`, `VotingEvent`, and `Candidate` define the document structures.
+
+- **Real-time Updates**: 
+  - `listenToVotingEvents()` returns a Stream of `VotingEvent` objects that update in real-time.
+  - `subscribeToCandidateUpdates(eventId)` provides live updates on candidate registrations.
+  - `VotingEventProvider` maintains reactive state based on these real-time streams.
+
+- **Cloud Functions**: 
+  - Functions like `verifyEligibility(userId)` and `finalizeVotingEvent(eventId)` run server-side logic.
+  - These functions are invoked through the `functions` instance from the Firebase SDK.
+  - Results are processed through `handleFunctionResult(result)` with appropriate error handling.
+
+- **Storage**: 
+  - `StorageService` handles file operations through methods like `uploadCandidateImage(file, candidateId)`.
+  - Download URLs are retrieved with `getDownloadUrl(path)`.
+  - Image caching is managed through `Flutter_cache_manager` for efficient loading.
+
+- **FCM Integration**: 
+  - `NotificationService` handles push notification setup and reception.
+  - `requestNotificationPermission()` ensures proper permissions are granted.
+  - Topics like `voting_events` and `results` allow targeted notifications based on user interests.
+
+- **Security Rules**: 
+  - Firestore rules enforce access patterns like "users can only read/write their own data".
+  - Functions for administrative operations check the `isAdmin` flag before execution.
+  - Storage rules limit file uploads based on user authentication and role.
+
+## 5. Voting Implementation
+
+The voting system is the core functionality of the application:
+
+### Implementation Details:
+
+- **Event Creation**: 
+  - Administrators create events through `VotingEventService.createEvent(title, description, startDate, endDate, eligibilityCriteria)`.
+  - The `VotingEvent` model includes fields like `title`, `description`, `startDate`, `endDate`, `status`, and `eligibilityCriteria`.
+  - Event validation is performed through `validateEventDates(startDate, endDate)` to ensure logical time ordering.
+
+- **Candidate Registration**: 
+  - `_registerAsCandidate()` in `VotingEventPage` handles the registration process.
+  - Registration eligibility is checked through `isEligibleToRegister(userId, eventId)`.
+  - The `candidateRegistrationDeadline` variable determines the cutoff time for registrations.
+
+- **Time-Based Control**: 
+  - All datetime operations use `ConverterUtil.getMalaysiaDateTime()` to ensure correct timezone (UTC+8).
+  - The `_buildTimeRemaining()` method calculates and displays the time left in voting periods.
+  - `_buildStatusBadge()` changes event status display based on current time relative to event times.
+
+- **Vote Casting**: 
+  - The `_vote(candidateId)` method in `VotingEventPage` handles the voting process.
+  - Votes are recorded on-chain through `SmartContractService.vote(eventId, candidateId)`.
+  - Each vote updates the `voteCount` in Firestore and triggers UI updates.
+
+- **Results Calculation**: 
+  - `_calculateResults()` tallies votes from blockchain data.
+  - The `CustomBarChart` widget in `custom_bar_chart.dart` visualizes results with proper scaling.
+  - Zero-vote candidates display with minimum bar height (0.2) for visibility.
+
+- **Status Indication**: 
+  - Event status is calculated through `determineEventStatus(event)` which returns an `EventStatus` enum.
+  - Status badges use color coding: green for active, red for ended, blue for upcoming.
+  - The `statusText` variable contains user-friendly status descriptions.
+
+- **Countdown Display**: 
+  - `_buildCountdownToStart()` shows time until voting begins.
+  - `_formatDuration(duration)` converts Duration objects to human-readable "Xd Xh Xm" format.
+  - Timer widgets use `Timer.periodic()` to update countdown displays every second.
+
+- **Voter Verification**: 
+  - `hasVoted(userId, eventId)` checks if a user has already cast a vote.
+  - Eligibility is determined through `isEligibleForVoting(userId)` based on user department and role.
+  - The system prevents double-voting by checking both Firebase and blockchain records.
+
+## 6. Main Architecture
+
+The application follows a robust architecture designed for maintainability and scalability:
+
+### Implementation Details:
+
+- **Flutter Framework**: 
+  - The app uses Flutter SDK version ^3.5.4 for cross-platform development.
+  - Material 3 design system is implemented through `ThemeData.from(colorScheme)`.
+  - All screens are responsive using `MediaQuery.of(context).size` for adaptive layouts.
+
+- **Provider Pattern**: 
+  - State management uses `Provider` package with key providers including `UserProvider`, `ThemeProvider`, and `VotingEventProvider`.
+  - `ChangeNotifierProvider` is used for reactive state that triggers UI rebuilds.
+  - `MultiProvider` in `main.dart` wraps the application to provide access to all services.
+
+- **Service-Oriented Architecture**: 
+  - Core services (`AuthService`, `SmartContractService`, etc.) are instantiated in `main.dart`.
+  - Each service has a clear responsibility and API for other components to use.
+  - Services are accessed through provider lookups like `Provider.of<AuthService>(context)`.
+
+- **Repository Pattern**: 
+  - Data access is abstracted through repositories like `UserRepository` and `VotingRepository`.
+  - Repositories handle data source switching between local cache and remote APIs.
+  - The pattern allows for easy unit testing through repository mocking.
+
+- **Dependency Injection**: 
+  - Services are created in `main.dart` and injected into the widget tree.
+  - `GetIt` is used for some service locator requirements outside the widget tree.
+  - Constructor injection is used for widget dependencies when appropriate.
+
+- **Shared Preferences**: 
+  - User settings are stored in `SharedPreferences` through methods like `saveLoginStatus()`, `saveDarkMode()`, and `saveLanguage()`.
+  - Preferences are loaded on app start in `main.dart` through `loadPreferences()`.
+  - `ThemeProvider` and `LocalizationProvider` observe these preferences for changes.
+
+- **Responsive Design**: 
+  - `ResponsiveBuilder` widget adapts layouts based on screen size.
+  - `LayoutBuilder` is used for more fine-grained control over widget dimensions.
+  - Custom breakpoints in `screen_util.dart` define mobile, tablet, and desktop layouts.
+
+- **Error Handling**: 
+  - Custom `AppException` hierarchy categorizes different error types.
+  - Global error handling is implemented in `runZonedGuarded()` in `main.dart`.
+  - User-facing errors are displayed through `SnackbarUtil.showError(context, message)`.
+
+- **Localization**: 
+  - Multiple languages are supported through `flutter_localizations`.
+  - Translations are stored in JSON files in `assets/translations/`.
+  - The app switches languages dynamically without restart through `LocalizationProvider.setLocale(locale)`.
+
+- **Theme Switching**: 
+  - `ThemeProvider` manages light and dark themes with `ThemeData` objects.
+  - `toggleTheme()` method switches between modes and persists the selection.
+  - Theme changes trigger a controlled app restart through `Phoenix.rebirth(context)`.
+
+- **State Restoration**: 
+  - The app implements `RestorationMixin` for key screens.
+  - Restorable properties like `RestorableInt` and `RestorableString` preserve state.
+  - `RestorationScope` in `main.dart` enables state restoration across app restarts.

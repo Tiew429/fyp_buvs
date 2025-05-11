@@ -73,11 +73,7 @@ class AuthService {
   // ---------------
   // LOGIN FUNCTIONS
   // ---------------
-  Future<void> loginWithCredentials(
-    context,
-    String emailOrUsername,
-    String password,
-  ) async {
+  Future<void> loginWithCredentials(context, String emailOrUsername, String password) async {
     try {
       // check the input is email or username
       final bool isEmail = emailOrUsername.contains('@');

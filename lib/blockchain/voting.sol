@@ -157,7 +157,7 @@ contract Voting {
     // SETTER FUNCTIONS
     //-------------------
 
-    // create a new voting event with empty candidates and  voters list
+    // create a new voting event with empty candidates and voters list
     function createVotingEvent(
         string memory _eventIDStr,
         string memory _title,
